@@ -1,0 +1,62 @@
+%% Diagram 2 — System Architecture Diagram
+%% Layered architecture of USAMIS-Python.
+flowchart TB
+    subgraph presentation["Presentation Layer (Browser)"]
+        UI["HTML5 + CSS3 + Bootstrap-style UI"]
+        JS["Vanilla JavaScript<br/>(progressive enhancement only)"]
+    end
+
+    subgraph appfactory["Flask Application Factory"]
+        direction TB
+        ROUTES["Blueprint Routes by Feature<br/>auth · dashboard · students · departments<br/>programs · courses · semesters · enrollments<br/>grades · attendance · fees · reports · admin"]
+
+        subgraph sec["Security Layer"]
+            AUTHN["Authentication<br/>Flask-Login · password hashing"]
+            AUTHZ["Authorization<br/>permission_required / roles_required<br/>ownership checks"]
+        end
+
+        subgraph svc["Service Layer"]
+            ES["enrollment_service"]
+            GS["grade_service"]
+            FS["fee_service"]
+            AU["audit_service"]
+        end
+
+        subgraph algos["Algorithm Modules (explainable, deterministic)"]
+            A1["1. Enrollment Eligibility"]
+            A2["2. Academic Performance"]
+            A3["3. Fee Balance & Payment Status"]
+        end
+    end
+
+    subgraph data["Data Access Layer"]
+        ORM["SQLAlchemy 2.0 ORM<br/>parameterized queries · transactions"]
+        MIG["Flask-Migrate / Alembic<br/>versioned migrations"]
+    end
+
+    DB[("PostgreSQL 17<br/>relational schema")]
+
+    UI --> ROUTES
+    JS --> ROUTES
+    ROUTES --> AUTHN
+    ROUTES --> AUTHZ
+    AUTHZ --> svc
+    svc --> algos
+    svc --> ORM
+    algos --> ORM
+    AU --> ORM
+    ORM --> DB
+    MIG --> DB
+
+    classDef pres fill:#e8eefc,stroke:#2b6cb0,color:#14243c;
+    classDef sec fill:#fdecec,stroke:#c53030,color:#5c1a1a;
+    classDef svc fill:#fef6e6,stroke:#b7791f,color:#4a3400;
+    classDef algo fill:#e6f5ec,stroke:#2f855a,color:#143525;
+    classDef data fill:#eef2f8,stroke:#475569,color:#1a2433;
+    classDef db fill:#e6f5ec,stroke:#2f855a,color:#143525;
+    class UI,JS pres;
+    class AUTHN,AUTHZ sec;
+    class ES,GS,FS,AU svc;
+    class A1,A2,A3 algo;
+    class ORM,MIG data;
+    class DB db;

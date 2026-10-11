@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Audit Log{% endblock %}
+{% block heading %}Audit Log{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <form method="get" class="inline-form">
+    <input class="input" type="text" name="action" value="{{ action }}" placeholder="Filter by action">
+    <input class="input" type="text" name="entity" value="{{ entity }}" placeholder="Filter by entity">
+    <button class="btn" type="submit">Filter</button>
+  </form>
+</div>
+{% if pagination.items %}
+<table class="table">
+  <thead><tr><th>Time (UTC)</th><th>Actor</th><th>Action</th><th>Entity</th><th>Summary</th><th>IP</th></tr></thead>
+  <tbody>
+  {% for log in pagination.items %}
+    <tr>
+      <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+      <td>{{ log.actor_username }}</td>
+      <td>{{ log.action }}</td>
+      <td>{{ log.entity_type }}{% if log.entity_id %}#{{ log.entity_id }}{% endif %}</td>
+      <td class="wrap">{{ log.summary }}</td>
+      <td>{{ log.ip_address or '—' }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% include "partials/pagination.html" with context %}
+{% else %}
+<p class="empty">No audit records match.</p>
+{% endif %}
+{% endblock %}

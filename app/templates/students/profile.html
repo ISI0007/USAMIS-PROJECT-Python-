@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ student.full_name }}{% endblock %}
+{% block heading %}Student Profile{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="profile-head">
+    <div>
+      <h2>{{ student.full_name }}</h2>
+      <p class="muted">{{ student.student_number }}
+        {% if student.program %}· {{ student.program.name }}{% endif %}</p>
+    </div>
+    {% if current_user.has_permission('manage_students') %}
+      <a class="btn" href="{{ url_for('students.edit', student_id=student.id) }}">Edit</a>
+    {% endif %}
+  </div>
+  <dl class="details">
+    <dt>Email</dt><dd>{{ student.email or '—' }}</dd>
+    <dt>Phone</dt><dd>{{ student.phone or '—' }}</dd>
+    <dt>Address</dt><dd>{{ student.address or '—' }}</dd>
+    <dt>Date of Birth</dt><dd>{{ student.date_of_birth or '—' }}</dd>
+    <dt>Department</dt><dd>{{ student.department.name if student.department else '—' }}</dd>
+    <dt>Admission Date</dt><dd>{{ student.admission_date or '—' }}</dd>
+    <dt>Status</dt><dd><span class="pill pill-{{ student.enrollment_status }}">{{ student.enrollment_status }}</span></dd>
+  </dl>
+</div>
+
+<h2>Enrollment History</h2>
+{% if enrollments %}
+<table class="table">
+  <thead><tr><th>Course</th><th>Semester</th><th>Status</th><th>Grade</th></tr></thead>
+  <tbody>
+  {% for e in enrollments %}
+    <tr>
+      <td>{{ e.offering.course.code }} — {{ e.offering.course.title }}</td>
+      <td>{{ e.offering.semester.label }}</td>
+      <td><span class="pill pill-{{ e.status }}">{{ e.status }}</span></td>
+      <td>{% if e.grade %}{{ e.grade.score }}{% if e.grade.is_published %} ({{ e.grade.letter }}){% else %} (unpublished){% endif %}{% else %}—{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No enrollments recorded.</p>
+{% endif %}
+
+{% if current_user.has_permission('manage_fees') %}
+  <a class="btn" href="{{ url_for('fees.student_fees', student_id=student.id) }}">View Fee Account</a>
+{% endif %}
+
+{% if current_user.has_permission('manage_students') and student.enrollment_status == 'active' %}
+  <form method="post" action="{{ url_for('students.deactivate', student_id=student.id) }}" class="inline"
+        onsubmit="return confirm('Mark this student as withdrawn?');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-danger" type="submit">Deactivate (Withdraw)</button>
+  </form>
+{% endif %}
+{% endblock %}

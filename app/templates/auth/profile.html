@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+{% block heading %}My Profile{% endblock %}
+{% block content %}
+<div class="card">
+  <form method="post" class="form">
+    {{ form.hidden_tag() }}
+    <div class="grid-2">
+      <div class="field">
+        {{ form.full_name.label }}{{ form.full_name(class="input") }}
+        {% for e in form.full_name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="field">
+        {{ form.email.label }}{{ form.email(class="input") }}
+        {% for e in form.email.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+    </div>
+    <button class="btn btn-primary" type="submit">Save Changes</button>
+  </form>
+</div>
+{% endblock %}

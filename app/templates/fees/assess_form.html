@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Assess Fee{% endblock %}
+{% block heading %}Assess Fee{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <form method="post" class="form">
+    {{ form.hidden_tag() }}
+    <div class="field">{{ form.student_id.label }}{{ form.student_id(class="input") }}</div>
+    <div class="field">{{ form.category_id.label }}{{ form.category_id(class="input") }}</div>
+    <div class="field">{{ form.semester_id.label }}{{ form.semester_id(class="input") }}</div>
+    <div class="grid-2">
+      <div class="field">{{ form.amount.label }}{{ form.amount(class="input") }}
+        {% for e in form.amount.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+      <div class="field">{{ form.adjustment.label }}{{ form.adjustment(class="input") }}</div>
+    </div>
+    <div class="field">{{ form.due_date.label }}{{ form.due_date(class="input") }}</div>
+    <div class="field">{{ form.note.label }}{{ form.note(class="input", rows=2) }}</div>
+    <button class="btn btn-primary" type="submit">Record Assessment</button>
+    <a class="btn" href="{{ url_for('fees.index') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

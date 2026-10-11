@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Enroll in Course{% endblock %}
+{% block heading %}Enroll in a Course{% endblock %}
+{% block content %}
+<p class="muted">Eligibility is verified on the server before your request is accepted.</p>
+<div class="card narrow">
+  <form method="post" class="form">
+    {{ form.hidden_tag() }}
+    <div class="field">
+      {{ form.offering_id.label }}
+      {{ form.offering_id(class="input") }}
+      {% for e in form.offering_id.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+    </div>
+    <button class="btn btn-primary" type="submit">Check Eligibility & Apply</button>
+  </form>
+</div>
+{% endblock %}

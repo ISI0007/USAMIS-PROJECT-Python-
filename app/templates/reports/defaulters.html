@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Fee Defaulters{% endblock %}
+{% block heading %}Fee Defaulters{% endblock %}
+{% block content %}
+<a class="link" href="{{ url_for('reports.index') }}">← Reports</a>
+{% if defaulters %}
+<table class="table">
+  <thead><tr><th>Student</th><th>Program</th><th>Outstanding</th></tr></thead>
+  <tbody>
+  {% for row in defaulters %}
+    <tr>
+      <td>{{ row.student.student_number }} — {{ row.student.full_name }}</td>
+      <td>{{ row.student.program.code if row.student.program else '—' }}</td>
+      <td class="warn-text">{{ '%.2f'|format(row.outstanding) }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No students with outstanding balances.</p>
+{% endif %}
+{% endblock %}

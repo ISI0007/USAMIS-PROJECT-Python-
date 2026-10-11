@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ course.code }}{% endblock %}
+{% block heading %}Course Detail{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="profile-head">
+    <div>
+      <h2>{{ course.code }} — {{ course.title }}</h2>
+      <p class="muted">{{ course.credits }} credits
+        {% if course.department %}· {{ course.department.name }}{% endif %}
+        · {{ 'Active' if course.is_active else 'Inactive' }}</p>
+    </div>
+    {% if current_user.has_permission('manage_courses') %}
+      <a class="btn" href="{{ url_for('courses.edit', course_id=course.id) }}">Edit</a>
+    {% endif %}
+  </div>
+  <p>{{ course.description or 'No description.' }}</p>
+  <h3>Prerequisites</h3>
+  {% if course.prerequisites %}
+    <ul>
+      {% for p in course.prerequisites %}
+        <li>{{ p.required_course.code }} — {{ p.required_course.title }}
+          {% if p.min_grade %}(min grade {{ p.min_grade }}){% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">No prerequisites configured.</p>
+  {% endif %}
+
+  {% if current_user.has_permission('manage_courses') %}
+  <form method="post" action="{{ url_for('courses.add_prerequisite', course_id=course.id) }}" class="inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <select class="input" name="required_course_id">
+      {% for c in offerings %}{% endfor %}
+    </select>
+    <button class="btn btn-sm" type="submit">Add</button>
+  </form>
+  {% endif %}
+</div>
+
+<h2>Offerings</h2>
+{% if offerings %}
+<table class="table">
+  <thead><tr><th>Semester</th><th>Teacher</th><th>Capacity</th><th>Enrolled</th><th>Active</th></tr></thead>
+  <tbody>
+  {% for o in offerings %}
+    <tr>
+      <td>{{ o.semester.label }}</td>
+      <td>{{ o.teacher.full_name if o.teacher else '—' }}</td>
+      <td>{{ o.capacity }}</td>
+      <td>{{ o.enrolled_count }}</td>
+      <td>{{ 'Yes' if o.is_active else 'No' }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">This course has no offerings yet.</p>
+{% endif %}
+{% endblock %}

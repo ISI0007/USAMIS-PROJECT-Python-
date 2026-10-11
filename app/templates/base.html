@@ -1,0 +1,109 @@
+{# Base layout: sidebar + topbar + flash messages. #}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}USAMIS{% endblock %} · USAMIS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+{% if current_user.is_authenticated %}
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-mark">U</span>
+        <span class="brand-text">USAMIS</span>
+      </div>
+      <nav class="nav">
+        <a href="{{ url_for('dashboard.home') }}">Dashboard</a>
+
+        {% if current_user.has_permission('view_students') %}
+          <a href="{{ url_for('students.index') }}">Students</a>
+        {% endif %}
+        {% if current_user.has_permission('manage_departments') %}
+          <a href="{{ url_for('departments.index') }}">Departments</a>
+        {% endif %}
+        {% if current_user.has_permission('manage_programs') %}
+          <a href="{{ url_for('programs.index') }}">Programs</a>
+        {% endif %}
+        {% if current_user.has_permission('manage_courses') or current_user.has_permission('view_students') %}
+          <a href="{{ url_for('courses.index') }}">Courses</a>
+          <a href="{{ url_for('semesters.index') }}">Semesters</a>
+        {% endif %}
+        {% if current_user.has_permission('manage_enrollments') %}
+          <a href="{{ url_for('enrollments.index') }}">Enrollments</a>
+        {% endif %}
+        {% if current_user.has_permission('view_own_enrollment') %}
+          <a href="{{ url_for('enrollments.my_enrollments') }}">My Enrollments</a>
+          <a href="{{ url_for('enrollments.request_enrollment') }}">Enroll in Course</a>
+        {% endif %}
+        {% if current_user.has_permission('enter_grades') %}
+          <a href="{{ url_for('grades.index') }}">Grade Entry</a>
+        {% endif %}
+        {% if current_user.has_permission('view_own_grades') %}
+          <a href="{{ url_for('grades.my_grades') }}">My Grades</a>
+        {% endif %}
+        {% if current_user.has_permission('record_attendance') %}
+          <a href="{{ url_for('attendance.index') }}">Attendance</a>
+        {% endif %}
+        {% if current_user.has_permission('view_own_attendance') %}
+          <a href="{{ url_for('attendance.my_attendance') }}">My Attendance</a>
+        {% endif %}
+        {% if current_user.has_permission('manage_fees') %}
+          <a href="{{ url_for('fees.index') }}">Fees</a>
+        {% endif %}
+        {% if current_user.has_permission('view_own_fees') %}
+          <a href="{{ url_for('fees.my_fees') }}">My Fees</a>
+        {% endif %}
+        {% if current_user.has_permission('view_reports') %}
+          <a href="{{ url_for('reports.index') }}">Reports</a>
+        {% endif %}
+        {% if current_user.role == 'administrator' %}
+          <a href="{{ url_for('admin.users') }}">Users</a>
+          <a href="{{ url_for('admin.roles') }}">Roles</a>
+          <a href="{{ url_for('admin.audit_log') }}">Audit Log</a>
+        {% endif %}
+      </nav>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="menu-toggle" type="button" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div class="topbar-title">{% block heading %}{% endblock %}</div>
+        <div class="topbar-user">
+          <span class="user-name">{{ current_user.full_name }}</span>
+          <span class="badge">{{ current_user.role_label }}</span>
+          <a class="link" href="{{ url_for('auth.profile') }}">Profile</a>
+          <a class="link" href="{{ url_for('auth.change_password') }}">Password</a>
+          <form method="post" action="{{ url_for('auth.logout') }}" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm" type="submit">Sign out</button>
+          </form>
+        </div>
+      </header>
+
+      <main class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flashes">
+              {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer class="footer">
+        USAMIS · University Student Academic Management Information System
+      </footer>
+    </div>
+  </div>
+{% else %}
+  {% block body_public %}{% endblock %}
+{% endif %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

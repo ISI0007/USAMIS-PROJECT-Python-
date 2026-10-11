@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Offerings · {{ semester.label }}{% endblock %}
+{% block heading %}Offerings · {{ semester.label }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <a class="link" href="{{ url_for('semesters.index') }}">← All semesters</a>
+  {% if current_user.has_permission('manage_semesters') %}
+    <a class="btn btn-primary" href="{{ url_for('semesters.create_offering', semester_id=semester.id) }}">New Offering</a>
+  {% endif %}
+</div>
+{% if offerings %}
+<table class="table">
+  <thead><tr><th>Course</th><th>Teacher</th><th>Capacity</th><th>Enrolled</th><th>Seats</th><th>Active</th><th></th></tr></thead>
+  <tbody>
+  {% for o in offerings %}
+    <tr>
+      <td>{{ o.course.code }} — {{ o.course.title }}</td>
+      <td>{{ o.teacher.full_name if o.teacher else '—' }}</td>
+      <td>{{ o.capacity }}</td>
+      <td>{{ o.enrolled_count }}</td>
+      <td>{{ o.available_seats }}</td>
+      <td>{{ 'Yes' if o.is_active else 'No' }}</td>
+      <td>
+        {% if current_user.has_permission('manage_semesters') %}
+          <a class="link" href="{{ url_for('semesters.edit_offering', offering_id=o.id) }}">Edit</a>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No offerings for this semester yet.</p>
+{% endif %}
+{% endblock %}

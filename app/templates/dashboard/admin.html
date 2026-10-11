@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Administrator Dashboard{% endblock %}
+{% block heading %}Administrator Dashboard{% endblock %}
+{% block content %}
+{% if semester %}<p class="muted">Active semester: <strong>{{ semester.label }}</strong> · Registration {{ 'open' if semester.registration_open else 'closed' }}</p>{% endif %}
+
+<div class="stat-grid">
+  <div class="stat"><span class="stat-value">{{ stats.students }}</span><span class="stat-label">Students</span></div>
+  <div class="stat"><span class="stat-value">{{ stats.departments }}</span><span class="stat-label">Active Departments</span></div>
+  <div class="stat"><span class="stat-value">{{ stats.programs }}</span><span class="stat-label">Active Programs</span></div>
+  <div class="stat"><span class="stat-value">{{ stats.offerings }}</span><span class="stat-label">Course Offerings</span></div>
+  <div class="stat"><span class="stat-value">{{ stats.enrolled }}</span><span class="stat-label">Active Enrollments</span></div>
+  <div class="stat"><span class="stat-value">{{ stats.pending }}</span><span class="stat-label">Pending Requests</span></div>
+  <div class="stat"><span class="stat-value">{{ '%.2f'|format(stats.fees_assessed) }}</span><span class="stat-label">Fees Assessed</span></div>
+  <div class="stat"><span class="stat-value">{{ '%.2f'|format(stats.fees_paid) }}</span><span class="stat-label">Fees Collected</span></div>
+  <div class="stat warn"><span class="stat-value">{{ '%.2f'|format(stats.outstanding) }}</span><span class="stat-label">Outstanding</span></div>
+</div>
+
+<div class="quick-links">
+  <a class="btn" href="{{ url_for('students.index') }}">Manage Students</a>
+  <a class="btn" href="{{ url_for('enrollments.index') }}">Enrollment Requests</a>
+  <a class="btn" href="{{ url_for('reports.index') }}">Reports</a>
+  <a class="btn" href="{{ url_for('admin.audit_log') }}">Audit Log</a>
+</div>
+{% endblock %}

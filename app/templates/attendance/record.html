@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block heading %}Attendance · {{ offering.course.code }}{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <form method="post" class="form">
+    {{ form.hidden_tag() }}
+    <p class="muted">Recording marks attendance for all enrolled students for the selected date
+      (duplicate records for the same date are prevented).</p>
+    <div class="grid-2">
+      <div class="field">{{ form.session_date.label }}{{ form.session_date(class="input") }}
+        {% for e in form.session_date.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+      <div class="field">{{ form.status.label }}{{ form.status(class="input") }}</div>
+    </div>
+    <button class="btn btn-primary" type="submit">Record for {{ enrollments|length }} student(s)</button>
+  </form>
+</div>
+
+<h2>Recent Attendance</h2>
+{% if recent %}
+<table class="table">
+  <thead><tr><th>Date</th><th>Student</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for a in recent %}
+    <tr>
+      <td>{{ a.session_date }}</td>
+      <td>{{ a.student.student_number }} — {{ a.student.full_name }}</td>
+      <td><span class="pill pill-{{ a.status }}">{{ a.status }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No attendance recorded yet.</p>
+{% endif %}
+{% endblock %}

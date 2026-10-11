@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if department else 'New' }} Department{% endblock %}
+{% block heading %}{{ 'Edit' if department else 'New' }} Department{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <form method="post" class="form">
+    {{ form.hidden_tag() }}
+    <div class="field">{{ form.code.label }}{{ form.code(class="input") }}
+      {% for e in form.code.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    <div class="field">{{ form.name.label }}{{ form.name(class="input") }}
+      {% for e in form.name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    <div class="field">{{ form.description.label }}{{ form.description(class="input", rows=4) }}</div>
+    <div class="field checkbox">{{ form.is_active() }} {{ form.is_active.label }}</div>
+    <button class="btn btn-primary" type="submit">Save Department</button>
+    <a class="btn" href="{{ url_for('departments.index') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

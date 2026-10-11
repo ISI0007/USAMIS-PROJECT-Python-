@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Offering{% endblock %}
+{% block heading %}{{ 'Edit' if offering else 'New' }} Offering · {{ semester.label }}{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <form method="post" class="form">
+    {{ form.hidden_tag() }}
+    {% if not offering %}
+      <div class="field">{{ form.course_id.label }}{{ form.course_id(class="input") }}</div>
+    {% endif %}
+    <div class="field">{{ form.teacher_id.label }}{{ form.teacher_id(class="input") }}</div>
+    <div class="field">{{ form.capacity.label }}{{ form.capacity(class="input") }}</div>
+    <div class="field checkbox">{{ form.is_active() }} {{ form.is_active.label }}</div>
+    <button class="btn btn-primary" type="submit">Save Offering</button>
+    <a class="btn" href="{{ url_for('semesters.offerings', semester_id=semester.id) }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

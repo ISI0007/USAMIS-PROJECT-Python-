@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block heading %}User Accounts{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span></span>
+  <a class="btn btn-primary" href="{{ url_for('admin.create_user') }}">New User</a>
+</div>
+<table class="table">
+  <thead><tr><th>Username</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th></th></tr></thead>
+  <tbody>
+  {% for u in pagination.items %}
+    <tr>
+      <td>{{ u.username }}</td>
+      <td>{{ u.full_name }}</td>
+      <td>{{ u.email }}</td>
+      <td>{{ role_labels.get(u.role, u.role) }}</td>
+      <td><span class="pill pill-{{ u.status }}">{{ u.status }}</span></td>
+      <td>{{ u.last_login_at.strftime('%Y-%m-%d %H:%M') if u.last_login_at else '—' }}</td>
+      <td>
+        <a class="link" href="{{ url_for('admin.edit_user', user_id=u.id) }}">Edit</a>
+        <form method="post" action="{{ url_for('admin.toggle_user', user_id=u.id) }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm" type="submit">{{ 'Deactivate' if u.status == 'active' else 'Activate' }}</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% include "partials/pagination.html" with context %}
+{% endblock %}

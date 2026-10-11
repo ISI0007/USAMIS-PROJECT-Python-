@@ -1,0 +1,10 @@
+{% extends "public_base.html" %}
+{% block title %}Forbidden{% endblock %}
+{% block content %}
+<div class="login-card">
+  <p class="error-code">403</p>
+  <h2>Access Denied</h2>
+  <p class="muted">You do not have permission to view this resource.</p>
+  <a class="btn btn-primary" href="{{ url_for('dashboard.home') }}">Back to Dashboard</a>
+</div>
+{% endblock %}

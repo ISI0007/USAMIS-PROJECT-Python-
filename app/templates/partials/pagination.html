@@ -1,0 +1,13 @@
+{% if pagination and pagination.pages > 1 %}
+<nav class="pager">
+  <span class="muted">Page {{ pagination.page }} of {{ pagination.pages }} ({{ pagination.total }} records)</span>
+  <span class="pager-links">
+    {% if pagination.has_prev %}
+      <a class="btn btn-sm" href="{{ url_for(request.endpoint, page=pagination.prev_num, **request.view_args) }}">← Previous</a>
+    {% endif %}
+    {% if pagination.has_next %}
+      <a class="btn btn-sm" href="{{ url_for(request.endpoint, page=pagination.next_num, **request.view_args) }}">Next →</a>
+    {% endif %}
+  </span>
+</nav>
+{% endif %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Fees{% endblock %}
+{% block heading %}Fee Assessments{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <div class="inline-form">
+    <a class="btn" href="{{ url_for('fees.create_category') }}">New Category</a>
+    <a class="btn" href="{{ url_for('fees.assess') }}">Assess Fee</a>
+    <a class="btn btn-primary" href="{{ url_for('fees.pay') }}">Record Payment</a>
+  </div>
+</div>
+
+<h2>Categories</h2>
+{% if categories %}
+<table class="table">
+  <thead><tr><th>Code</th><th>Name</th><th>Default Amount</th><th>Active</th></tr></thead>
+  <tbody>
+  {% for c in categories %}
+    <tr><td>{{ c.code }}</td><td>{{ c.name }}</td><td>{{ c.default_amount }}</td>
+      <td>{{ 'Yes' if c.is_active else 'No' }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No fee categories defined.</p>
+{% endif %}
+
+<h2>Recent Assessments</h2>
+{% if pagination.items %}
+<table class="table">
+  <thead><tr><th>Student</th><th>Category</th><th>Amount</th><th>Adjustment</th><th>Semester</th><th>Due</th></tr></thead>
+  <tbody>
+  {% for a in pagination.items %}
+    <tr>
+      <td>{{ a.student.student_number }} — {{ a.student.full_name }}</td>
+      <td>{{ a.category.code }}</td>
+      <td>{{ a.amount }}</td>
+      <td>{{ a.adjustment }}</td>
+      <td>{{ a.semester.label if a.semester else '—' }}</td>
+      <td>{{ a.due_date or '—' }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% include "partials/pagination.html" with context %}
+{% else %}
+<p class="empty">No fee assessments recorded.</p>
+{% endif %}
+{% endblock %}

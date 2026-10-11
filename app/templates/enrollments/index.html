@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Enrollments{% endblock %}
+{% block heading %}Enrollment Requests{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <form method="get" class="inline-form">
+    <select class="input" name="status" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      {% for s in ['pending','enrolled','rejected','dropped','completed'] %}
+        <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s|capitalize }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+{% if pagination.items %}
+<table class="table">
+  <thead><tr><th>Student</th><th>Course</th><th>Semester</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead>
+  <tbody>
+  {% for e in pagination.items %}
+    <tr>
+      <td>{{ e.student.student_number }} — {{ e.student.full_name }}</td>
+      <td>{{ e.offering.course.code }}</td>
+      <td>{{ e.offering.semester.label }}</td>
+      <td><span class="pill pill-{{ e.status }}">{{ e.status }}</span></td>
+      <td>{{ e.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>
+        {% if e.status == 'pending' %}
+          <form method="post" action="{{ url_for('enrollments.decide', enrollment_id=e.id) }}" class="inline"
+                onsubmit="return confirm('Confirm this decision?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-primary" name="decision" value="approve" type="submit">Approve</button>
+            <button class="btn btn-sm btn-danger" name="decision" value="reject" type="submit">Reject</button>
+          </form>
+        {% elif e.status in ('enrolled','pending') %}
+          <form method="post" action="{{ url_for('enrollments.drop', enrollment_id=e.id) }}" class="inline"
+                onsubmit="return confirm('Drop this enrollment?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm" type="submit">Drop</button>
+          </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% include "partials/pagination.html" with context %}
+{% else %}
+<p class="empty">No enrollment records found.</p>
+{% endif %}
+{% endblock %}

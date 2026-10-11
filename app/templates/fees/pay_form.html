@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Record Payment{% endblock %}
+{% block heading %}Record Payment{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <form method="post" class="form">
+    {{ form.hidden_tag() }}
+    <div class="field">{{ form.student_id.label }}{{ form.student_id(class="input") }}</div>
+    <div class="field">{{ form.assessment_id.label }}{{ form.assessment_id(class="input") }}</div>
+    <div class="grid-2">
+      <div class="field">{{ form.amount.label }}{{ form.amount(class="input") }}
+        {% for e in form.amount.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+      <div class="field">{{ form.reference.label }}{{ form.reference(class="input") }}</div>
+    </div>
+    <div class="field">{{ form.paid_on.label }}{{ form.paid_on(class="input") }}</div>
+    <div class="field">{{ form.note.label }}{{ form.note(class="input", rows=2) }}</div>
+    <button class="btn btn-primary" type="submit">Record Payment</button>
+    <a class="btn" href="{{ url_for('fees.index') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

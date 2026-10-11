@@ -1,0 +1,10 @@
+{% extends "public_base.html" %}
+{% block title %}Server Error{% endblock %}
+{% block content %}
+<div class="login-card">
+  <p class="error-code">500</p>
+  <h2>Something Went Wrong</h2>
+  <p class="muted">An unexpected error occurred. The problem has been logged.</p>
+  <a class="btn btn-primary" href="{{ url_for('index') }}">Back to Home</a>
+</div>
+{% endblock %}

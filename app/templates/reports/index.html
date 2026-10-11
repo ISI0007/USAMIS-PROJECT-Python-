@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block heading %}Management Reports{% endblock %}
+{% block content %}
+<div class="stat-grid">
+  <div class="stat"><span class="stat-value">{{ totals.students }}</span><span class="stat-label">Students</span></div>
+  <div class="stat"><span class="stat-value">{{ totals.courses }}</span><span class="stat-label">Courses</span></div>
+  <div class="stat"><span class="stat-value">{{ totals.offerings }}</span><span class="stat-label">Offerings</span></div>
+  <div class="stat"><span class="stat-value">{{ '%.2f'|format(totals.assessed) }}</span><span class="stat-label">Fees Assessed</span></div>
+  <div class="stat"><span class="stat-value">{{ '%.2f'|format(totals.collected) }}</span><span class="stat-label">Collected</span></div>
+  <div class="stat warn"><span class="stat-value">{{ '%.2f'|format(totals.outstanding) }}</span><span class="stat-label">Outstanding</span></div>
+</div>
+
+<div class="quick-links">
+  <a class="btn" href="{{ url_for('reports.fee_defaulters') }}">Fee Defaulters</a>
+  <a class="btn" href="{{ url_for('reports.low_attendance') }}">Low Attendance</a>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Students per Department</h3>
+    {% if students_per_department %}
+    <table class="table">
+      <thead><tr><th>Department</th><th>Students</th></tr></thead>
+      <tbody>
+      {% for code, count in students_per_department %}
+        <tr><td>{{ code }}</td><td>{{ count }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="empty">No data.</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Enrollment by Status</h3>
+    {% if enrollment_by_status %}
+    <table class="table">
+      <thead><tr><th>Status</th><th>Count</th></tr></thead>
+      <tbody>
+      {% for status, count in enrollment_by_status %}
+        <tr><td>{{ status|capitalize }}</td><td>{{ count }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="empty">No data.</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Published Grade Distribution</h3>
+    {% if grade_distribution %}
+    <table class="table">
+      <thead><tr><th>Letter</th><th>Count</th></tr></thead>
+      <tbody>
+      {% for letter, count in grade_distribution %}
+        <tr><td>{{ letter }}</td><td>{{ count }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="empty">No published grades.</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if student else 'New' }} Student{% endblock %}
+{% block heading %}{{ 'Edit' if student else 'New' }} Student{% endblock %}
+{% block content %}
+<div class="card">
+  <form method="post" class="form">
+    {{ form.hidden_tag() }}
+    <div class="grid-2">
+      <div class="field">
+        {{ form.student_number.label }}{{ form.student_number(class="input", readonly=student is not none) }}
+        {% for e in form.student_number.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="field">
+        {{ form.enrollment_status.label }}{{ form.enrollment_status(class="input") }}
+      </div>
+      <div class="field">
+        {{ form.first_name.label }}{{ form.first_name(class="input") }}
+        {% for e in form.first_name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="field">
+        {{ form.last_name.label }}{{ form.last_name(class="input") }}
+        {% for e in form.last_name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="field">{{ form.email.label }}{{ form.email(class="input") }}
+        {% for e in form.email.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+      <div class="field">{{ form.phone.label }}{{ form.phone(class="input") }}</div>
+      <div class="field">{{ form.address.label }}{{ form.address(class="input") }}</div>
+      <div class="field">{{ form.date_of_birth.label }}{{ form.date_of_birth(class="input") }}</div>
+      <div class="field">{{ form.department_id.label }}{{ form.department_id(class="input") }}</div>
+      <div class="field">{{ form.program_id.label }}{{ form.program_id(class="input") }}</div>
+      <div class="field">{{ form.admission_date.label }}{{ form.admission_date(class="input") }}</div>
+    </div>
+    <button class="btn btn-primary" type="submit">Save Student</button>
+    <a class="btn" href="{{ url_for('students.index') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

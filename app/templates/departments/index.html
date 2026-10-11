@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Departments{% endblock %}
+{% block heading %}Departments{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span></span>
+  <a class="btn btn-primary" href="{{ url_for('departments.create') }}">New Department</a>
+</div>
+{% if pagination.items %}
+<table class="table">
+  <thead><tr><th>Code</th><th>Name</th><th>Active</th><th></th></tr></thead>
+  <tbody>
+  {% for d in pagination.items %}
+    <tr>
+      <td>{{ d.code }}</td>
+      <td>{{ d.name }}</td>
+      <td>{{ 'Yes' if d.is_active else 'No' }}</td>
+      <td><a class="link" href="{{ url_for('departments.edit', department_id=d.id) }}">Edit</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% include "partials/pagination.html" with context %}
+{% else %}
+<p class="empty">No departments yet.</p>
+{% endif %}
+{% endblock %}

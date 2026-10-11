@@ -1,0 +1,184 @@
+%% Diagram 3 — Entity Relationship Diagram
+%% Reflects the actual SQLAlchemy models (see app/models/).
+erDiagram
+    USER ||--o| STUDENT : "links to"
+    USER ||--o| TEACHER : "links to"
+    USER ||--o{ AUDIT_LOG : "acts in"
+    USER ||--o{ ENROLLMENT : "decides"
+    USER ||--o{ GRADE : "enters"
+    USER ||--o{ ATTENDANCE : "records"
+    USER ||--o{ FEE_ASSESSMENT : "creates"
+    USER ||--o{ PAYMENT : "records"
+
+    DEPARTMENT ||--o{ ACADEMIC_PROGRAM : "offers"
+    DEPARTMENT ||--o{ STUDENT : "enrols"
+    DEPARTMENT ||--o{ TEACHER : "employs"
+    DEPARTMENT ||--o{ COURSE : "owns"
+
+    ACADEMIC_PROGRAM ||--o{ STUDENT : "contains"
+
+    COURSE ||--o{ COURSE_OFFERING : "offered as"
+    COURSE ||--o{ PREREQUISITE : "requires (as course)"
+    COURSE ||--o{ PREREQUISITE : "required (as required_course)"
+
+    SEMESTER ||--o{ COURSE_OFFERING : "schedules"
+    SEMESTER ||--o{ FEE_ASSESSMENT : "billed in"
+
+    TEACHER ||--o{ COURSE_OFFERING : "teaches"
+
+    STUDENT ||--o{ ENROLLMENT : "registers"
+    COURSE_OFFERING ||--o{ ENROLLMENT : "receives"
+    ENROLLMENT ||--o| GRADE : "graded by"
+
+    STUDENT ||--o{ GRADE : "receives"
+    COURSE_OFFERING ||--o{ ATTENDANCE : "sessions for"
+    STUDENT ||--o{ ATTENDANCE : "attends"
+
+    FEE_CATEGORY ||--o{ FEE_ASSESSMENT : "classifies"
+    STUDENT ||--o{ FEE_ASSESSMENT : "is billed"
+    STUDENT ||--o{ PAYMENT : "pays"
+    FEE_ASSESSMENT ||--o{ PAYMENT : "settled by"
+
+    USER {
+        int id PK
+        string username UK
+        string email UK
+        string full_name
+        string password_hash
+        string role
+        string status
+        bool is_active_flag
+        datetime last_login_at
+        int failed_login_count
+        datetime locked_until
+    }
+    STUDENT {
+        int id PK
+        string student_number UK
+        int user_id FK
+        string first_name
+        string last_name
+        string email
+        int department_id FK
+        int program_id FK
+        date admission_date
+        string enrollment_status
+    }
+    TEACHER {
+        int id PK
+        string staff_number UK
+        int user_id FK
+        string first_name
+        string last_name
+        int department_id FK
+    }
+    DEPARTMENT {
+        int id PK
+        string code UK
+        string name
+        bool is_active
+    }
+    ACADEMIC_PROGRAM {
+        int id PK
+        string code
+        string name
+        int department_id FK
+        int duration_years
+        int total_credits_required
+        bool is_active
+    }
+    COURSE {
+        int id PK
+        string code UK
+        string title
+        int credits
+        int department_id FK
+        bool is_active
+    }
+    PREREQUISITE {
+        int id PK
+        int course_id FK
+        int required_course_id FK
+        numeric min_grade
+    }
+    SEMESTER {
+        int id PK
+        string academic_year
+        string term
+        date start_date
+        date end_date
+        bool is_active
+        bool registration_open
+    }
+    COURSE_OFFERING {
+        int id PK
+        int course_id FK
+        int semester_id FK
+        int teacher_id FK
+        int capacity
+        bool is_active
+    }
+    ENROLLMENT {
+        int id PK
+        int student_id FK
+        int offering_id FK
+        string status
+        datetime requested_at
+        datetime decided_at
+        int decided_by_id FK
+    }
+    GRADE {
+        int id PK
+        int enrollment_id FK
+        int student_id FK
+        numeric score
+        string letter
+        bool is_published
+        datetime published_at
+        int entered_by_id FK
+    }
+    ATTENDANCE {
+        int id PK
+        int student_id FK
+        int offering_id FK
+        date session_date
+        string status
+        int recorded_by_id FK
+    }
+    FEE_CATEGORY {
+        int id PK
+        string code UK
+        string name
+        numeric default_amount
+        bool is_active
+    }
+    FEE_ASSESSMENT {
+        int id PK
+        int student_id FK
+        int category_id FK
+        int semester_id FK
+        numeric amount
+        numeric adjustment
+        date due_date
+        int created_by_id FK
+    }
+    PAYMENT {
+        int id PK
+        int student_id FK
+        int assessment_id FK
+        numeric amount
+        string reference UK
+        date paid_on
+        int recorded_by_id FK
+    }
+    AUDIT_LOG {
+        int id PK
+        int actor_id FK
+        string actor_username
+        string action
+        string entity_type
+        string entity_id
+        string summary
+        string ip_address
+        datetime created_at
+    }

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Programs{% endblock %}
+{% block heading %}Academic Programs{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span></span>
+  <a class="btn btn-primary" href="{{ url_for('programs.create') }}">New Program</a>
+</div>
+{% if pagination.items %}
+<table class="table">
+  <thead><tr><th>Code</th><th>Name</th><th>Department</th><th>Duration</th><th>Credits</th><th></th></tr></thead>
+  <tbody>
+  {% for p in pagination.items %}
+    <tr>
+      <td>{{ p.code }}</td>
+      <td>{{ p.name }}</td>
+      <td>{{ p.department.code if p.department else '—' }}</td>
+      <td>{{ p.duration_years }} yr</td>
+      <td>{{ p.total_credits_required }}</td>
+      <td><a class="link" href="{{ url_for('programs.edit', program_id=p.id) }}">Edit</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% include "partials/pagination.html" with context %}
+{% else %}
+<p class="empty">No programs yet.</p>
+{% endif %}
+{% endblock %}

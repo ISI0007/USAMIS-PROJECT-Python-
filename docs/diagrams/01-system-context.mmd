@@ -1,0 +1,38 @@
+%% Diagram 1 — System Context Diagram
+%% USAMIS-Python and its external actors / systems.
+flowchart TB
+    subgraph actors["External Actors"]
+        ADMIN["Administrator<br/>(system control, users, audit)"]
+        STAFF["Academic Staff / Registrar<br/>(students, courses, enrollment)"]
+        TEACHER["Teacher<br/>(grades, attendance)"]
+        FINANCE["Finance Officer<br/>(fees, payments)"]
+        STUDENT["Student<br/>(own records)"]
+    end
+
+    subgraph boundary["USAMIS-Python — System Boundary"]
+        USAMIS["USAMIS-Python<br/>University Student Academic<br/>Management Information System<br/>(Flask + SQLAlchemy)"]
+    end
+
+    PG[("PostgreSQL 17<br/>Relational Database")]
+
+    ADMIN -- "HTTPS: manage users, view audit" --> USAMIS
+    STAFF -- "HTTPS: manage academic records" --> USAMIS
+    TEACHER -- "HTTPS: enter grades, attendance" --> USAMIS
+    FINANCE -- "HTTPS: assess fees, record payments" --> USAMIS
+    STUDENT -- "HTTPS: view grades, fees, enroll" --> USAMIS
+
+    USAMIS -- "Dashboards, reports,<br/>confirmations" --> ADMIN
+    USAMIS -- "Records, eligibility results" --> STAFF
+    USAMIS -- "Class lists, grade status" --> TEACHER
+    USAMIS -- "Balances, receipts" --> FINANCE
+    USAMIS -- "Own results, fees, attendance" --> STUDENT
+
+    USAMIS -- "Parameterized SQL / transactions" --> PG
+    PG -- "Persisted records" --> USAMIS
+
+    classDef ext fill:#e8eefc,stroke:#2b6cb0,color:#14243c;
+    classDef sys fill:#1f3a5f,stroke:#122740,color:#ffffff;
+    classDef db fill:#e6f5ec,stroke:#2f855a,color:#143525;
+    class ADMIN,STAFF,TEACHER,FINANCE,STUDENT ext;
+    class USAMIS sys;
+    class PG db;

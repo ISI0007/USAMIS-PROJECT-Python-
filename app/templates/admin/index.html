@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Administration{% endblock %}
+{% block heading %}Administration{% endblock %}
+{% block content %}
+<div class="stat-grid">
+  <div class="stat"><span class="stat-value">{{ counts.users }}</span><span class="stat-label">User Accounts</span></div>
+  <div class="stat"><span class="stat-value">{{ counts.audit }}</span><span class="stat-label">Audit Records</span></div>
+</div>
+<div class="quick-links">
+  <a class="btn" href="{{ url_for('admin.users') }}">User Accounts</a>
+  <a class="btn" href="{{ url_for('admin.roles') }}">Roles &amp; Permissions</a>
+  <a class="btn" href="{{ url_for('admin.audit_log') }}">Audit Log</a>
+</div>
+{% endblock %}

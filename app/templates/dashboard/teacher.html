@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Teacher Dashboard{% endblock %}
+{% block heading %}Teacher Dashboard{% endblock %}
+{% block content %}
+{% if not teacher %}
+  <p class="empty">No teacher profile is linked to your account. Contact an administrator.</p>
+{% elif rows %}
+<table class="table">
+  <thead><tr><th>Course</th><th>Semester</th><th>Enrolled</th><th>Graded (published)</th><th>Capacity</th><th></th></tr></thead>
+  <tbody>
+  {% for row in rows %}
+    <tr>
+      <td>{{ row.offering.course.code }} — {{ row.offering.course.title }}</td>
+      <td>{{ row.offering.semester.label }}</td>
+      <td>{{ row.enrolled }}</td>
+      <td>{{ row.graded }}</td>
+      <td>{{ row.offering.capacity }}</td>
+      <td>
+        <a class="link" href="{{ url_for('grades.entry', offering_id=row.offering.id) }}">Grades</a>
+        <a class="link" href="{{ url_for('attendance.record', offering_id=row.offering.id) }}">Attendance</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">You have no assigned course offerings.</p>
+{% endif %}
+{% endblock %}

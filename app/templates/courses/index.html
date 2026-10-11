@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Courses{% endblock %}
+{% block heading %}Courses{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <span></span>
+  {% if current_user.has_permission('manage_courses') %}
+    <a class="btn btn-primary" href="{{ url_for('courses.create') }}">New Course</a>
+  {% endif %}
+</div>
+{% if pagination.items %}
+<table class="table">
+  <thead><tr><th>Code</th><th>Title</th><th>Credits</th><th>Department</th><th>Active</th><th></th></tr></thead>
+  <tbody>
+  {% for c in pagination.items %}
+    <tr>
+      <td>{{ c.code }}</td>
+      <td>{{ c.title }}</td>
+      <td>{{ c.credits }}</td>
+      <td>{{ c.department.code if c.department else '—' }}</td>
+      <td>{{ 'Yes' if c.is_active else 'No' }}</td>
+      <td><a class="link" href="{{ url_for('courses.detail', course_id=c.id) }}">View</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% include "partials/pagination.html" with context %}
+{% else %}
+<p class="empty">No courses yet.</p>
+{% endif %}
+{% endblock %}

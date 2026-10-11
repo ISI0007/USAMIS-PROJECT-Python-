@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Finance Dashboard{% endblock %}
+{% block heading %}Finance Dashboard{% endblock %}
+{% block content %}
+<div class="stat-grid">
+  <div class="stat"><span class="stat-value">{{ '%.2f'|format(stats.fees_assessed) }}</span><span class="stat-label">Fees Assessed</span></div>
+  <div class="stat"><span class="stat-value">{{ '%.2f'|format(stats.fees_paid) }}</span><span class="stat-label">Collected</span></div>
+  <div class="stat warn"><span class="stat-value">{{ '%.2f'|format(stats.outstanding) }}</span><span class="stat-label">Outstanding</span></div>
+</div>
+<div class="quick-links">
+  <a class="btn" href="{{ url_for('fees.assess') }}">Assess Fee</a>
+  <a class="btn" href="{{ url_for('fees.pay') }}">Record Payment</a>
+  <a class="btn" href="{{ url_for('reports.fee_defaulters') }}">Fee Defaulters</a>
+</div>
+
+<h2>Recent Payments</h2>
+{% if recent %}
+<table class="table">
+  <thead><tr><th>Student</th><th>Amount</th><th>Reference</th><th>Paid On</th></tr></thead>
+  <tbody>
+  {% for p in recent %}
+    <tr>
+      <td>{{ p.student.student_number }} — {{ p.student.full_name }}</td>
+      <td>{{ p.amount }}</td>
+      <td>{{ p.reference or '—' }}</td>
+      <td>{{ p.paid_on }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No payments recorded yet.</p>
+{% endif %}
+{% endblock %}

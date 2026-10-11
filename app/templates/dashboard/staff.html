@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Academic Staff Dashboard{% endblock %}
+{% block heading %}Academic Staff Dashboard{% endblock %}
+{% block content %}
+{% if semester %}<p class="muted">Active semester: <strong>{{ semester.label }}</strong></p>{% endif %}
+<div class="stat-grid">
+  <div class="stat"><span class="stat-value">{{ counts.students }}</span><span class="stat-label">Students</span></div>
+  <div class="stat"><span class="stat-value">{{ counts.courses }}</span><span class="stat-label">Courses</span></div>
+  <div class="stat"><span class="stat-value">{{ counts.offerings }}</span><span class="stat-label">Offerings</span></div>
+</div>
+
+<h2>Pending Enrollment Requests</h2>
+{% if pending %}
+<table class="table">
+  <thead><tr><th>Student</th><th>Course</th><th>Semester</th><th>Requested</th><th></th></tr></thead>
+  <tbody>
+  {% for e in pending %}
+    <tr>
+      <td>{{ e.student.student_number }} — {{ e.student.full_name }}</td>
+      <td>{{ e.offering.course.code }} — {{ e.offering.course.title }}</td>
+      <td>{{ e.offering.semester.label }}</td>
+      <td>{{ e.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td><a class="link" href="{{ url_for('enrollments.index', status='pending') }}">Review</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No pending enrollment requests.</p>
+{% endif %}
+{% endblock %}

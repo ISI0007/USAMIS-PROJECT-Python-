@@ -1,0 +1,85 @@
+%% Diagram 5 — Data Flow Diagram (Level 1)
+%% Movement of user requests and academic data between actors, processes,
+%% and data stores.
+flowchart LR
+    ADMIN["Administrator"]
+    STAFF["Academic Staff"]
+    TEACHER["Teacher"]
+    FINANCE["Finance Officer"]
+    STUDENT["Student"]
+
+    subgraph system["USAMIS-Python"]
+        P1["1.0 Authenticate<br/>& Authorize"]
+        P2["2.0 Manage Students<br/>& Structure"]
+        P3["3.0 Manage Courses,<br/>Semesters & Offerings"]
+        P4["4.0 Process<br/>Enrollment"]
+        P5["5.0 Record Grades<br/>& Attendance"]
+        P6["6.0 Assess Fees<br/>& Payments"]
+        P7["7.0 Generate<br/>Reports"]
+        P8["8.0 Audit Logging"]
+    end
+
+    D1[("D1 Users & Roles")]
+    D2[("D2 Students &<br/>Structure")]
+    D3[("D3 Courses, Semesters<br/>& Offerings")]
+    D4[("D4 Enrollments")]
+    D5[("D5 Grades &<br/>Attendance")]
+    D6[("D6 Fees &<br/>Payments")]
+    D7[("D7 Audit Log")]
+
+    ADMIN --> P1
+    STAFF --> P1
+    TEACHER --> P1
+    FINANCE --> P1
+    STUDENT --> P1
+    P1 <--> D1
+
+    STAFF --> P2
+    P2 <--> D2
+    STAFF --> P3
+    P3 <--> D3
+
+    STUDENT --> P4
+    STAFF --> P4
+    P4 <--> D2
+    P4 <--> D3
+    P4 <--> D4
+
+    TEACHER --> P5
+    P5 <--> D4
+    P5 <--> D5
+    STUDENT -.-> P5
+
+    FINANCE --> P6
+    P6 <--> D2
+    P6 <--> D6
+
+    ADMIN --> P7
+    STAFF --> P7
+    FINANCE --> P7
+    P7 <--> D2
+    P7 <--> D4
+    P7 <--> D5
+    P7 <--> D6
+
+    P2 --> P8
+    P3 --> P8
+    P4 --> P8
+    P5 --> P8
+    P6 --> P8
+    P8 --> D7
+    ADMIN --> P8
+
+    P7 --> ADMIN
+    P7 --> STAFF
+    P7 --> FINANCE
+    P4 --> STUDENT
+    P5 --> STUDENT
+    P6 --> STUDENT
+
+    classDef actor fill:#e8eefc,stroke:#2b6cb0,color:#14243c;
+    classDef proc fill:#1f3a5f,stroke:#122740,color:#ffffff;
+    classDef store fill:#e6f5ec,stroke:#2f855a,color:#143525;
+    class ADMIN,STAFF,TEACHER,FINANCE,STUDENT actor;
+    class P1,P2,P3,P4,P5,P6,P7,P8 proc;
+    class D1,D2,D3,D4,D5,D6,D7 store;

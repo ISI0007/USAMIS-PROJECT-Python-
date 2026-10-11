@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Roles{% endblock %}
+{% block heading %}Roles &amp; Permissions{% endblock %}
+{% block content %}
+<p class="muted">Read-only view of the server-side RBAC matrix (source of truth:
+  <code>app/security/permissions.py</code>). Permissions are enforced in the backend, not the UI.</p>
+{% for role, perms in role_permissions.items() %}
+  <div class="card">
+    <h3>{{ role_labels.get(role, role) }} <span class="muted small">({{ role }})</span></h3>
+    <ul class="perm-list">
+      {% for p in perms|sort %}<li><code>{{ p }}</code></li>{% endfor %}
+    </ul>
+  </div>
+{% endfor %}
+{% endblock %}

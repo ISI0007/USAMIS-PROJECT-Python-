@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}My Attendance{% endblock %}
+{% block heading %}My Attendance{% endblock %}
+{% block content %}
+<div class="stat-grid">
+  <div class="stat"><span class="stat-value">{{ present }}</span><span class="stat-label">Present / Late</span></div>
+  <div class="stat"><span class="stat-value">{{ total }}</span><span class="stat-label">Sessions</span></div>
+</div>
+{% if rows %}
+<table class="table">
+  <thead><tr><th>Date</th><th>Course</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for a in rows %}
+    <tr>
+      <td>{{ a.session_date }}</td>
+      <td>{{ a.offering.course.code }} — {{ a.offering.course.title }}</td>
+      <td><span class="pill pill-{{ a.status }}">{{ a.status }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No attendance records yet.</p>
+{% endif %}
+{% endblock %}

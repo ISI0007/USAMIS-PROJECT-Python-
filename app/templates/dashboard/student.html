@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard{% endblock %}
+{% block heading %}Student Dashboard{% endblock %}
+{% block content %}
+<p class="muted">{{ student.student_number }} · {{ student.full_name }}
+  {% if student.program %}· {{ student.program.name }}{% endif %}</p>
+
+<div class="stat-grid">
+  <div class="stat"><span class="stat-value">{{ enrollments|length }}</span><span class="stat-label">Enrollments</span></div>
+  <div class="stat"><span class="stat-value">{{ performance.weighted_average if performance.weighted_average is not none else '—' }}</span><span class="stat-label">Weighted Average</span></div>
+  <div class="stat"><span class="stat-value">{{ attendance_present }}/{{ attendance_total }}</span><span class="stat-label">Attendance</span></div>
+  <div class="stat {{ 'warn' if balance.balance > 0 else '' }}"><span class="stat-value">{{ balance.balance }}</span><span class="stat-label">Fee Balance</span></div>
+</div>
+
+<h2>Current Enrollments</h2>
+{% if enrollments %}
+<table class="table">
+  <thead><tr><th>Course</th><th>Semester</th><th>Status</th><th>Grade</th></tr></thead>
+  <tbody>
+  {% for e in enrollments %}
+    <tr>
+      <td>{{ e.offering.course.code }} — {{ e.offering.course.title }}</td>
+      <td>{{ e.offering.semester.label }}</td>
+      <td><span class="pill pill-{{ e.status }}">{{ e.status }}</span></td>
+      <td>{% if e.grade and e.grade.is_published %}{{ e.grade.score }} ({{ e.grade.letter }}){% else %}—{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">You have no enrollments yet. <a class="link" href="{{ url_for('enrollments.request_enrollment') }}">Enroll in a course</a>.</p>
+{% endif %}
+
+<div class="quick-links">
+  <a class="btn" href="{{ url_for('enrollments.request_enrollment') }}">Enroll in Course</a>
+  <a class="btn" href="{{ url_for('grades.my_grades') }}">My Grades</a>
+  <a class="btn" href="{{ url_for('attendance.my_attendance') }}">My Attendance</a>
+  <a class="btn" href="{{ url_for('fees.my_fees') }}">My Fees</a>
+</div>
+{% endblock %}

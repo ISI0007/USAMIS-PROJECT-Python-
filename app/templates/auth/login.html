@@ -1,0 +1,32 @@
+{% extends "public_base.html" %}
+{% block title %}Sign In{% endblock %}
+{% block content %}
+<div class="login-card">
+  <div class="login-brand">
+    <span class="brand-mark">U</span>
+    <div>
+      <h1>USAMIS</h1>
+      <p>University Student Academic Management Information System</p>
+    </div>
+  </div>
+
+  <form method="post" action="{{ url_for('auth.login') }}" class="form">
+    {{ form.hidden_tag() }}
+    <div class="field">
+      {{ form.username.label }}
+      {{ form.username(class="input", autofocus=true, autocomplete="username") }}
+      {% for error in form.username.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+    <div class="field">
+      {{ form.password.label }}
+      {{ form.password(class="input", autocomplete="current-password") }}
+      {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+    <button class="btn btn-primary btn-block" type="submit">Sign In</button>
+  </form>
+
+  <p class="muted small">
+    Authorized users only. All access is logged.
+  </p>
+</div>
+{% endblock %}

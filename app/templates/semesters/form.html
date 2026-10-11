@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if semester else 'New' }} Semester{% endblock %}
+{% block heading %}{{ 'Edit' if semester else 'New' }} Semester{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <form method="post" class="form">
+    {{ form.hidden_tag() }}
+    <div class="grid-2">
+      <div class="field">{{ form.academic_year.label }}{{ form.academic_year(class="input", placeholder="2025/2026") }}
+        {% for e in form.academic_year.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+      <div class="field">{{ form.term.label }}{{ form.term(class="input") }}</div>
+      <div class="field">{{ form.start_date.label }}{{ form.start_date(class="input") }}</div>
+      <div class="field">{{ form.end_date.label }}{{ form.end_date(class="input") }}</div>
+    </div>
+    <div class="field checkbox">{{ form.is_active() }} {{ form.is_active.label }}</div>
+    <div class="field checkbox">{{ form.registration_open() }} {{ form.registration_open.label }}</div>
+    <button class="btn btn-primary" type="submit">Save Semester</button>
+    <a class="btn" href="{{ url_for('semesters.index') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

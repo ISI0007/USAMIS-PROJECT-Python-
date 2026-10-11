@@ -1,0 +1,62 @@
+%% Diagram 4 — Enrollment Process Flowchart
+%% Implements Algorithm 1 (app/algorithms/enrollment_eligibility.py) and
+%% app/services/enrollment_service.py, including concurrency handling.
+flowchart TD
+    START(["Student selects a course offering"])
+    REQ["Submit enrollment request"]
+    S1{"Student account<br/>found?"}
+    S2{"Student status<br/>= active?"}
+    S3{"Offering exists<br/>and is active?"}
+    S4{"Semester registration<br/>open?"}
+    S5{"Already pending /<br/>enrolled / completed?"}
+    S6{"All prerequisites met?<br/>(published passing grade)"}
+
+    LOCK["BEGIN TRANSACTION<br/>SELECT offering FOR UPDATE"]
+    S7{"Capacity available?<br/>enrolled < capacity"}
+    INSERT["INSERT enrollment<br/>(status = pending or enrolled)"]
+    AUDIT["Write audit log entry"]
+    COMMIT["COMMIT transaction"]
+
+    R1["Reject: student not found"]
+    R2["Reject: student not active"]
+    R3["Reject: offering unavailable"]
+    R4["Reject: registration closed"]
+    R5["Reject: duplicate enrollment"]
+    R6["Reject: prerequisites not met<br/>(list unmet courses)"]
+    R7["Reject: capacity full"]
+    OK(["Enrollment request accepted"])
+    ERRC(["Error / rolled back"])
+
+    START --> REQ --> S1
+    S1 -- No --> R1
+    S1 -- Yes --> S2
+    S2 -- No --> R2
+    S2 -- Yes --> S3
+    S3 -- No --> R3
+    S3 -- Yes --> S4
+    S4 -- No --> R4
+    S4 -- Yes --> S5
+    S5 -- Yes --> R5
+    S5 -- No --> S6
+    S6 -- No --> R6
+    S6 -- Yes --> LOCK
+    LOCK --> S7
+    S7 -- No --> R7
+    S7 -- Yes --> INSERT --> AUDIT --> COMMIT --> OK
+
+    R1 --> ERRC
+    R2 --> ERRC
+    R3 --> ERRC
+    R4 --> ERRC
+    R5 --> ERRC
+    R6 --> ERRC
+    R7 --> ERRC
+
+    classDef ok fill:#e6f5ec,stroke:#2f855a,color:#143525;
+    classDef rej fill:#fdecec,stroke:#c53030,color:#5c1a1a;
+    classDef dec fill:#fef6e6,stroke:#b7791f,color:#4a3400;
+    classDef step fill:#e8eefc,stroke:#2b6cb0,color:#14243c;
+    class OK ok;
+    class R1,R2,R3,R4,R5,R6,R7,ERRC rej;
+    class S1,S2,S3,S4,S5,S6,S7 dec;
+    class START,REQ,LOCK,INSERT,AUDIT,COMMIT step;

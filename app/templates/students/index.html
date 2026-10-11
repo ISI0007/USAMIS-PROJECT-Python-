@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block heading %}Students{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <form method="get" class="inline-form">
+    <input class="input" type="text" name="q" value="{{ q }}" placeholder="Search number, name or email">
+    <select class="input" name="status">
+      <option value="">All statuses</option>
+      {% for s in ['active','graduated','suspended','withdrawn'] %}
+        <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s|capitalize }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn" type="submit">Search</button>
+  </form>
+  {% if current_user.has_permission('manage_students') %}
+    <a class="btn btn-primary" href="{{ url_for('students.create') }}">New Student</a>
+  {% endif %}
+</div>
+
+{% if pagination.items %}
+<table class="table">
+  <thead><tr><th>Number</th><th>Name</th><th>Email</th><th>Program</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for s in pagination.items %}
+    <tr>
+      <td>{{ s.student_number }}</td>
+      <td>{{ s.full_name }}</td>
+      <td>{{ s.email or '—' }}</td>
+      <td>{{ s.program.code if s.program else '—' }}</td>
+      <td><span class="pill pill-{{ s.enrollment_status }}">{{ s.enrollment_status }}</span></td>
+      <td><a class="link" href="{{ url_for('students.profile', student_id=s.id) }}">View</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% include "partials/pagination.html" with context %}
+{% else %}
+<p class="empty">No students found.</p>
+{% endif %}
+{% endblock %}

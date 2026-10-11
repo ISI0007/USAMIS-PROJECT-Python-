@@ -1,0 +1,10 @@
+# Alembic README
+#
+# Single database for USAMIS-Python. Configuration is taken from the Flask
+# application (see app/config.py) via migrations/env.py.
+#
+# Common commands:
+#   flask --app wsgi db migrate -m "message"   # autogenerate a revision
+#   flask --app wsgi db upgrade                # apply migrations
+#   flask --app wsgi db downgrade              # roll back one revision
+#   flask --app wsgi db current                # show current revision

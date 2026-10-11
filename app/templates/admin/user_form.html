@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if user else 'New' }} User{% endblock %}
+{% block heading %}{{ 'Edit' if user else 'New' }} User{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <form method="post" class="form">
+    {{ form.hidden_tag() }}
+    <div class="field">{{ form.username.label }}{{ form.username(class="input", readonly=user is not none) }}</div>
+    <div class="field">{{ form.full_name.label }}{{ form.full_name(class="input") }}</div>
+    <div class="field">{{ form.email.label }}{{ form.email(class="input") }}
+      {% for e in form.email.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    <div class="grid-2">
+      <div class="field">{{ form.role.label }}{{ form.role(class="input") }}</div>
+      <div class="field">{{ form.status.label }}{{ form.status(class="input") }}</div>
+    </div>
+    <div class="field">{{ form.password.label }}{{ form.password(class="input", placeholder="Leave blank to keep current") }}
+      {% for e in form.password.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
+    <button class="btn btn-primary" type="submit">Save User</button>
+    <a class="btn" href="{{ url_for('admin.users') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

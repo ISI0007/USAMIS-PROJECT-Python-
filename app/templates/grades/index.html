@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Grade Entry{% endblock %}
+{% block heading %}Grade Entry{% endblock %}
+{% block content %}
+{% if offerings %}
+<table class="table">
+  <thead><tr><th>Course</th><th>Semester</th><th>Enrolled</th><th></th></tr></thead>
+  <tbody>
+  {% for o in offerings %}
+    <tr>
+      <td>{{ o.course.code }} — {{ o.course.title }}</td>
+      <td>{{ o.semester.label }}</td>
+      <td>{{ o.enrolled_count }}</td>
+      <td><a class="link" href="{{ url_for('grades.entry', offering_id=o.id) }}">Enter Grades</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No courses are assigned to you.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Low Attendance{% endblock %}
+{% block heading %}Low Attendance (&lt; 75%){% endblock %}
+{% block content %}
+<a class="link" href="{{ url_for('reports.index') }}">← Reports</a>
+{% if summary %}
+<table class="table">
+  <thead><tr><th>Student</th><th>Course</th><th>Present</th><th>Total</th><th>Rate</th></tr></thead>
+  <tbody>
+  {% for row in summary %}
+    <tr>
+      <td>{{ row.student.student_number }} — {{ row.student.full_name }}</td>
+      <td>{{ row.offering.course.code }}</td>
+      <td>{{ row.present }}</td>
+      <td>{{ row.total }}</td>
+      <td class="warn-text">{{ row.rate }}%</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No students below the attendance threshold.</p>
+{% endif %}
+{% endblock %}

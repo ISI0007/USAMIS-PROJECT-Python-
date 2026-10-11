@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Eligibility Check{% endblock %}
+{% block heading %}Eligibility Check{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>{{ offering.course.code }} — {{ offering.course.title }}</h2>
+  <p class="muted">{{ offering.semester.label }} · {{ offering.enrolled_count }}/{{ offering.capacity }} enrolled</p>
+  {% if result.eligible %}
+    <div class="flash flash-success">{{ result.message }}</div>
+  {% else %}
+    <div class="flash flash-danger">{{ result.message }} <code>{{ result.reason_code }}</code></div>
+    {% if result.reasons %}
+      <ul>{% for r in result.reasons %}<li>{{ r }}</li>{% endfor %}</ul>
+    {% endif %}
+  {% endif %}
+  <a class="btn" href="{{ url_for('enrollments.request_enrollment') }}">Back to enrollment</a>
+</div>
+{% endblock %}
