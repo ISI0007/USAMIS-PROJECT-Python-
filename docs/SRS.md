@@ -25,6 +25,35 @@ The scope is a demonstrable, testable academic MIS. It does **not** include
 real online payment processing, an admissions portal, or AI/ML features (three
 conventional, explainable algorithms are specified instead).
 
+ > Planned extension: SMS notifications, an online payment gateway, QR-code
+ > attendance, AI-based performance prediction, and a parent portal are being
+ > added as a follow-on release (full implementation, with external providers
+ > behind adapter interfaces using offline development stubs). See
+ > `docs/EXPANSION_PLAN.md`.
+
+### 1.1 How USAMIS solves academic management problems
+
+USAMIS addresses the day-to-day problems of academic administration by treating
+them as a single system built on **people, process, and technology** that turns
+raw records into **information** for **decisions**.
+
+| Dimension | How USAMIS delivers it |
+|---|---|
+| **People** | Every stakeholder (student, teacher, registrar, finance, administrator, parent) gets a role-scoped view and the exact actions their job requires — nothing more, nothing less. |
+| **Process** | The academic lifecycle runs as one flow: admit student → register/enroll → teach → grade → record attendance → assess and pay fees → report. |
+| **Technology** | Python Flask + SQLAlchemy on PostgreSQL 17, with server-side authorization, database constraints, and full audit logging. |
+| **Information** | Live records become management information: enrollment trends, grade distributions, attendance rates, and fee-collection status. |
+| **Decisions** | Real-time reports give administrators evidence for staffing, intervention, and finance decisions. |
+
+**Concrete value provided:**
+
+- **Centralized data management** — removes scattered, paper and spreadsheet records in favour of one authoritative relational database.
+- **Secure, role-based access control** — enforces data integrity and confidentiality; every protected operation is authorized server-side.
+- **Reliable data storage** — PostgreSQL 17 with transactional integrity, constraints, and migrations.
+- **Flexible, scalable backend** — Python Flask with a modular blueprint architecture.
+- **Comprehensive functionality** — full add / edit / delete / view operations across every module, with a complete audit trail.
+- **Real-time management reports** — derived from live data for informed decision-making.
+
 ## 2. Definitions and abbreviations
 
 | Term | Meaning |

@@ -229,12 +229,18 @@ def run_seed(reset: bool = False) -> None:
     for roll, first, last in STUDENTS:
         number = f"{ROLL_PREFIX}{roll[1:]}"          # G19 -> G2422486019
         email = f"{number.lower()}@usamis.demo"
+        # Deterministic demo phone numbers so SMS notifications are exercisable.
+        phone = f"+8613800{roll[1:].zfill(6)}"
         student, _ = _get_or_create(Student, {
             "first_name": first, "last_name": last, "email": email,
+            "phone": phone,
             "department_id": cse.id, "program_id": bse.id,
             "admission_date": dt.date(2024, 9, 1), "enrollment_status": "active"},
             student_number=number,
         )
+        # Backfill a phone number for students seeded before phones existed.
+        if not student.phone:
+            student.phone = phone
         # Link the primary demo login (s.demo) to the first student (G19).
         if roll == "G19" and student.user_id is None:
             student.user_id = student_user.id

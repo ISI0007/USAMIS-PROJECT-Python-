@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Fee Reminders{% endblock %}
+{% block heading %}Fee Reminders{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('notifications.sms_index') }}">SMS Notifications</a>
+  <span class="sep">/</span><span class="current">Fee Reminders</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">Fee reminders</h1>
+  <p class="page-sub">Select students with an outstanding balance and send each a reminder message.</p>
+</div>
+
+{% if defaulters %}
+<form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th><input type="checkbox" id="checkAll" aria-label="Select all"></th><th>Student</th><th>Program</th><th>Outstanding</th><th>Phone</th></tr></thead>
+    <tbody>
+    {% for row in defaulters %}
+      <tr>
+        <td><input type="checkbox" name="student_id" value="{{ row.student.id }}" class="row-check" {{ 'disabled' if not row.has_phone }}></td>
+        <td>{{ row.student.student_number }} — {{ row.student.full_name }}</td>
+        <td>{{ row.student.program.code if row.student.program else '—' }}</td>
+        <td class="warn-text"><strong>{{ '%.2f'|format(row.outstanding) }}</strong></td>
+        <td>{% if row.has_phone %}{{ row.student.phone }}{% else %}<span class="muted">no phone on file</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <div class="form-actions">
+    <a class="btn" href="{{ url_for('notifications.sms_index') }}">Cancel</a>
+    <button class="btn primary" type="submit" onclick="return confirm('Send fee reminder SMS to the selected students?');">Send reminders</button>
+  </div>
+</form>
+<script>
+  (function () {
+    var all = document.getElementById('checkAll');
+    if (all) all.addEventListener('change', function () {
+      document.querySelectorAll('.row-check:not([disabled])').forEach(function (c) { c.checked = all.checked; });
+    });
+  })();
+</script>
+{% else %}
+<div class="empty"><div class="empty-icon">✅</div>No students with outstanding balances.</div>
+{% endif %}
+{% endblock %}

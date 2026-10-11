@@ -81,6 +81,7 @@ def _register_blueprints(app: Flask) -> None:
     from .attendance import bp as attendance_bp
     from .fees import bp as fees_bp
     from .reports import bp as reports_bp
+    from .notifications import bp as notifications_bp
     from .admin import bp as admin_bp
 
     app.register_blueprint(auth_bp)
@@ -95,6 +96,7 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(attendance_bp)
     app.register_blueprint(fees_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(notifications_bp)
     app.register_blueprint(admin_bp)
 
     @app.route("/")

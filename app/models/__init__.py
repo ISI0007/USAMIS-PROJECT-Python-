@@ -19,6 +19,7 @@ from .enrollment import Enrollment  # noqa: F401
 from .grade import Grade  # noqa: F401
 from .attendance import Attendance  # noqa: F401
 from .fee import FeeCategory, FeeAssessment, Payment  # noqa: F401
+from .notification import SmsMessage  # noqa: F401
 
 __all__ = [
     "utcnow",
@@ -38,4 +39,5 @@ __all__ = [
     "FeeCategory",
     "FeeAssessment",
     "Payment",
+    "SmsMessage",
 ]

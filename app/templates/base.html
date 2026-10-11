@@ -74,9 +74,10 @@
           {{ navlink('reports.index', 'Reports', '/reports', '<path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/>') }}
         {% endif %}
 
-        {% if current_user.has_permission('manage_fees') %}
+        {% if current_user.has_permission('send_notifications') %}
           <div class="nav-group-label">Finance</div>
           {{ navlink('fees.index', 'Fees', '/fees', '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>') }}
+          {{ navlink('notifications.sms_index', 'SMS Notifications', '/notifications/sms', '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>') }}
         {% endif %}
 
         {% if current_user.has_permission('view_own_grades') and not current_user.has_permission('view_grades') %}

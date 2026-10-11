@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}SMS Notifications{% endblock %}
+{% block heading %}SMS Notifications{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">SMS Notifications</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">SMS notifications</h1>
+  <p class="page-sub">Outbound text messages for critical updates such as fee reminders.</p>
+</div>
+
+<div class="stat-grid">
+  <div class="stat"><span class="stat-value">{{ counts.total }}</span><span class="stat-label">Messages</span></div>
+  <div class="stat"><span class="stat-value">{{ counts.sent }}</span><span class="stat-label">Sent</span></div>
+  <div class="stat warn"><span class="stat-value">{{ counts.failed }}</span><span class="stat-label">Failed</span></div>
+</div>
+
+<div class="toolbar">
+  <form method="get" class="filters">
+    <select name="status" aria-label="Filter by status">
+      <option value="">All statuses</option>
+      {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if status == s }}>{{ s|capitalize }}</option>{% endfor %}
+    </select>
+    <select name="category" aria-label="Filter by category">
+      <option value="">All categories</option>
+      {% for c in categories %}<option value="{{ c }}" {{ 'selected' if category == c }}>{{ c|replace('_', ' ')|capitalize }}</option>{% endfor %}
+    </select>
+    <button class="btn" type="submit">Filter</button>
+  </form>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('notifications.sms_fee_reminders') }}">Fee reminders</a>
+    <a class="btn primary" href="{{ url_for('notifications.sms_compose') }}">Compose</a>
+  </div>
+</div>
+
+{% if messages %}
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Recipient</th><th>Category</th><th>Message</th><th>Status</th><th>Sent</th></tr></thead>
+  <tbody>
+  {% for m in messages %}
+    <tr>
+      <td>{{ m.recipient }}</td>
+      <td>{{ m.category|replace('_', ' ') }}</td>
+      <td class="muted">{{ m.body[:80] }}{% if m.body|length > 80 %}…{% endif %}</td>
+      <td>
+        {% if m.status == 'sent' %}<span class="pill ok">sent</span>
+        {% elif m.status == 'failed' %}<span class="pill danger">failed</span>
+        {% else %}<span class="pill">{{ m.status }}</span>{% endif %}
+      </td>
+      <td class="muted">{{ m.sent_at.strftime('%Y-%m-%d %H:%M') if m.sent_at else '—' }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty"><div class="empty-icon">💬</div>No SMS messages yet.</div>
+{% endif %}
+{% endblock %}

@@ -23,6 +23,19 @@ deliverables (SRS, architecture, database design, algorithms, installation
 guide, user manual, testing report, project report, five diagrams, real
 application screenshots, and a 15-slide presentation).
 
+### Value proposition — how USAMIS solves academic management problems
+
+USAMIS treats academic administration as one system built on **people,
+process, and technology** that turns raw records into **information** for
+**decisions**:
+
+- **Centralized data management** — eliminates scattered records in favour of one authoritative relational database.
+- **Secure, role-based access control** — ensures data integrity and confidentiality; every protected operation is authorized server-side.
+- **Reliable data storage** — PostgreSQL 17 with transactional integrity, constraints, and migrations.
+- **Flexible, scalable backend** — Python Flask with a modular blueprint architecture.
+- **Comprehensive system functionality** — add / edit / delete / view operations across every module, with a full audit trail.
+- **Real-time management reports** — generated from live data for informed decision-making.
+
 ### Current verification on this machine (2026-10-12)
 
 | Check | Result |

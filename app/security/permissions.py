@@ -66,6 +66,9 @@ class Permission(StrEnum):
     MANAGE_FEES = "manage_fees"
     VIEW_OWN_FEES = "view_own_fees"
 
+    # Notifications
+    SEND_NOTIFICATIONS = "send_notifications"
+
     # Reports
     VIEW_REPORTS = "view_reports"
 
@@ -93,6 +96,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         Permission.RECORD_ATTENDANCE,
         Permission.VIEW_OWN_ATTENDANCE,
         Permission.MANAGE_FEES,
+        Permission.SEND_NOTIFICATIONS,
         Permission.VIEW_OWN_FEES,
         Permission.VIEW_REPORTS,
     },
@@ -117,6 +121,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
     },
     Role.FINANCE: {
         Permission.MANAGE_FEES,
+        Permission.SEND_NOTIFICATIONS,
         Permission.VIEW_STUDENTS,
         Permission.VIEW_REPORTS,
     },

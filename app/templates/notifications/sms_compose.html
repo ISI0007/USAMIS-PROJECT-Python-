@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Compose SMS{% endblock %}
+{% block heading %}Compose SMS{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('notifications.sms_index') }}">SMS Notifications</a>
+  <span class="sep">/</span><span class="current">Compose</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">Compose SMS</h1>
+  <p class="page-sub">Send a one-off message. Leave the number blank to use the selected student's on-file number.</p>
+</div>
+
+<form method="post" class="form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="form-grid">
+    <div class="field">
+      <label for="student_id">Student <span class="opt">(optional)</span></label>
+      <select id="student_id" name="student_id">
+        <option value="">— none —</option>
+        {% for s in students %}
+          <option value="{{ s.id }}">{{ s.student_number }} — {{ s.full_name }}{% if not s.phone %} (no phone){% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="recipient">Phone number</label>
+      <input type="text" id="recipient" name="recipient" placeholder="+1234567890">
+      <small class="hint">Used when no student is selected, or to override the on-file number.</small>
+    </div>
+    <div class="field span-2">
+      <label for="body">Message <span class="req">*</span></label>
+      <textarea id="body" name="body" rows="4" maxlength="480" required placeholder="Type your message…"></textarea>
+    </div>
+  </div>
+  <div class="form-actions">
+    <a class="btn" href="{{ url_for('notifications.sms_index') }}">Cancel</a>
+    <button class="btn primary" type="submit">Send message</button>
+  </div>
+</form>
+{% endblock %}
