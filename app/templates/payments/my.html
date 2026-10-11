@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}My Payments{% endblock %}
+{% block heading %}My Payments{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">My Payments</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">My payments</h1>
+  <p class="page-sub">Pay your outstanding balance online and review past attempts.</p>
+</div>
+
+<div class="stat-grid">
+  <div class="stat {{ 'warn' if balance.balance > 0 }}">
+    <span class="stat-value">{{ '%.2f'|format(balance.balance) }}</span>
+    <span class="stat-label">Outstanding balance</span>
+  </div>
+</div>
+
+{% if balance.balance > 0 %}
+<form method="post" action="{{ url_for('payments.start') }}" class="form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="form-grid">
+    <div class="field">
+      <label for="amount">Amount to pay <span class="req">*</span></label>
+      <input type="number" step="0.01" min="0.01" id="amount" name="amount"
+             value="{{ '%.2f'|format(balance.balance) }}" required>
+      <small class="hint">Maximum {{ '%.2f'|format(balance.balance) }}.</small>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn primary" type="submit">Pay now</button>
+  </div>
+</form>
+{% else %}
+<div class="empty"><div class="empty-icon">✅</div>You have no outstanding balance.</div>
+{% endif %}
+
+<h2 class="section-title">Payment history</h2>
+{% if intents %}
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Reference</th><th>Amount</th><th>Status</th><th>Started</th></tr></thead>
+  <tbody>
+  {% for i in intents %}
+    <tr>
+      <td><code>{{ i.reference }}</code></td>
+      <td>{{ i.currency }} {{ '%.2f'|format(i.amount) }}</td>
+      <td>
+        {% if i.status == 'paid' %}<span class="pill ok">paid</span>
+        {% elif i.status == 'failed' %}<span class="pill danger">failed</span>
+        {% else %}<span class="pill">{{ i.status }}</span>{% endif %}
+      </td>
+      <td class="muted">{{ i.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty"><div class="empty-icon">💳</div>No payments yet.</div>
+{% endif %}
+{% endblock %}

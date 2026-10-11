@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block heading %}Checkout{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('payments.my_payments') }}">My Payments</a>
+  <span class="sep">/</span><span class="current">Checkout</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">Checkout</h1>
+  <p class="page-sub">This is the development (stub) payment page. No real card is charged.</p>
+</div>
+
+<div class="form-card">
+  <div class="detail-grid">
+    <div><span class="muted">Reference</span><br><code>{{ intent.reference }}</code></div>
+    <div><span class="muted">Amount</span><br><strong>{{ intent.currency }} {{ '%.2f'|format(intent.amount) }}</strong></div>
+    <div><span class="muted">Status</span><br>
+      {% if intent.status == 'paid' %}<span class="pill ok">paid</span>
+      {% else %}<span class="pill">{{ intent.status }}</span>{% endif %}
+    </div>
+    <div><span class="muted">Provider</span><br>{{ intent.provider or '—' }}</div>
+  </div>
+
+  {% if intent.status == 'pending' %}
+  <form method="post" action="{{ url_for('payments.callback') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="reference" value="{{ intent.reference }}">
+    <input type="hidden" name="provider_ref" value="{{ intent.provider_ref or '' }}">
+    <div class="form-actions">
+      <a class="btn" href="{{ url_for('payments.my_payments') }}">Cancel</a>
+      <button class="btn primary" type="submit">Simulate successful payment</button>
+    </div>
+  </form>
+  {% else %}
+  <div class="form-actions">
+    <a class="btn" href="{{ url_for('payments.my_payments') }}">Back to my payments</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

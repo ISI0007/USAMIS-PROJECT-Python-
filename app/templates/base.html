@@ -78,6 +78,7 @@
           <div class="nav-group-label">Finance</div>
           {{ navlink('fees.index', 'Fees', '/fees', '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>') }}
           {{ navlink('notifications.sms_index', 'SMS Notifications', '/notifications/sms', '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>') }}
+          {{ navlink('payments.index', 'Payments', '/payments', '<rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/>') }}
         {% endif %}
 
         {% if current_user.has_permission('view_own_grades') and not current_user.has_permission('view_grades') %}
@@ -92,6 +93,7 @@
             <div class="nav-group-label">My Records</div>
           {% endif %}
           {{ navlink('fees.my_fees', 'My Fees', '/fees/my', '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>') }}
+          {{ navlink('payments.my_payments', 'Pay Online', '/payments/my', '<rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/>') }}
         {% endif %}
 
         {% if current_user.role == 'administrator' %}

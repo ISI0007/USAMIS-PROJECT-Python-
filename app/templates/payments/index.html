@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Payments{% endblock %}
+{% block heading %}Payments{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Payments</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">Online payments</h1>
+  <p class="page-sub">Payment intents started through the gateway.</p>
+</div>
+
+<div class="toolbar">
+  <form method="get" class="filters">
+    <select name="status" aria-label="Filter by status">
+      <option value="">All statuses</option>
+      {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if status == s }}>{{ s|capitalize }}</option>{% endfor %}
+    </select>
+    <button class="btn" type="submit">Filter</button>
+  </form>
+</div>
+
+{% if intents %}
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Reference</th><th>Student</th><th>Amount</th><th>Status</th><th>Provider</th><th>Started</th></tr></thead>
+  <tbody>
+  {% for i in intents %}
+    <tr>
+      <td><code>{{ i.reference }}</code></td>
+      <td>{{ i.student.student_number if i.student else '—' }}</td>
+      <td>{{ i.currency }} {{ '%.2f'|format(i.amount) }}</td>
+      <td>
+        {% if i.status == 'paid' %}<span class="pill ok">paid</span>
+        {% elif i.status == 'failed' %}<span class="pill danger">failed</span>
+        {% else %}<span class="pill">{{ i.status }}</span>{% endif %}
+      </td>
+      <td class="muted">{{ i.provider or '—' }}</td>
+      <td class="muted">{{ i.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty"><div class="empty-icon">💳</div>No payment intents yet.</div>
+{% endif %}
+{% endblock %}
