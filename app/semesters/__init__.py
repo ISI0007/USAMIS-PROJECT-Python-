@@ -14,8 +14,9 @@ bp = Blueprint("semesters", __name__, url_prefix="/semesters")
 @bp.route("/")
 @login_required
 def index():
-    if not (current_user.has_permission("manage_semesters")
-            or current_user.has_permission("view_students")):
+    # Academic calendar is an academic-structure module: restrict to roles that
+    # manage semesters (plus administrators), matching the RBAC matrix.
+    if not current_user.has_permission("manage_semesters"):
         abort(403)
     semesters = db.session.execute(
         db.select(Semester).order_by(Semester.academic_year.desc(), Semester.term)

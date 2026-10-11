@@ -1,0 +1,51 @@
+{% extends "public_base.html" %}
+{% block title %}Create Account{% endblock %}
+{% block content %}
+<div class="login-card">
+  <div class="login-brand">
+    <span class="brand-mark">U</span>
+    <div>
+      <h1>USAMIS</h1>
+      <p>University Student Academic Management Information System</p>
+    </div>
+  </div>
+
+  <form method="post" action="{{ url_for('auth.register') }}" class="form">
+    {{ form.hidden_tag() }}
+    <div class="field">
+      {{ form.full_name.label }}
+      {{ form.full_name(class="input", autofocus=true, autocomplete="name") }}
+      {% for error in form.full_name.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+    <div class="field">
+      {{ form.username.label }}
+      {{ form.username(class="input", autocomplete="username") }}
+      {% for error in form.username.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+    <div class="field">
+      {{ form.email.label }}
+      {{ form.email(class="input", autocomplete="email") }}
+      {% for error in form.email.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+    <div class="field">
+      {{ form.password.label }}
+      {{ form.password(class="input", autocomplete="new-password") }}
+      {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+    <div class="field">
+      {{ form.confirm_password.label }}
+      {{ form.confirm_password(class="input", autocomplete="new-password") }}
+      {% for error in form.confirm_password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </div>
+    <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+  </form>
+
+  <p class="muted small">
+    New accounts are created as <strong>students</strong>. Staff and administrator
+    roles are assigned only by an administrator.
+  </p>
+  <p class="muted small">
+    Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a>.
+  </p>
+</div>
+{% endblock %}

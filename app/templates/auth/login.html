@@ -28,5 +28,38 @@
   <p class="muted small">
     Authorized users only. All access is logged.
   </p>
+  <p class="muted small">
+    No account yet? <a href="{{ url_for('auth.register') }}">Create one</a>.
+  </p>
 </div>
+
+{# Demo credentials: development/demo convenience only. #}
+<div class="demo-accounts">
+  <h2>Demo accounts</h2>
+  <p class="muted small">Click a role to fill the form. Password for all accounts: <code>Demo_Pass1!</code></p>
+  <table class="demo-table">
+    <thead>
+      <tr><th>Role</th><th>Username</th><th>Password</th><th></th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Administrator</td><td><code>admin</code></td><td><code>Demo_Pass1!</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="admin">Use</button></td></tr>
+      <tr><td>Academic staff</td><td><code>registrar</code></td><td><code>Demo_Pass1!</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="registrar">Use</button></td></tr>
+      <tr><td>Teacher</td><td><code>t.mensah</code></td><td><code>Demo_Pass1!</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="t.mensah">Use</button></td></tr>
+      <tr><td>Finance officer</td><td><code>finance</code></td><td><code>Demo_Pass1!</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="finance">Use</button></td></tr>
+      <tr><td>Student</td><td><code>s.demo</code></td><td><code>Demo_Pass1!</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="s.demo">Use</button></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // One-click demo login: fill the form fields, never submit automatically.
+  document.querySelectorAll('.demo-fill').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var u = document.getElementById('username');
+      var p = document.getElementById('password');
+      if (u) { u.value = btn.dataset.user; u.focus(); }
+      if (p) { p.value = 'Demo_Pass1!'; }
+    });
+  });
+</script>
 {% endblock %}

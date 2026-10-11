@@ -46,6 +46,11 @@ def _init_extensions(app: Flask) -> None:
     csrf.init_app(app)
     limiter.init_app(app)
 
+    # Allow automated tooling (screenshot capture, smoke scripts) to disable
+    # rate limiting explicitly. Never set this in a real deployment.
+    if os.environ.get("USAMIS_DISABLE_RATELIMIT") == "1":
+        limiter.enabled = False
+
     # Models must be imported so SQLAlchemy/Alembic can see them.
     from . import models  # noqa: F401
 

@@ -141,7 +141,7 @@ class Teacher(TimestampMixin, db.Model):
 class Course(TimestampMixin, db.Model):
     __tablename__ = "courses"
     __table_args__ = (
-        CheckConstraint("credits > 0 AND credits <= 12", name="ck_course_credits_range"),
+        CheckConstraint("credits > 0 AND credits <= 20", name="ck_course_credits_range"),
         UniqueConstraint("code", name="uq_course_code"),
     )
 

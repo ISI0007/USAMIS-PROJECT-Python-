@@ -16,8 +16,10 @@ bp = Blueprint("courses", __name__, url_prefix="/courses")
 def index():
     from flask_login import current_user
 
-    if not (current_user.has_permission("manage_courses")
-            or current_user.has_permission("view_students")):
+    # Course catalogue is an academic-structure module: only roles that manage
+    # courses (plus administrators) may browse it. Teachers/finance reach the
+    # courses they need through their own graded/assigned views.
+    if not current_user.has_permission("manage_courses"):
         abort(403)
     page = request.args.get("page", 1, type=int)
     pagination = db.paginate(

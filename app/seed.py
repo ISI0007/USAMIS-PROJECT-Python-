@@ -4,6 +4,11 @@ SAFETY:
 * Development/demo use only — synthetic data, never real student records.
 * Idempotent: repeated runs upsert on natural keys and do not duplicate.
 * ``--reset`` clears the demo tables first (explicit, deliberate action).
+
+The curriculum mirrors a real 4-year / 8-semester Software Engineering
+undergraduate programme (see docs/CURRICULUM.md). Student roll numbers follow
+the institutional pattern ``G<YY><2224><8601><NN>`` for the 2024 intake cohort,
+i.e. G19 -> G2422486019 ... G26 -> G2422486026.
 """
 from __future__ import annotations
 
@@ -34,6 +39,24 @@ from .models import (
 
 DEMO_PASSWORD = "Demo_Pass1!"  # noqa: S105 - documented demo credential
 
+# --------------------------------------------------------------------------- #
+# Cohorts (roll numbers) and identities
+# --------------------------------------------------------------------------- #
+# Roll number pattern: G + 2-digit suffix + 2224 + 860 + 2-digit roll
+ROLL_PREFIX = "G24224860"
+
+STUDENTS = [
+    # (roll suffix, first_name, last_name, gender-neutral email local part)
+    ("G19", "Lin", "Wei"),
+    ("G20", "Chen", "Yu"),
+    ("G21", "Zhang", "Hao"),
+    ("G22", "Wang", "Fang"),
+    ("G23", "Liu", "Yang"),
+    ("G24", "Zhao", "Min"),
+    ("G25", "Sun", "Lei"),
+    ("G26", "Zhou", "Xin"),
+]
+
 
 def _get_or_create(model, defaults=None, **filters):
     instance = db.session.execute(db.select(model).filter_by(**filters)).scalars().first()
@@ -59,35 +82,128 @@ def _reset() -> None:
     db.session.commit()
 
 
+# --------------------------------------------------------------------------- #
+# Curriculum: 8 semesters of a Software Engineering programme
+# (code, title, credits, category, component, is_core)
+# --------------------------------------------------------------------------- #
+CURRICULUM: dict[int, list[tuple]] = {
+    1: [
+        ("070112051L", "Advanced Mathematics 1", 3, "General Education", "Course", False),
+        ("050110201L", "Comprehensive Chinese 1", 6, "General Education", "Course", False),
+        ("050111101L", "Overview of China", 2, "General Education", "Course", False),
+        ("050110211L", "Chinese Traditional Culture 1", 1.5, "General Education", "Course", False),
+        ("040212627L", "Physical Education 1", 1.5, "General Education", "Course", False),
+        ("080931201L", "Advanced Language Programming", 2.5, "Professional Foundation", "Course", True),
+        ("080931202L", "Advanced Language Programming Lab", 2, "Professional Foundation", "Course", False),
+    ],
+    2: [
+        ("070112052L", "Advanced Mathematics 2", 3, "General Education", "Course", False),
+        ("050110202L", "Comprehensive Chinese 2", 6, "General Education", "Course", False),
+        ("050110212L", "Chinese Traditional Culture 2", 1.5, "General Education", "Course", False),
+        ("040212628L", "Physical Education 2", 1.5, "General Education", "Course", False),
+        ("080931204L", "Advanced Java Programming", 3, "Major", "Course", True),
+        ("080931205L", "Data Structures and Algorithms", 4, "Major", "Course", True),
+    ],
+    3: [
+        ("070112053L", "Linear Algebra C", 3, "General Education", "Course", False),
+        ("050110203L", "Comprehensive Chinese 3", 6, "General Education", "Course", False),
+        ("050110213L", "Chinese Traditional Culture 3", 1.5, "General Education", "Course", False),
+        ("040212629L", "Physical Education 3", 1.5, "General Education", "Course", False),
+        ("080931203L", "Introduction to Software Engineering", 3, "Professional Foundation", "Course", True),
+        ("080941201L", "Python Programming", 3, "Major", "Course", False),
+        ("080941202L", "Robotics Technology", 3, "Major", "Course", False),
+        ("080991201L", "Comprehensive Programming Course Design", 1, "Practical Teaching", "Practical", False),
+    ],
+    4: [
+        ("070112054L", "Probability Theory & Mathematical Statistics C", 3, "General Education", "Course", False),
+        ("050110204L", "Comprehensive Chinese 4", 6, "General Education", "Course", False),
+        ("050110214L", "Chinese Traditional Culture 4", 1.5, "General Education", "Course", False),
+        ("040212630L", "Physical Education 4", 1.5, "General Education", "Course", False),
+        ("080931206L", "Operating Systems", 4, "Major", "Course", True),
+        ("080931208L", "Software Requirements & Modeling", 3, "Major", "Course", True),
+    ],
+    5: [
+        ("050110221L", "Chinese Reading 1", 2, "General Education", "Course", False),
+        ("080931211L", "Database Systems", 3, "Professional Foundation", "Course", True),
+        ("080931209L", "Software Architecture", 3, "Major", "Course", True),
+        ("080931210L", "Introduction to Artificial Intelligence", 2, "Major", "Course", False),
+        ("080931207L", "Computer Networks", 3, "Major", "Course", False),
+    ],
+    6: [
+        ("050110222L", "Chinese Reading 2", 2, "General Education", "Course", False),
+        ("080931215L", "Software Testing", 3, "Major", "Course", True),
+        ("080931216L", "Software Project Management", 2, "Major", "Course", False),
+        ("080931214L", "Web Development and Applications", 4, "Major", "Course", True),
+        ("080941203L", "GPU Parallel Programming", 3, "Major", "Course", False),
+        ("080991203L", "Information Systems Course Design", 1, "Practical Teaching", "Practical", False),
+        ("080991204L", "Computer Network Course Design", 1, "Practical Teaching", "Practical", False),
+    ],
+    7: [
+        ("080931217L", "Academic Paper Writing", 2, "General Education", "Course", False),
+        ("080941204L", "Web Front-end Design and Development", 3, "Major", "Course", False),
+        ("080991206L", "Project Practice", 8, "Practical Teaching", "Practical", False),
+        ("080991205L", "Software Testing Course Design", 1, "Practical Teaching", "Practical", False),
+    ],
+    8: [
+        ("080991207L", "Graduation Thesis (Design)", 15, "Practical Teaching", "Practical", False),
+    ],
+}
+
+# Prerequisites expressed as (course_code, required_course_code, min_grade)
+PREREQUISITES = [
+    ("070112052L", "070112051L", Decimal("60.00")),   # Adv Maths 2 <- Adv Maths 1
+    ("080931205L", "080931201L", Decimal("60.00")),   # Data Structures <- Adv Language Prog
+    ("080931206L", "080931205L", Decimal("60.00")),   # Operating Systems <- Data Structures
+    ("080931211L", "080931205L", Decimal("60.00")),   # Database Systems <- Data Structures
+    ("080931209L", "080931203L", Decimal("60.00")),   # Software Architecture <- Intro SE
+    ("080931215L", "080931203L", Decimal("60.00")),   # Software Testing <- Intro SE
+    ("080931214L", "080931203L", Decimal("60.00")),   # Web Development <- Intro SE
+]
+
+
 def run_seed(reset: bool = False) -> None:
     if reset:
         _reset()
 
     # --- Departments ---------------------------------------------------- #
-    cs, _ = _get_or_create(Department, {"name": "Computer Science", "is_active": True,
-                                        "description": "Computing and software engineering."},
-                           code="CS")
-    bus, _ = _get_or_create(Department, {"name": "Business Administration", "is_active": True},
-                            code="BUS")
-    eng, _ = _get_or_create(Department, {"name": "Engineering", "is_active": True}, code="ENG")
+    cse, _ = _get_or_create(
+        Department,
+        {"name": "Software Engineering", "is_active": True,
+         "description": "Software engineering, systems and applications."},
+        code="0809",
+    )
+    gen, _ = _get_or_create(
+        Department,
+        {"name": "General Education", "is_active": True,
+         "description": "Mathematics, languages and general studies."},
+        code="0501",
+    )
+    pe, _ = _get_or_create(
+        Department,
+        {"name": "Physical Education", "is_active": True,
+         "description": "Physical education and health."},
+        code="0402",
+    )
+    db.session.commit()
 
     # --- Programs ------------------------------------------------------- #
-    bscs, _ = _get_or_create(AcademicProgram, {
-        "name": "BSc Computer Science", "department_id": cs.id, "duration_years": 4,
-        "total_credits_required": 120, "is_active": True}, code="BSCS")
-    bba, _ = _get_or_create(AcademicProgram, {
-        "name": "BBA", "department_id": bus.id, "duration_years": 4,
-        "total_credits_required": 120, "is_active": True}, code="BBA")
+    bse, _ = _get_or_create(
+        AcademicProgram,
+        {"name": "BSc Software Engineering", "department_id": cse.id,
+         "duration_years": 4, "total_credits_required": 137, "is_active": True},
+        code="BSE",
+    )
+    db.session.commit()
 
     # --- Users ---------------------------------------------------------- #
     def account(username, email, name, role):
-        user, created = _get_or_create(User, {
-            "email": email, "full_name": name, "role": role,
-            "status": "active", "is_active_flag": True,
-            "password_hash": generate_password_hash(DEMO_PASSWORD)}, username=username)
-        if created:
-            # password_hash was provided above; ensure it is never null.
-            pass
+        user, _ = _get_or_create(
+            User,
+            {"email": email, "full_name": name, "role": role,
+             "status": "active", "is_active_flag": True,
+             "password_hash": generate_password_hash(DEMO_PASSWORD)},
+            username=username,
+        )
         return user
 
     admin = account("admin", "admin@usamis.demo", "System Administrator", "administrator")
@@ -95,132 +211,178 @@ def run_seed(reset: bool = False) -> None:
     finance = account("finance", "finance@usamis.demo", "Finance Officer", "finance")
     teacher_user = account("t.mensah", "t.mensah@usamis.demo", "Thomas Mensah", "teacher")
     teacher_user2 = account("a.okafor", "a.okafor@usamis.demo", "Ada Okafor", "teacher")
-    student_user = account("s.demo", "s.demo@usamis.demo", "Demo Student", "student")
+    # Primary demo student account (roll G19).
+    student_user = account("s.demo", "g2422486019@usamis.demo", "Lin Wei", "student")
     db.session.commit()
 
     # --- Teachers ------------------------------------------------------- #
     t1, _ = _get_or_create(Teacher, {
         "first_name": "Thomas", "last_name": "Mensah", "email": teacher_user.email,
-        "department_id": cs.id, "user_id": teacher_user.id}, staff_number="T-1001")
+        "department_id": cse.id, "user_id": teacher_user.id}, staff_number="T-1001")
     t2, _ = _get_or_create(Teacher, {
         "first_name": "Ada", "last_name": "Okafor", "email": teacher_user2.email,
-        "department_id": bus.id, "user_id": teacher_user2.id}, staff_number="T-1002")
-
-    # --- Students ------------------------------------------------------- #
-    student, _ = _get_or_create(Student, {
-        "first_name": "Demo", "last_name": "Student", "email": student_user.email,
-        "user_id": student_user.id, "department_id": cs.id, "program_id": bscs.id,
-        "admission_date": dt.date(2023, 9, 1), "enrollment_status": "active"},
-        student_number="S-2023-0001")
-
-    for i in range(2, 13):
-        _get_or_create(Student, {
-            "first_name": f"Student{i:02d}", "last_name": "Sample",
-            "email": f"student{i:02d}@usamis.demo", "department_id": cs.id,
-            "program_id": bscs.id, "admission_date": dt.date(2023, 9, 1),
-            "enrollment_status": "active"}, student_number=f"S-2023-{i:04d}")
-
-    _get_or_create(Student, {
-        "first_name": "Bella", "last_name": "Business", "email": "bella@usamis.demo",
-        "department_id": bus.id, "program_id": bba.id,
-        "admission_date": dt.date(2022, 9, 1), "enrollment_status": "active"},
-        student_number="S-2022-0001")
-
-    # --- Courses -------------------------------------------------------- #
-    courses = {}
-    for code, title, credits, dept in [
-        ("CS101", "Introduction to Programming", 3, cs),
-        ("CS102", "Data Structures", 4, cs),
-        ("CS201", "Databases", 3, cs),
-        ("CS301", "Software Engineering", 3, cs),
-        ("BUS101", "Principles of Management", 3, bus),
-        ("ENG101", "Engineering Mathematics I", 4, eng),
-    ]:
-        courses[code], _ = _get_or_create(Course, {
-            "title": title, "credits": credits, "department_id": dept.id,
-            "is_active": True,
-            "description": f"{title} — core course."}, code=code)
-
-    # Prerequisite: CS201 requires CS102
-    _get_or_create(Prerequisite, {"min_grade": Decimal("60.00")},
-                   course_id=courses["CS201"].id,
-                   required_course_id=courses["CS102"].id)
+        "department_id": gen.id, "user_id": teacher_user2.id}, staff_number="T-1002")
     db.session.commit()
 
-    # --- Semesters ------------------------------------------------------ #
-    sem1, _ = _get_or_create(Semester, {
-        "term": "fall", "start_date": dt.date(2025, 9, 1),
-        "end_date": dt.date(2025, 12, 20), "is_active": True,
-        "registration_open": True}, academic_year="2025/2026")
-    sem2, _ = _get_or_create(Semester, {
-        "term": "spring", "start_date": dt.date(2026, 1, 15),
-        "end_date": dt.date(2026, 5, 30), "is_active": True,
-        "registration_open": True}, academic_year="2025/2026")
+    # --- Students (roll G19..G26) --------------------------------------- #
+    students: list[Student] = []
+    for roll, first, last in STUDENTS:
+        number = f"{ROLL_PREFIX}{roll[1:]}"          # G19 -> G2422486019
+        email = f"{number.lower()}@usamis.demo"
+        student, _ = _get_or_create(Student, {
+            "first_name": first, "last_name": last, "email": email,
+            "department_id": cse.id, "program_id": bse.id,
+            "admission_date": dt.date(2024, 9, 1), "enrollment_status": "active"},
+            student_number=number,
+        )
+        # Link the primary demo login (s.demo) to the first student (G19).
+        if roll == "G19" and student.user_id is None:
+            student.user_id = student_user.id
+        students.append(student)
+    db.session.commit()
 
-    # --- Offerings ------------------------------------------------------ #
-    offerings = {}
-    for sem, prefix in ((sem1, "A"), (sem2, "B")):
-        for idx, code in enumerate(courses.keys()):
+    # --- Courses (full curriculum) -------------------------------------- #
+    # Map programme component -> department for realistic ownership.
+    dept_for = {"0809": cse, "0501": gen, "0402": pe, "0701": gen}
+    courses: dict[str, Course] = {}
+    for sem_no in sorted(CURRICULUM):
+        for code, title, credits, category, component, is_core in CURRICULUM[sem_no]:
+            dept = dept_for.get(code[:4], cse)
+            course, _ = _get_or_create(Course, {
+                "title": title,
+                "credits": credits,
+                "department_id": dept.id,
+                "is_active": True,
+                "description": f"{title} — {category} ({component}"
+                               f"{', core' if is_core else ''}).",
+            }, code=code)
+            courses[code] = course
+    db.session.commit()
+
+    # --- Prerequisites -------------------------------------------------- #
+    for course_code, req_code, min_grade in PREREQUISITES:
+        c = courses.get(course_code)
+        r = courses.get(req_code)
+        if not c or not r:
+            continue
+        _get_or_create(Prerequisite, {"min_grade": min_grade},
+                       course_id=c.id, required_course_id=r.id)
+    db.session.commit()
+
+    # --- Semesters (8, matching the curriculum years) ------------------- #
+    # 2024/2025 (sem 1-2), 2025/2026 (sem 3-4), 2026/2027 (sem 5-6),
+    # 2027/2028 (sem 7-8). Terms alternate fall/spring.
+    # (term, start_month, start_day, end_month, end_day)
+    SEMESTER_SHAPE = {
+        "fall": (9, 1, 12, 20),
+        "spring": (2, 15, 6, 30),
+    }
+    semesters: dict[int, Semester] = {}
+    years = [(2024, 2025), (2025, 2026), (2026, 2027), (2027, 2028)]
+    sem_no = 1
+    for start_year, end_year in years:
+        for term in ("fall", "spring"):
+            if sem_no > 8:
+                break
+            sm, sd, em, ed = SEMESTER_SHAPE[term]
+            # Fall runs in the first calendar year; spring spills into the next.
+            start_date = dt.date(start_year, sm, sd)
+            end_date = dt.date(start_year if term == "fall" else end_year, em, ed)
+            label = f"{start_year}/{end_year}"
+            semester, _ = _get_or_create(Semester, {
+                "start_date": start_date,
+                "end_date": end_date,
+                "is_active": True,
+                "registration_open": True,
+            }, academic_year=label, term=term)
+            semesters[sem_no] = semester
+            sem_no += 1
+    db.session.commit()
+
+    # --- Offerings (every curriculum course in its semester) ------------ #
+    offerings: dict[tuple[int, str], CourseOffering] = {}
+    for sem_no, rows in CURRICULUM.items():
+        semester = semesters.get(sem_no)
+        if semester is None:
+            continue
+        for idx, (code, *_rest) in enumerate(rows):
+            course = courses.get(code)
+            if course is None:
+                continue
             offering, _ = _get_or_create(CourseOffering, {
                 "teacher_id": (t1 if idx % 2 == 0 else t2).id,
-                "capacity": 40, "is_active": True},
-                course_id=courses[code].id, semester_id=sem.id)
-            offerings[(sem.id, code)] = offering
+                "capacity": 60, "is_active": True},
+                course_id=course.id, semester_id=semester.id,
+            )
+            offerings[(sem_no, code)] = offering
     db.session.commit()
 
     # --- Enrollments, grades, attendance -------------------------------- #
-    all_students = db.session.execute(db.select(Student)).scalars().all()
-    for s in all_students:
-        for code in ["CS101", "CS102", "BUS101"]:
-            offering = offerings.get((sem1.id, code))
-            if not offering:
-                continue
-            existing = db.session.execute(
-                db.select(Enrollment).where(
-                    Enrollment.student_id == s.id, Enrollment.offering_id == offering.id,
-                    Enrollment.status == "enrolled")
-            ).scalars().first()
-            if existing:
-                continue
-            enrollment = Enrollment(student_id=s.id, offering_id=offering.id,
-                                    status="enrolled")
-            db.session.add(enrollment)
-            db.session.flush()
-
-            grade = db.session.execute(
-                db.select(Grade).where(Grade.enrollment_id == enrollment.id)
-            ).scalars().first()
-            if grade is None:
-                score = Decimal("72.50") if s.id % 2 == 0 else Decimal("58.00")
-                db.session.add(Grade(
-                    enrollment_id=enrollment.id, student_id=s.id, score=score,
-                    letter="B" if score >= 70 else "E", is_published=True,
-                    published_at=dt.datetime.now(dt.timezone.utc), entered_by_id=teacher_user.id))
-
-            for day in (dt.date(2025, 9, 8), dt.date(2025, 9, 15)):
-                db.session.execute(db.select(Attendance))  # touch session
-                exists = db.session.execute(
-                    db.select(Attendance).where(
-                        Attendance.student_id == s.id,
-                        Attendance.offering_id == offering.id,
-                        Attendance.session_date == day)
+    # Enrol everyone (G19..G26) in their first two semesters' courses.
+    for s in students:
+        for sem_no in (1, 2):
+            for code, *_rest in CURRICULUM.get(sem_no, []):
+                offering = offerings.get((sem_no, code))
+                if offering is None:
+                    continue
+                existing = db.session.execute(
+                    db.select(Enrollment).where(
+                        Enrollment.student_id == s.id,
+                        Enrollment.offering_id == offering.id,
+                        Enrollment.status == "enrolled")
                 ).scalars().first()
-                if not exists:
-                    db.session.add(Attendance(
-                        student_id=s.id, offering_id=offering.id, session_date=day,
-                        status="present", recorded_by_id=teacher_user.id))
+                if existing:
+                    continue
+                enrollment = Enrollment(student_id=s.id, offering_id=offering.id,
+                                        status="enrolled")
+                db.session.add(enrollment)
+                db.session.flush()
+
+                grade = db.session.execute(
+                    db.select(Grade).where(Grade.enrollment_id == enrollment.id)
+                ).scalars().first()
+                if grade is None:
+                    # Deterministic, realistic spread of scores.
+                    base = 60 + (s.id * 3 + hash(code) % 30) % 40
+                    score = Decimal(f"{base}.00")
+                    letter = ("A" if score >= 85 else "B" if score >= 75
+                              else "C" if score >= 65 else "D" if score >= 60 else "F")
+                    db.session.add(Grade(
+                        enrollment_id=enrollment.id, student_id=s.id, score=score,
+                        letter=letter, is_published=True,
+                        published_at=dt.datetime.now(dt.timezone.utc),
+                        entered_by_id=teacher_user.id))
+
+                for day in (dt.date(2025, 9, 8), dt.date(2025, 9, 15)):
+                    exists = db.session.execute(
+                        db.select(Attendance).where(
+                            Attendance.student_id == s.id,
+                            Attendance.offering_id == offering.id,
+                            Attendance.session_date == day)
+                    ).scalars().first()
+                    if not exists:
+                        db.session.add(Attendance(
+                            student_id=s.id, offering_id=offering.id, session_date=day,
+                            status="present", recorded_by_id=teacher_user.id))
     db.session.commit()
 
     # --- Fees ----------------------------------------------------------- #
     tuition, _ = _get_or_create(FeeCategory, {
-        "name": "Tuition", "default_amount": Decimal("2500.00"),
-        "is_active": True}, code="TUITION")
+        "name": "Tuition", "default_amount": Decimal("12000.00"), "is_active": True},
+        code="TUITION")
     library, _ = _get_or_create(FeeCategory, {
-        "name": "Library", "default_amount": Decimal("150.00"),
-        "is_active": True}, code="LIBRARY")
+        "name": "Library", "default_amount": Decimal("300.00"), "is_active": True},
+        code="LIBRARY")
+    accommodation, _ = _get_or_create(FeeCategory, {
+        "name": "Accommodation", "default_amount": Decimal("1200.00"), "is_active": True},
+        code="ACCOMM")
+    db.session.commit()
 
-    for s in all_students:
-        for cat, amt in ((tuition, Decimal("2500.00")), (library, Decimal("150.00"))):
+    sem1 = semesters.get(1)
+    for s in students:
+        for cat, amt in ((tuition, Decimal("12000.00")),
+                         (library, Decimal("300.00")),
+                         (accommodation, Decimal("1200.00"))):
             assessment = db.session.execute(
                 db.select(FeeAssessment).where(
                     FeeAssessment.student_id == s.id,
@@ -228,23 +390,21 @@ def run_seed(reset: bool = False) -> None:
                     FeeAssessment.semester_id == sem1.id)
             ).scalars().first()
             if assessment is None:
-                assessment = FeeAssessment(
+                db.session.add(FeeAssessment(
                     student_id=s.id, category_id=cat.id, semester_id=sem1.id,
                     amount=amt, adjustment=Decimal("0.00"),
-                    due_date=dt.date(2025, 10, 15), created_by_id=finance.id)
-                db.session.add(assessment)
-                db.session.flush()
+                    due_date=dt.date(2024, 10, 15), created_by_id=finance.id))
 
-        # Give the demo student a partial payment for a realistic dashboard.
-        if s.student_number == "S-2023-0001":
+        # Partial payment for the primary demo student (G19).
+        if s.student_number == f"{ROLL_PREFIX}19":
             existing_pay = db.session.execute(
                 db.select(Payment).where(Payment.student_id == s.id,
                                          Payment.reference == "PAY-DEMO-0001")
             ).scalars().first()
             if existing_pay is None:
                 db.session.add(Payment(
-                    student_id=s.id, amount=Decimal("1000.00"),
-                    reference="PAY-DEMO-0001", paid_on=dt.date(2025, 9, 20),
+                    student_id=s.id, amount=Decimal("5000.00"),
+                    reference="PAY-DEMO-0001", paid_on=dt.date(2024, 9, 20),
                     recorded_by_id=finance.id))
     db.session.commit()
 
@@ -253,5 +413,6 @@ def run_seed(reset: bool = False) -> None:
         db.session.add(AuditLog(
             actor_id=admin.id, actor_username="admin", action="seed",
             entity_type="System", entity_id=None,
-            summary="Synthetic demo data generated."))
+            summary="Synthetic demo data generated (8-semester SE curriculum, "
+                    "students G19-G26)."))
         db.session.commit()

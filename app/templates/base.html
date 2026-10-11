@@ -27,33 +27,38 @@
         {% if current_user.has_permission('manage_programs') %}
           <a href="{{ url_for('programs.index') }}">Programs</a>
         {% endif %}
-        {% if current_user.has_permission('manage_courses') or current_user.has_permission('view_students') %}
+        {% if current_user.has_permission('manage_courses') %}
           <a href="{{ url_for('courses.index') }}">Courses</a>
+        {% endif %}
+        {% if current_user.has_permission('manage_semesters') %}
           <a href="{{ url_for('semesters.index') }}">Semesters</a>
         {% endif %}
         {% if current_user.has_permission('manage_enrollments') %}
           <a href="{{ url_for('enrollments.index') }}">Enrollments</a>
         {% endif %}
-        {% if current_user.has_permission('view_own_enrollment') %}
+        {% if current_user.has_permission('view_own_enrollment') and not current_user.has_permission('manage_enrollments') %}
           <a href="{{ url_for('enrollments.my_enrollments') }}">My Enrollments</a>
           <a href="{{ url_for('enrollments.request_enrollment') }}">Enroll in Course</a>
         {% endif %}
         {% if current_user.has_permission('enter_grades') %}
           <a href="{{ url_for('grades.index') }}">Grade Entry</a>
         {% endif %}
-        {% if current_user.has_permission('view_own_grades') %}
+        {% if current_user.has_permission('view_grades') and not current_user.has_permission('enter_grades') %}
+          <a href="{{ url_for('grades.index') }}">Grades</a>
+        {% endif %}
+        {% if current_user.has_permission('view_own_grades') and not current_user.has_permission('view_grades') %}
           <a href="{{ url_for('grades.my_grades') }}">My Grades</a>
         {% endif %}
         {% if current_user.has_permission('record_attendance') %}
           <a href="{{ url_for('attendance.index') }}">Attendance</a>
         {% endif %}
-        {% if current_user.has_permission('view_own_attendance') %}
+        {% if current_user.has_permission('view_own_attendance') and not current_user.has_permission('record_attendance') %}
           <a href="{{ url_for('attendance.my_attendance') }}">My Attendance</a>
         {% endif %}
         {% if current_user.has_permission('manage_fees') %}
           <a href="{{ url_for('fees.index') }}">Fees</a>
         {% endif %}
-        {% if current_user.has_permission('view_own_fees') %}
+        {% if current_user.has_permission('view_own_fees') and not current_user.has_permission('manage_fees') %}
           <a href="{{ url_for('fees.my_fees') }}">My Fees</a>
         {% endif %}
         {% if current_user.has_permission('view_reports') %}

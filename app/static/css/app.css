@@ -226,6 +226,26 @@ body.public {
 
 .error-code { font-size: 54px; font-weight: 800; color: var(--brand); margin: 0; }
 
+/* ---------- Demo accounts panel (login convenience) ---------- */
+.demo-accounts {
+  margin-top: 18px; background: var(--surface); border-radius: 14px;
+  padding: 18px 20px; box-shadow: 0 18px 44px rgba(8, 20, 40, .28);
+}
+.demo-accounts h2 { margin: 0 0 4px; font-size: 15px; }
+.demo-accounts p { margin: 0 0 12px; }
+.demo-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.demo-table th {
+  text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--muted); padding: 4px 6px; border-bottom: 1px solid var(--border);
+}
+.demo-table td { padding: 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.demo-table tr:last-child td { border-bottom: none; }
+.demo-table code {
+  background: var(--surface-2, #f1f5f9); padding: 1px 5px; border-radius: 4px;
+  font-size: 12px;
+}
+.demo-fill { white-space: nowrap; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .grid-2 { grid-template-columns: 1fr; }

@@ -5,10 +5,12 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -29,6 +31,16 @@ class Enrollment(TimestampMixin, db.Model):
     __table_args__ = (
         UniqueConstraint("student_id", "offering_id", "status",
                          name="uq_enrollment_student_offering_status"),
+        # Business rule: a student may hold at most one *active* enrollment per
+        # offering. Rejected/dropped rows are kept as immutable history, so this
+        # is a partial unique index over the active statuses only.
+        Index(
+            "uq_active_enrollment_student_offering",
+            "student_id",
+            "offering_id",
+            unique=True,
+            postgresql_where=text("status IN ('pending', 'enrolled', 'completed')"),
+        ),
         CheckConstraint(
             "status IN ('pending','enrolled','rejected','dropped','completed')",
             name="ck_enrollment_status_valid",

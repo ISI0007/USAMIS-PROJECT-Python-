@@ -9,8 +9,9 @@ from flask_login import current_user, login_required, login_user, logout_user
 from ..extensions import db, limiter
 from ..models import User, utcnow
 from ..security.decorators import is_safe_redirect
+from ..security.permissions import Role
 from ..services import audit
-from .forms import LoginForm, PasswordChangeForm, ProfileForm
+from .forms import LoginForm, PasswordChangeForm, ProfileForm, RegistrationForm
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -66,6 +67,56 @@ def login():
         return redirect(url_for("dashboard.home"))
 
     return render_template("auth/login.html", form=form)
+
+
+@bp.route("/register", methods=["GET", "POST"])
+@limiter.limit("10 per hour", methods=["POST"])
+def register():
+    """Public self-registration.
+
+    Newly created accounts are always assigned the STUDENT role and are
+    activated immediately so a visitor can explore the student experience.
+    Elevated roles (administrator, academic staff, teacher, finance) are
+    never self-assignable; only an administrator can grant them.
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard.home"))
+
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        username = form.username.data.strip()
+        email = form.email.data.strip().lower()
+
+        # Uniqueness is enforced by the DB, but check first for a friendly error.
+        existing = db.session.execute(
+            db.select(User).where(
+                (User.username == username) | (User.email == email)
+            )
+        ).scalars().first()
+        if existing is not None:
+            flash("That username or email is already registered.", "danger")
+            return render_template("auth/register.html", form=form), 409
+
+        user = User(
+            username=username,
+            email=email,
+            full_name=form.full_name.data.strip(),
+            role=Role.STUDENT,
+            status="active",
+            is_active_flag=True,
+        )
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+
+        audit.log_action("user_registered", "User", user.id,
+                         summary=f"Self-registration of '{username}' (student).")
+        db.session.commit()
+
+        flash("Account created. You can now sign in.", "success")
+        return redirect(url_for("auth.login"))
+
+    return render_template("auth/register.html", form=form)
 
 
 @bp.route("/logout", methods=["POST", "GET"])
