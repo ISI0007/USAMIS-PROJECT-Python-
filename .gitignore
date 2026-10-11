@@ -35,3 +35,8 @@ Thumbs.db
 # Export artifacts that are regenerated
 docs/_build/
 *.log
+
+# Local dev scratch
+_server.*
+scripts/_*.py
+

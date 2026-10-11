@@ -18,6 +18,7 @@ from .academic import (  # noqa: F401
 from .enrollment import Enrollment  # noqa: F401
 from .grade import Grade  # noqa: F401
 from .attendance import Attendance  # noqa: F401
+from .attendance_session import AttendanceSession  # noqa: F401
 from .fee import FeeCategory, FeeAssessment, Payment  # noqa: F401
 from .notification import SmsMessage  # noqa: F401
 from .payment_intent import PaymentIntent  # noqa: F401
@@ -37,6 +38,7 @@ __all__ = [
     "Enrollment",
     "Grade",
     "Attendance",
+    "AttendanceSession",
     "FeeCategory",
     "FeeAssessment",
     "Payment",

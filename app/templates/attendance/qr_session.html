@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}QR Attendance{% endblock %}
+{% block heading %}QR Attendance{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('attendance.index') }}">Attendance</a>
+  <span class="sep">/</span><span class="current">{{ offering.course.code }}</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">QR attendance — {{ offering.course.code }}</h1>
+  <p class="page-sub">{{ offering.course.title }} · {{ offering.semester.label if offering.semester else '' }}</p>
+</div>
+
+{% if session and scan_url %}
+<div class="form-card">
+  <h2 class="section-title">Active session</h2>
+  <div class="detail-grid">
+    <div><span class="muted">Opened</span><br>{{ session.session_date.strftime('%Y-%m-%d %H:%M') }}</div>
+    <div><span class="muted">Expires</span><br>{{ session.expires_at.strftime('%Y-%m-%d %H:%M') }}</div>
+    <div><span class="muted">Marked present today</span><br>{{ present|length }}</div>
+  </div>
+  <div class="qr-box" style="margin:16px 0;text-align:center">
+    <img alt="Attendance QR code"
+         src="{{ url_for('attendance.qr_image', token=session.token) }}"
+         width="240" height="240" style="border:8px solid #fff;border-radius:12px">
+    <p class="muted" style="word-break:break-all;max-width:520px;margin:8px auto">
+      {{ scan_url }}
+    </p>
+  </div>
+  <form method="post" action="{{ url_for('attendance.qr_close', offering_id=offering.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="session_id" value="{{ session.id }}">
+    <div class="form-actions">
+      <button class="btn danger" type="submit">Close session</button>
+    </div>
+  </form>
+</div>
+{% else %}
+<div class="form-card">
+  <h2 class="section-title">No active session</h2>
+  <p class="muted">Open a session to display a QR code students can scan to mark themselves present.</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-grid">
+      <div class="field">
+        <label for="ttl_minutes">Valid for (minutes)</label>
+        <input type="number" id="ttl_minutes" name="ttl_minutes" value="15" min="1" max="240">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn primary" type="submit">Open QR session</button>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+{% if present %}
+<h2 class="section-title">Marked present today</h2>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Student</th><th>Status</th><th>Source</th></tr></thead>
+  <tbody>
+  {% for a in present %}
+    <tr>
+      <td>{{ a.student.student_number }} — {{ a.student.full_name }}</td>
+      <td>{% if a.status == 'present' %}<span class="pill ok">present</span>{% else %}<span class="pill">{{ a.status }}</span>{% endif %}</td>
+      <td class="muted">{{ a.source }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

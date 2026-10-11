@@ -42,12 +42,21 @@ class Attendance(TimestampMixin, db.Model):
     session_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="present")
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # How the record was captured: manual entry or a QR scan (F3).
+    source: Mapped[str] = mapped_column(
+        String(8), nullable=False, default="manual", server_default="manual"
+    )
+    session_id: Mapped[int | None] = mapped_column(
+        ForeignKey("attendance_sessions.id", ondelete="SET NULL"),
+        nullable=True, index=True,
+    )
     recorded_by_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
 
     student = relationship("Student", back_populates="attendances")
     offering = relationship("CourseOffering")
+    session = relationship("AttendanceSession", back_populates="records")
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<Attendance s{self.student_id} {self.session_date} {self.status}>"
