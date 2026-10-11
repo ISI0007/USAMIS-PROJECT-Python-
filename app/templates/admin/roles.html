@@ -1,15 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Roles{% endblock %}
 {% block heading %}Roles &amp; Permissions{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Roles</span>
+</nav>
+{% endblock %}
 {% block content %}
-<p class="muted">Read-only view of the server-side RBAC matrix (source of truth:
-  <code>app/security/permissions.py</code>). Permissions are enforced in the backend, not the UI.</p>
-{% for role, perms in role_permissions.items() %}
-  <div class="card">
-    <h3>{{ role_labels.get(role, role) }} <span class="muted small">({{ role }})</span></h3>
-    <ul class="perm-list">
-      {% for p in perms|sort %}<li><code>{{ p }}</code></li>{% endfor %}
-    </ul>
-  </div>
-{% endfor %}
+<div class="page-head">
+  <h1 class="page-title">Roles &amp; permissions</h1>
+  <p class="page-sub">Read-only view of the server-side RBAC matrix (source of truth:
+    <code>app/security/permissions.py</code>). Permissions are enforced in the backend, not the UI.</p>
+</div>
+<div class="grid-cards">
+  {% for role, perms in role_permissions.items() %}
+    <div class="card">
+      <h3 class="card-title">{{ role_labels.get(role, role) }} <span class="muted small">({{ role }})</span></h3>
+      <ul class="perm-list">
+        {% for p in perms|sort %}<li><code>{{ p }}</code></li>{% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+</div>
 {% endblock %}

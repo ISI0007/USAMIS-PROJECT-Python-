@@ -38,7 +38,17 @@ def detail(course_id: int):
     offerings = db.session.execute(
         db.select(CourseOffering).where(CourseOffering.course_id == course.id)
     ).scalars().all()
-    return render_template("courses/detail.html", course=course, offerings=offerings)
+    # Candidate prerequisite courses: all active courses except this one and
+    # those already configured as prerequisites (avoids duplicate options).
+    existing_ids = {p.required_course_id for p in course.prerequisites}
+    candidate_courses = db.session.execute(
+        db.select(Course)
+        .where(Course.id != course.id, Course.is_active.is_(True))
+        .order_by(Course.code)
+    ).scalars().all()
+    candidate_courses = [c for c in candidate_courses if c.id not in existing_ids]
+    return render_template("courses/detail.html", course=course, offerings=offerings,
+                           candidate_courses=candidate_courses)
 
 
 @bp.route("/new", methods=["GET", "POST"])

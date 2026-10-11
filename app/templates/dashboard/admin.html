@@ -1,25 +1,183 @@
 {% extends "base.html" %}
 {% block title %}Administrator Dashboard{% endblock %}
-{% block heading %}Administrator Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Dashboard</span>
+</nav>
+{% endblock %}
 {% block content %}
-{% if semester %}<p class="muted">Active semester: <strong>{{ semester.label }}</strong> · Registration {{ 'open' if semester.registration_open else 'closed' }}</p>{% endif %}
+<div class="page-head">
+  <h1 class="page-title">Good day, {{ current_user.full_name.split()[0] }}</h1>
+  <p class="page-sub">
+    {% if semester %}Active semester: <strong>{{ semester.label }}</strong> · Registration {{ 'open' if semester.registration_open else 'closed' }}{% else %}No active semester{% endif %}
+  </p>
+</div>
 
+{# ---------- KPI cards ---------- #}
 <div class="stat-grid">
-  <div class="stat"><span class="stat-value">{{ stats.students }}</span><span class="stat-label">Students</span></div>
-  <div class="stat"><span class="stat-value">{{ stats.departments }}</span><span class="stat-label">Active Departments</span></div>
-  <div class="stat"><span class="stat-value">{{ stats.programs }}</span><span class="stat-label">Active Programs</span></div>
-  <div class="stat"><span class="stat-value">{{ stats.offerings }}</span><span class="stat-label">Course Offerings</span></div>
-  <div class="stat"><span class="stat-value">{{ stats.enrolled }}</span><span class="stat-label">Active Enrollments</span></div>
-  <div class="stat"><span class="stat-value">{{ stats.pending }}</span><span class="stat-label">Pending Requests</span></div>
-  <div class="stat"><span class="stat-value">{{ '%.2f'|format(stats.fees_assessed) }}</span><span class="stat-label">Fees Assessed</span></div>
-  <div class="stat"><span class="stat-value">{{ '%.2f'|format(stats.fees_paid) }}</span><span class="stat-label">Fees Collected</span></div>
-  <div class="stat warn"><span class="stat-value">{{ '%.2f'|format(stats.outstanding) }}</span><span class="stat-label">Outstanding</span></div>
+  <div class="stat">
+    <div class="stat-top">
+      <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></span>
+    </div>
+    <span class="stat-value">{{ stats.students }}</span>
+    <span class="stat-label">Total Students</span>
+    <span class="stat-compare">Across {{ stats.departments }} departments</span>
+  </div>
+  <div class="stat success">
+    <div class="stat-top">
+      <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+    </div>
+    <span class="stat-value">{{ stats.enrolled }}</span>
+    <span class="stat-label">Active Enrollments</span>
+    <span class="stat-compare">Across {{ stats.offerings }} offerings</span>
+  </div>
+  <div class="stat warn">
+    <div class="stat-top">
+      <span class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+    </div>
+    <span class="stat-value">{{ stats.pending }}</span>
+    <span class="stat-label">Pending Requests</span>
+    <span class="stat-compare">Awaiting review</span>
+  </div>
+  <div class="stat">
+    <div class="stat-top">
+      <span class="stat-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>
+    </div>
+    <span class="stat-value small-value">{{ '%.0f'|format(stats.fees_paid) }}</span>
+    <span class="stat-label">Fees Collected</span>
+    <span class="stat-compare">of {{ '%.0f'|format(stats.fees_assessed) }} assessed</span>
+  </div>
+  <div class="stat danger">
+    <div class="stat-top">
+      <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+    </div>
+    <span class="stat-value small-value">{{ '%.0f'|format(stats.outstanding) }}</span>
+    <span class="stat-label">Outstanding Fees</span>
+    <span class="stat-compare">Uncollected balance</span>
+  </div>
 </div>
 
-<div class="quick-links">
-  <a class="btn" href="{{ url_for('students.index') }}">Manage Students</a>
-  <a class="btn" href="{{ url_for('enrollments.index') }}">Enrollment Requests</a>
-  <a class="btn" href="{{ url_for('reports.index') }}">Reports</a>
-  <a class="btn" href="{{ url_for('admin.audit_log') }}">Audit Log</a>
+{# ---------- Analytics ---------- #}
+<div class="grid-2-1">
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">Enrollment Trend</h2><span class="muted small">active enrollments per semester</span></div>
+    <canvas id="enrollmentChart" height="110" role="img" aria-label="Enrollment trend chart"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">Grade Distribution</h2></div>
+    <canvas id="gradeChart" height="180" role="img" aria-label="Grade distribution chart"></canvas>
+  </div>
 </div>
+
+<div class="grid-2-1">
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">Students by Department</h2></div>
+    <canvas id="deptChart" height="120" role="img" aria-label="Students by department chart"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">Fee Collection</h2></div>
+    <canvas id="feeChart" height="180" role="img" aria-label="Fee collection chart"></canvas>
+    <p class="muted small" style="margin-top:12px;">
+      Collected {{ '%.0f'|format(stats.fees_paid) }} · Outstanding {{ '%.0f'|format(stats.outstanding) }}
+    </p>
+  </div>
+</div>
+
+{# ---------- Activity + actions ---------- #}
+<div class="grid-2-1">
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">Recent Activity</h2>
+      <a class="btn btn-sm btn-ghost" href="{{ url_for('admin.audit_log') }}">View all</a></div>
+    {% if recent_activity %}
+      <ul class="activity">
+        {% for a in recent_activity %}
+        <li>
+          <span class="act-dot"></span>
+          <span>{{ a.summary or a.action }}<br><span class="muted small">{{ a.actor_username }}</span></span>
+          <span class="act-time">{{ a.created_at.strftime('%Y-%m-%d %H:%M') if a.created_at else '' }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">No activity recorded yet.</p>
+    {% endif %}
+  </div>
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">Quick Actions</h2></div>
+    <div class="quick-links" style="flex-direction:column; align-items:stretch;">
+      <a class="btn" href="{{ url_for('students.index') }}"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add / manage students</a>
+      <a class="btn" href="{{ url_for('enrollments.index') }}"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/></svg> Review enrollment requests</a>
+      <a class="btn" href="{{ url_for('semesters.index') }}"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Create a course offering</a>
+      <a class="btn" href="{{ url_for('reports.index') }}"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg> View reports</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script id="dashboard-data" type="application/json">
+{{ {
+  "trend": {"labels": charts.trend_labels, "values": charts.trend_values},
+  "grades": {"labels": charts.grade_labels, "values": charts.grade_values},
+  "dept": {"labels": charts.dept_labels, "values": charts.dept_values},
+  "fee": {"assessed": charts.fee_assessed, "paid": charts.fee_paid}
+} | tojson }}
+</script>
+<script>
+(function () {
+  if (typeof Chart === 'undefined') return;
+  var data = JSON.parse(document.getElementById('dashboard-data').textContent);
+  var royal = '#2563eb', cyan = '#06b6d4', success = '#059669', warning = '#d97706';
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+  Chart.defaults.color = '#64748b';
+
+  var el;
+  if ((el = document.getElementById('enrollmentChart'))) {
+    new Chart(el, {
+      type: 'line',
+      data: { labels: data.trend.labels, datasets: [{
+        label: 'Enrollments', data: data.trend.values,
+        borderColor: royal, backgroundColor: 'rgba(37,99,235,.12)',
+        fill: true, tension: .35, pointRadius: 3, borderWidth: 2
+      }]},
+      options: { plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+  }
+  if ((el = document.getElementById('gradeChart'))) {
+    new Chart(el, {
+      type: 'doughnut',
+      data: { labels: data.grades.labels, datasets: [{
+        data: data.grades.values,
+        backgroundColor: ['#059669', '#2563eb', '#06b6d4', '#d97706', '#dc2626'],
+        borderWidth: 0
+      }]},
+      options: { plugins: { legend: { position: 'bottom' } }, cutout: '62%' }
+    });
+  }
+  if ((el = document.getElementById('deptChart'))) {
+    new Chart(el, {
+      type: 'bar',
+      data: { labels: data.dept.labels, datasets: [{
+        label: 'Students', data: data.dept.values,
+        backgroundColor: cyan, borderRadius: 6, maxBarThickness: 46
+      }]},
+      options: { plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+  }
+  if ((el = document.getElementById('feeChart'))) {
+    var outstanding = Math.max((data.fee.assessed || 0) - (data.fee.paid || 0), 0);
+    new Chart(el, {
+      type: 'doughnut',
+      data: { labels: ['Collected', 'Outstanding'], datasets: [{
+        data: [data.fee.paid, outstanding],
+        backgroundColor: [success, warning], borderWidth: 0
+      }]},
+      options: { plugins: { legend: { position: 'bottom' } }, cutout: '62%' }
+    });
+  }
+})();
+</script>
 {% endblock %}

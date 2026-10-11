@@ -1,14 +1,25 @@
 {% extends "base.html" %}
 {% block title %}Reports{% endblock %}
 {% block heading %}Management Reports{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Reports</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Management Reports</h1>
+  <p class="page-sub">Institution-wide totals and breakdowns, derived from live data.</p>
+</div>
+
 <div class="stat-grid">
-  <div class="stat"><span class="stat-value">{{ totals.students }}</span><span class="stat-label">Students</span></div>
-  <div class="stat"><span class="stat-value">{{ totals.courses }}</span><span class="stat-label">Courses</span></div>
-  <div class="stat"><span class="stat-value">{{ totals.offerings }}</span><span class="stat-label">Offerings</span></div>
-  <div class="stat"><span class="stat-value">{{ '%.2f'|format(totals.assessed) }}</span><span class="stat-label">Fees Assessed</span></div>
-  <div class="stat"><span class="stat-value">{{ '%.2f'|format(totals.collected) }}</span><span class="stat-label">Collected</span></div>
-  <div class="stat warn"><span class="stat-value">{{ '%.2f'|format(totals.outstanding) }}</span><span class="stat-label">Outstanding</span></div>
+  <div class="stat"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span></div><span class="stat-value">{{ totals.students }}</span><span class="stat-label">Students</span></div>
+  <div class="stat"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span></div><span class="stat-value">{{ totals.courses }}</span><span class="stat-label">Courses</span></div>
+  <div class="stat cyan"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span></div><span class="stat-value">{{ totals.offerings }}</span><span class="stat-label">Offerings</span></div>
+  <div class="stat"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span></div><span class="stat-value small-value">{{ '%.0f'|format(totals.assessed) }}</span><span class="stat-label">Fees Assessed</span></div>
+  <div class="stat success"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span></div><span class="stat-value small-value">{{ '%.0f'|format(totals.collected) }}</span><span class="stat-label">Collected</span></div>
+  <div class="stat danger"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span></div><span class="stat-value small-value">{{ '%.0f'|format(totals.outstanding) }}</span><span class="stat-label">Outstanding</span></div>
 </div>
 
 <div class="quick-links">
@@ -18,45 +29,45 @@
 
 <div class="grid-2">
   <div class="card">
-    <h3>Students per Department</h3>
+    <h3 class="card-title">Students per Department</h3>
     {% if students_per_department %}
     <table class="table">
       <thead><tr><th>Department</th><th>Students</th></tr></thead>
       <tbody>
       {% for code, count in students_per_department %}
-        <tr><td>{{ code }}</td><td>{{ count }}</td></tr>
+        <tr><td>{{ code }}</td><td><strong>{{ count }}</strong></td></tr>
       {% endfor %}
       </tbody>
     </table>
-    {% else %}<p class="empty">No data.</p>{% endif %}
+    {% else %}<div class="empty">No data.</div>{% endif %}
   </div>
 
   <div class="card">
-    <h3>Enrollment by Status</h3>
+    <h3 class="card-title">Enrollment by Status</h3>
     {% if enrollment_by_status %}
     <table class="table">
       <thead><tr><th>Status</th><th>Count</th></tr></thead>
       <tbody>
       {% for status, count in enrollment_by_status %}
-        <tr><td>{{ status|capitalize }}</td><td>{{ count }}</td></tr>
+        <tr><td><span class="pill pill-{{ status }}">{{ status }}</span></td><td><strong>{{ count }}</strong></td></tr>
       {% endfor %}
       </tbody>
     </table>
-    {% else %}<p class="empty">No data.</p>{% endif %}
+    {% else %}<div class="empty">No data.</div>{% endif %}
   </div>
 
   <div class="card">
-    <h3>Published Grade Distribution</h3>
+    <h3 class="card-title">Published Grade Distribution</h3>
     {% if grade_distribution %}
     <table class="table">
       <thead><tr><th>Letter</th><th>Count</th></tr></thead>
       <tbody>
       {% for letter, count in grade_distribution %}
-        <tr><td>{{ letter }}</td><td>{{ count }}</td></tr>
+        <tr><td><strong>{{ letter }}</strong></td><td>{{ count }}</td></tr>
       {% endfor %}
       </tbody>
     </table>
-    {% else %}<p class="empty">No published grades.</p>{% endif %}
+    {% else %}<div class="empty">No published grades.</div>{% endif %}
   </div>
 </div>
 {% endblock %}

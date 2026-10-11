@@ -1,7 +1,18 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Edit' if user else 'New' }} User{% endblock %}
 {% block heading %}{{ 'Edit' if user else 'New' }} User{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('admin.users') }}">Users</a>
+  <span class="sep">/</span><span class="current">{{ 'Edit' if user else 'New' }}</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ 'Edit user' if user else 'New user' }}</h1>
+  <p class="page-sub">Account details, role and status.</p>
+</div>
 <div class="card narrow">
   <form method="post" class="form">
     {{ form.hidden_tag() }}
@@ -15,8 +26,10 @@
     </div>
     <div class="field">{{ form.password.label }}{{ form.password(class="input", placeholder="Leave blank to keep current") }}
       {% for e in form.password.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
-    <button class="btn btn-primary" type="submit">Save User</button>
-    <a class="btn" href="{{ url_for('admin.users') }}">Cancel</a>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save user</button>
+      <a class="btn btn-ghost" href="{{ url_for('admin.users') }}">Cancel</a>
+    </div>
   </form>
 </div>
 {% endblock %}

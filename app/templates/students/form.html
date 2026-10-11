@@ -1,7 +1,18 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Edit' if student else 'New' }} Student{% endblock %}
 {% block heading %}{{ 'Edit' if student else 'New' }} Student{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('students.index') }}">Students</a>
+  <span class="sep">/</span><span class="current">{{ 'Edit' if student else 'New' }}</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ 'Edit student' if student else 'New student' }}</h1>
+  <p class="page-sub">Student information. Fields marked <span class="req">*</span> are required.</p>
+</div>
 <div class="card">
   <form method="post" class="form">
     {{ form.hidden_tag() }}
@@ -9,6 +20,7 @@
       <div class="field">
         {{ form.student_number.label }}{{ form.student_number(class="input", readonly=student is not none) }}
         {% for e in form.student_number.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        {% if student %}<span class="hint">Student number cannot be changed.</span>{% endif %}
       </div>
       <div class="field">
         {{ form.enrollment_status.label }}{{ form.enrollment_status(class="input") }}
@@ -30,8 +42,10 @@
       <div class="field">{{ form.program_id.label }}{{ form.program_id(class="input") }}</div>
       <div class="field">{{ form.admission_date.label }}{{ form.admission_date(class="input") }}</div>
     </div>
-    <button class="btn btn-primary" type="submit">Save Student</button>
-    <a class="btn" href="{{ url_for('students.index') }}">Cancel</a>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save student</button>
+      <a class="btn btn-ghost" href="{{ url_for('students.index') }}">Cancel</a>
+    </div>
   </form>
 </div>
 {% endblock %}

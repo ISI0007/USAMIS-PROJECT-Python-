@@ -1,27 +1,43 @@
 {% extends "base.html" %}
 {% block title %}Departments{% endblock %}
 {% block heading %}Departments{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Departments</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Departments</h1>
+  <p class="page-sub">Academic departments that own programmes and courses.</p>
+</div>
 <div class="toolbar">
-  <span></span>
-  <a class="btn btn-primary" href="{{ url_for('departments.create') }}">New Department</a>
+  <div class="toolbar-left"><span class="muted small">{{ pagination.total }} department{{ '' if pagination.total == 1 else 's' }}</span></div>
+  <div class="toolbar-right">
+    <a class="btn btn-primary btn-sm" href="{{ url_for('departments.create') }}">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> New Department
+    </a>
+  </div>
 </div>
 {% if pagination.items %}
+<div class="table-wrap">
 <table class="table">
-  <thead><tr><th>Code</th><th>Name</th><th>Active</th><th></th></tr></thead>
+  <thead><tr><th>Code</th><th>Name</th><th>Status</th><th></th></tr></thead>
   <tbody>
   {% for d in pagination.items %}
     <tr>
-      <td>{{ d.code }}</td>
+      <td><code>{{ d.code }}</code></td>
       <td>{{ d.name }}</td>
-      <td>{{ 'Yes' if d.is_active else 'No' }}</td>
-      <td><a class="link" href="{{ url_for('departments.edit', department_id=d.id) }}">Edit</a></td>
+      <td>{% if d.is_active %}<span class="pill pill-active">active</span>{% else %}<span class="pill pill-inactive">inactive</span>{% endif %}</td>
+      <td class="actions"><a class="btn btn-sm btn-ghost" href="{{ url_for('departments.edit', department_id=d.id) }}">Edit</a></td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% include "partials/pagination.html" with context %}
 {% else %}
-<p class="empty">No departments yet.</p>
+<div class="empty"><div class="empty-icon">🏛️</div>No departments yet.</div>
 {% endif %}
 {% endblock %}

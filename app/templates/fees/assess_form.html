@@ -1,7 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Assess Fee{% endblock %}
 {% block heading %}Assess Fee{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('fees.index') }}">Fees</a>
+  <span class="sep">/</span><span class="current">Assess</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Assess a fee</h1>
+  <p class="page-sub">Record a fee assessment against a student account.</p>
+</div>
 <div class="card narrow">
   <form method="post" class="form">
     {{ form.hidden_tag() }}
@@ -15,8 +26,10 @@
     </div>
     <div class="field">{{ form.due_date.label }}{{ form.due_date(class="input") }}</div>
     <div class="field">{{ form.note.label }}{{ form.note(class="input", rows=2) }}</div>
-    <button class="btn btn-primary" type="submit">Record Assessment</button>
-    <a class="btn" href="{{ url_for('fees.index') }}">Cancel</a>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Record assessment</button>
+      <a class="btn btn-ghost" href="{{ url_for('fees.index') }}">Cancel</a>
+    </div>
   </form>
 </div>
 {% endblock %}

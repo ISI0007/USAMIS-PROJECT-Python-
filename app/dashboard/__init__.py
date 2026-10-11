@@ -8,13 +8,68 @@ from sqlalchemy import func
 
 from ..extensions import db
 from ..models import (
-    AcademicProgram, Attendance, Course, CourseOffering, Department, Enrollment,
-    FeeAssessment, Grade, Payment, Semester, Student, Teacher,
+    AcademicProgram, Attendance, AuditLog, Course, CourseOffering, Department,
+    Enrollment, FeeAssessment, Grade, Payment, Semester, Student, Teacher,
 )
 from ..security.permissions import Role
 from ..services import fee_service
 
 bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
+
+# Grade band labels used for the distribution chart (letters are stored on
+# published grades; see the grading policy in docs/ALGORITHMS.md).
+GRADE_BANDS = ("A", "B", "C", "D", "F")
+
+
+def _grade_distribution() -> list[int]:
+    """Count published grades per letter band (A-F)."""
+    rows = db.session.execute(
+        db.select(Grade.letter, func.count(Grade.id))
+        .where(Grade.is_published.is_(True))
+        .group_by(Grade.letter)
+    ).all()
+    counts = {letter: 0 for letter in GRADE_BANDS}
+    for letter, n in rows:
+        if letter in counts:
+            counts[letter] = n
+    return [counts[b] for b in GRADE_BANDS]
+
+
+def _students_by_department() -> tuple[list[str], list[int]]:
+    """Student counts grouped by department name."""
+    rows = db.session.execute(
+        db.select(Department.name, func.count(Student.id))
+        .join(Student, Student.department_id == Department.id, isouter=True)
+        .group_by(Department.name)
+        .order_by(func.count(Student.id).desc())
+    ).all()
+    labels = [name for name, _ in rows]
+    values = [n for _, n in rows]
+    return labels, values
+
+
+def _enrollment_trend() -> tuple[list[str], list[int]]:
+    """Active enrollments per semester, ordered chronologically.
+
+    ``Semester.label`` is a Python property (not a mapped column), so the
+    label is composed in Python from the mapped columns.
+    """
+    rows = db.session.execute(
+        db.select(
+            Semester.academic_year,
+            Semester.term,
+            Semester.start_date,
+            func.count(Enrollment.id),
+        )
+        .join(CourseOffering, CourseOffering.semester_id == Semester.id, isouter=True)
+        .join(Enrollment, Enrollment.offering_id == CourseOffering.id, isouter=True)
+        .where(Enrollment.status.in_(("enrolled", "completed")))
+        .group_by(Semester.id, Semester.academic_year, Semester.term, Semester.start_date)
+        .order_by(Semester.start_date)
+    ).all()
+    labels = [f"{year} {term.title()}" for year, term, _start, _n in rows]
+    values = [n for _year, _term, _start, n in rows]
+    return labels, values
 
 
 @bp.route("/")
@@ -62,6 +117,12 @@ def _admin_dashboard():
     total_paid = db.session.scalar(db.select(func.coalesce(func.sum(Payment.amount), 0))) or 0
     outstanding = max(float(total_fees) - float(total_paid), 0.0)
 
+    dept_labels, dept_values = _students_by_department()
+    trend_labels, trend_values = _enrollment_trend()
+    recent_activity = db.session.execute(
+        db.select(AuditLog).order_by(AuditLog.created_at.desc()).limit(8)
+    ).scalars().all()
+
     return render_template(
         "dashboard/admin.html",
         stats={
@@ -76,6 +137,17 @@ def _admin_dashboard():
             "outstanding": outstanding,
         },
         semester=_active_semester(),
+        charts={
+            "dept_labels": dept_labels,
+            "dept_values": dept_values,
+            "trend_labels": trend_labels,
+            "trend_values": trend_values,
+            "grade_labels": list(GRADE_BANDS),
+            "grade_values": _grade_distribution(),
+            "fee_assessed": float(total_fees),
+            "fee_paid": float(total_paid),
+        },
+        recent_activity=recent_activity,
     )
 
 
@@ -103,12 +175,27 @@ def _teacher_dashboard():
             db.select(CourseOffering).where(CourseOffering.teacher_id == teacher.id)
         ).scalars().all()
     rows = []
+    pending_publication = 0
+    incomplete_attendance = 0
     for o in offerings:
         enrolled = sum(1 for e in o.enrollments if e.status in ("enrolled", "completed"))
         graded = sum(1 for e in o.enrollments
                      if e.grade is not None and e.grade.is_published)
-        rows.append({"offering": o, "enrolled": enrolled, "graded": graded})
-    return render_template("dashboard/teacher.html", rows=rows, teacher=teacher)
+        ungraded = max(enrolled - graded, 0)
+        pending_publication += ungraded
+        sessions = db.session.scalar(
+            db.select(func.count(func.distinct(Attendance.session_date)))
+            .where(Attendance.offering_id == o.id)
+        ) or 0
+        if enrolled and sessions == 0:
+            incomplete_attendance += 1
+        rows.append({"offering": o, "enrolled": enrolled, "graded": graded,
+                     "ungraded": ungraded})
+    return render_template(
+        "dashboard/teacher.html", rows=rows, teacher=teacher,
+        pending_publication=pending_publication,
+        incomplete_attendance=incomplete_attendance,
+    )
 
 
 def _finance_dashboard():
@@ -120,10 +207,11 @@ def _finance_dashboard():
     recent = db.session.execute(
         db.select(Payment).order_by(Payment.created_at.desc()).limit(10)
     ).scalars().all()
+    collection_pct = (float(total_paid) / float(total_fees) * 100.0) if total_fees else 0.0
     return render_template(
         "dashboard/finance.html",
         stats={"fees_assessed": total_fees, "fees_paid": total_paid,
-               "outstanding": outstanding},
+               "outstanding": outstanding, "collection_pct": round(collection_pct, 1)},
         recent=recent,
     )
 
@@ -158,16 +246,28 @@ def _student_dashboard():
         db.select(Attendance).where(Attendance.student_id == student.id)
     ).scalars().all()
     present = sum(1 for a in attendance_rows if a.status in ("present", "late"))
+    attendance_pct = round((present / len(attendance_rows) * 100.0), 1) if attendance_rows else 0.0
 
     balance = fee_service.student_balance(student)
+
+    # Current-semester active courses (distinct from full history).
+    active_sem = _active_semester()
+    current_enrollments = [
+        e for e in enrollments
+        if e.status in ("enrolled", "pending")
+        and (active_sem is None or e.offering.semester_id == active_sem.id)
+    ]
 
     return render_template(
         "dashboard/student.html",
         student=student,
         enrollments=enrollments,
+        current_enrollments=current_enrollments,
         grades=published_grades,
         performance=performance,
         attendance_total=len(attendance_rows),
         attendance_present=present,
+        attendance_pct=attendance_pct,
         balance=balance,
+        semester=active_sem,
     )

@@ -1,32 +1,53 @@
 {% extends "base.html" %}
 {% block title %}Users{% endblock %}
 {% block heading %}User Accounts{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Users</span>
+</nav>
+{% endblock %}
 {% block content %}
-<div class="toolbar">
-  <span></span>
-  <a class="btn btn-primary" href="{{ url_for('admin.create_user') }}">New User</a>
+<div class="page-head">
+  <h1 class="page-title">User accounts</h1>
+  <p class="page-sub">Manage system accounts, roles and status.</p>
 </div>
+<div class="toolbar">
+  <div class="toolbar-left"><span class="muted small">{{ pagination.total }} user{{ '' if pagination.total == 1 else 's' }}</span></div>
+  <div class="toolbar-right">
+    <a class="btn btn-primary btn-sm" href="{{ url_for('admin.create_user') }}">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> New User
+    </a>
+  </div>
+</div>
+{% if pagination.items %}
+<div class="table-wrap">
 <table class="table">
   <thead><tr><th>Username</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th></th></tr></thead>
   <tbody>
   {% for u in pagination.items %}
     <tr>
-      <td>{{ u.username }}</td>
+      <td><code>{{ u.username }}</code></td>
       <td>{{ u.full_name }}</td>
       <td>{{ u.email }}</td>
       <td>{{ role_labels.get(u.role, u.role) }}</td>
       <td><span class="pill pill-{{ u.status }}">{{ u.status }}</span></td>
       <td>{{ u.last_login_at.strftime('%Y-%m-%d %H:%M') if u.last_login_at else '—' }}</td>
-      <td>
-        <a class="link" href="{{ url_for('admin.edit_user', user_id=u.id) }}">Edit</a>
-        <form method="post" action="{{ url_for('admin.toggle_user', user_id=u.id) }}" class="inline">
+      <td class="actions">
+        <a class="btn btn-sm btn-ghost" href="{{ url_for('admin.edit_user', user_id=u.id) }}">Edit</a>
+        <form method="post" action="{{ url_for('admin.toggle_user', user_id=u.id) }}" class="inline"
+              onsubmit="return confirm('Change this account\'s status?');">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button class="btn btn-sm" type="submit">{{ 'Deactivate' if u.status == 'active' else 'Activate' }}</button>
+          <button class="btn btn-sm {% if u.status == 'active' %}btn-danger{% endif %}" type="submit">{{ 'Deactivate' if u.status == 'active' else 'Activate' }}</button>
         </form>
       </td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% include "partials/pagination.html" with context %}
+{% else %}
+<div class="empty">No users found.</div>
+{% endif %}
 {% endblock %}

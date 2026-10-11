@@ -1,14 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Administration{% endblock %}
 {% block heading %}Administration{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Administration</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Administration</h1>
+  <p class="page-sub">User accounts, roles and the audit trail.</p>
+</div>
 <div class="stat-grid">
-  <div class="stat"><span class="stat-value">{{ counts.users }}</span><span class="stat-label">User Accounts</span></div>
-  <div class="stat"><span class="stat-value">{{ counts.audit }}</span><span class="stat-label">Audit Records</span></div>
+  <div class="stat"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span></div><span class="stat-value">{{ counts.users }}</span><span class="stat-label">User Accounts</span></div>
+  <div class="stat cyan"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span></div><span class="stat-value">{{ counts.audit }}</span><span class="stat-label">Audit Records</span></div>
 </div>
 <div class="quick-links">
-  <a class="btn" href="{{ url_for('admin.users') }}">User Accounts</a>
-  <a class="btn" href="{{ url_for('admin.roles') }}">Roles &amp; Permissions</a>
-  <a class="btn" href="{{ url_for('admin.audit_log') }}">Audit Log</a>
+  <a class="btn" href="{{ url_for('admin.users') }}">User accounts</a>
+  <a class="btn" href="{{ url_for('admin.roles') }}">Roles &amp; permissions</a>
+  <a class="btn" href="{{ url_for('admin.audit_log') }}">Audit log</a>
 </div>
 {% endblock %}

@@ -1,7 +1,18 @@
 {% extends "base.html" %}
 {% block title %}New Fee Category{% endblock %}
 {% block heading %}New Fee Category{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('fees.index') }}">Fees</a>
+  <span class="sep">/</span><span class="current">New category</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">New fee category</h1>
+  <p class="page-sub">Define a category and its default amount.</p>
+</div>
 <div class="card narrow">
   <form method="post" class="form">
     {{ form.hidden_tag() }}
@@ -12,8 +23,10 @@
       {% for e in form.default_amount.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
     <div class="field">{{ form.description.label }}{{ form.description(class="input", rows=3) }}</div>
     <div class="field checkbox">{{ form.is_active() }} {{ form.is_active.label }}</div>
-    <button class="btn btn-primary" type="submit">Save Category</button>
-    <a class="btn" href="{{ url_for('fees.index') }}">Cancel</a>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save category</button>
+      <a class="btn btn-ghost" href="{{ url_for('fees.index') }}">Cancel</a>
+    </div>
   </form>
 </div>
 {% endblock %}

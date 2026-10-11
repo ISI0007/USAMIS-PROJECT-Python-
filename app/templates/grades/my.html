@@ -1,16 +1,27 @@
 {% extends "base.html" %}
 {% block title %}My Grades{% endblock %}
 {% block heading %}My Grades{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">My Grades</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">My grades</h1>
+  <p class="page-sub">Only <strong>published</strong> grades are shown and included in the average.</p>
+</div>
+
 <div class="stat-grid">
-  <div class="stat"><span class="stat-value">{{ performance.weighted_average if performance.weighted_average is not none else '—' }}</span><span class="stat-label">Weighted Average</span></div>
+  <div class="stat success"><span class="stat-value">{{ performance.weighted_average if performance.weighted_average is not none else '—' }}</span><span class="stat-label">Weighted Average</span></div>
   <div class="stat"><span class="stat-value">{{ performance.graded_credits }}</span><span class="stat-label">Graded Credits</span></div>
   <div class="stat"><span class="stat-value">{{ performance.passed }}</span><span class="stat-label">Passed</span></div>
-  <div class="stat {{ 'warn' if performance.failed else '' }}"><span class="stat-value">{{ performance.failed }}</span><span class="stat-label">Failed</span></div>
+  <div class="stat {{ 'danger' if performance.failed else '' }}"><span class="stat-value">{{ performance.failed }}</span><span class="stat-label">Failed</span></div>
 </div>
-<p class="muted">Only <strong>published</strong> grades are shown and included in the average.</p>
 
 {% if grades %}
+<div class="table-wrap">
 <table class="table">
   <thead><tr><th>Course</th><th>Credits</th><th>Score</th><th>Letter</th></tr></thead>
   <tbody>
@@ -19,18 +30,19 @@
       <td>{{ g.enrollment.offering.course.code }} — {{ g.enrollment.offering.course.title }}</td>
       <td>{{ g.enrollment.offering.course.credits }}</td>
       <td>{{ g.score }}</td>
-      <td>{{ g.letter }}</td>
+      <td><strong>{{ g.letter }}</strong></td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% else %}
-<p class="empty">No published grades yet.</p>
+<div class="empty"><div class="empty-icon">📊</div>No published grades yet.</div>
 {% endif %}
 
 {% if performance.notes %}
-<details>
-  <summary>Calculation notes</summary>
+<details class="card">
+  <summary style="cursor:pointer; font-weight:600;">Calculation notes</summary>
   <ul>{% for n in performance.notes %}<li>{{ n }}</li>{% endfor %}</ul>
 </details>
 {% endif %}

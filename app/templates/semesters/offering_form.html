@@ -1,7 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Offering{% endblock %}
 {% block heading %}{{ 'Edit' if offering else 'New' }} Offering · {{ semester.label }}{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('semesters.index') }}">Semesters</a>
+  <span class="sep">/</span><a href="{{ url_for('semesters.offerings', semester_id=semester.id) }}">{{ semester.label }}</a>
+  <span class="sep">/</span><span class="current">{{ 'Edit' if offering else 'New' }}</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ 'Edit offering' if offering else 'New offering' }}</h1>
+  <p class="page-sub">Assign a course to a teacher in {{ semester.label }}.</p>
+</div>
 <div class="card narrow">
   <form method="post" class="form">
     {{ form.hidden_tag() }}
@@ -11,8 +23,10 @@
     <div class="field">{{ form.teacher_id.label }}{{ form.teacher_id(class="input") }}</div>
     <div class="field">{{ form.capacity.label }}{{ form.capacity(class="input") }}</div>
     <div class="field checkbox">{{ form.is_active() }} {{ form.is_active.label }}</div>
-    <button class="btn btn-primary" type="submit">Save Offering</button>
-    <a class="btn" href="{{ url_for('semesters.offerings', semester_id=semester.id) }}">Cancel</a>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save offering</button>
+      <a class="btn btn-ghost" href="{{ url_for('semesters.offerings', semester_id=semester.id) }}">Cancel</a>
+    </div>
   </form>
 </div>
 {% endblock %}

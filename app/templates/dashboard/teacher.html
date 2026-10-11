@@ -1,29 +1,75 @@
 {% extends "base.html" %}
 {% block title %}Teacher Dashboard{% endblock %}
-{% block heading %}Teacher Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Dashboard</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Welcome, {{ current_user.full_name.split()[0] }}</h1>
+  <p class="page-sub">{% if teacher %}Your assigned courses, grading and attendance at a glance.{% else %}No teacher profile linked.{% endif %}</p>
+</div>
+
 {% if not teacher %}
-  <p class="empty">No teacher profile is linked to your account. Contact an administrator.</p>
-{% elif rows %}
-<table class="table">
-  <thead><tr><th>Course</th><th>Semester</th><th>Enrolled</th><th>Graded (published)</th><th>Capacity</th><th></th></tr></thead>
-  <tbody>
-  {% for row in rows %}
-    <tr>
-      <td>{{ row.offering.course.code }} — {{ row.offering.course.title }}</td>
-      <td>{{ row.offering.semester.label }}</td>
-      <td>{{ row.enrolled }}</td>
-      <td>{{ row.graded }}</td>
-      <td>{{ row.offering.capacity }}</td>
-      <td>
-        <a class="link" href="{{ url_for('grades.entry', offering_id=row.offering.id) }}">Grades</a>
-        <a class="link" href="{{ url_for('attendance.record', offering_id=row.offering.id) }}">Attendance</a>
-      </td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
+  <p class="empty"><span class="empty-icon">👤</span><br>No teacher profile is linked to your account. Contact an administrator.</p>
 {% else %}
-<p class="empty">You have no assigned course offerings.</p>
+
+{# ---------- Warning / status cards ---------- #}
+<div class="stat-grid">
+  <div class="stat">
+    <div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span></div>
+    <span class="stat-value">{{ rows|length }}</span>
+    <span class="stat-label">Assigned Courses</span>
+  </div>
+  <div class="stat warn">
+    <div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span></div>
+    <span class="stat-value">{{ pending_publication }}</span>
+    <span class="stat-label">Grades Awaiting Publication</span>
+    <span class="stat-compare">Entered but not published</span>
+  </div>
+  <div class="stat danger">
+    <div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span></div>
+    <span class="stat-value">{{ incomplete_attendance }}</span>
+    <span class="stat-label">Attendance Incomplete</span>
+    <span class="stat-compare">Courses with no sessions recorded</span>
+  </div>
+</div>
+
+{# ---------- Assigned courses ---------- #}
+<div class="card">
+  <div class="card-head"><h2 class="card-title">Assigned Courses</h2></div>
+  {% if rows %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Course</th><th>Semester</th><th>Enrolled</th><th>Grading</th><th>Capacity</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        <td>{{ row.offering.course.code }} — {{ row.offering.course.title }}</td>
+        <td>{{ row.offering.semester.label }}</td>
+        <td>{{ row.enrolled }}</td>
+        <td>
+          <div class="progress thin" style="min-width:90px;">
+            <span style="width: {{ (row.graded / row.enrolled * 100) if row.enrolled else 0 }}%"></span>
+          </div>
+          <span class="muted small">{{ row.graded }}/{{ row.enrolled }} published</span>
+        </td>
+        <td>{{ row.offering.capacity }}</td>
+        <td class="actions">
+          <a class="btn btn-sm" href="{{ url_for('grades.entry', offering_id=row.offering.id) }}">Enter grades</a>
+          <a class="btn btn-sm btn-ghost" href="{{ url_for('attendance.record', offering_id=row.offering.id) }}">Attendance</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="empty"><span class="empty-icon">📖</span><br>You have no assigned course offerings.</p>
+  {% endif %}
+</div>
 {% endif %}
 {% endblock %}

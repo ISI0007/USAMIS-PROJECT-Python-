@@ -1,16 +1,32 @@
 {% extends "base.html" %}
 {% block title %}Offerings · {{ semester.label }}{% endblock %}
 {% block heading %}Offerings · {{ semester.label }}{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('semesters.index') }}">Semesters</a>
+  <span class="sep">/</span><span class="current">{{ semester.label }}</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Offerings — {{ semester.label }}</h1>
+  <p class="page-sub">Courses offered this semester, with capacity and enrollment.</p>
+</div>
 <div class="toolbar">
-  <a class="link" href="{{ url_for('semesters.index') }}">← All semesters</a>
-  {% if current_user.has_permission('manage_semesters') %}
-    <a class="btn btn-primary" href="{{ url_for('semesters.create_offering', semester_id=semester.id) }}">New Offering</a>
-  {% endif %}
+  <div class="toolbar-left"><span class="muted small">{{ offerings|length }} offering{{ '' if offerings|length == 1 else 's' }}</span></div>
+  <div class="toolbar-right">
+    {% if current_user.has_permission('manage_semesters') %}
+      <a class="btn btn-primary btn-sm" href="{{ url_for('semesters.create_offering', semester_id=semester.id) }}">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> New Offering
+      </a>
+    {% endif %}
+  </div>
 </div>
 {% if offerings %}
+<div class="table-wrap">
 <table class="table">
-  <thead><tr><th>Course</th><th>Teacher</th><th>Capacity</th><th>Enrolled</th><th>Seats</th><th>Active</th><th></th></tr></thead>
+  <thead><tr><th>Course</th><th>Teacher</th><th>Capacity</th><th>Enrolled</th><th>Seats</th><th>Status</th><th></th></tr></thead>
   <tbody>
   {% for o in offerings %}
     <tr>
@@ -19,17 +35,18 @@
       <td>{{ o.capacity }}</td>
       <td>{{ o.enrolled_count }}</td>
       <td>{{ o.available_seats }}</td>
-      <td>{{ 'Yes' if o.is_active else 'No' }}</td>
-      <td>
+      <td>{% if o.is_active %}<span class="pill pill-active">active</span>{% else %}<span class="pill pill-inactive">inactive</span>{% endif %}</td>
+      <td class="actions">
         {% if current_user.has_permission('manage_semesters') %}
-          <a class="link" href="{{ url_for('semesters.edit_offering', offering_id=o.id) }}">Edit</a>
+          <a class="btn btn-sm btn-ghost" href="{{ url_for('semesters.edit_offering', offering_id=o.id) }}">Edit</a>
         {% endif %}
       </td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% else %}
-<p class="empty">No offerings for this semester yet.</p>
+<div class="empty"><div class="empty-icon">📅</div>No offerings for this semester yet.</div>
 {% endif %}
 {% endblock %}

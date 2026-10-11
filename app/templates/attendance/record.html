@@ -1,36 +1,55 @@
 {% extends "base.html" %}
 {% block title %}Attendance{% endblock %}
 {% block heading %}Attendance · {{ offering.course.code }}{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('attendance.index') }}">Attendance</a>
+  <span class="sep">/</span><span class="current">{{ offering.course.code }}</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ offering.course.code }} — {{ offering.course.title }}</h1>
+  <p class="page-sub">{{ offering.semester.label }} · record attendance for all enrolled students.</p>
+</div>
+
 <div class="card narrow">
   <form method="post" class="form">
     {{ form.hidden_tag() }}
-    <p class="muted">Recording marks attendance for all enrolled students for the selected date
+    <p class="muted small">Recording marks attendance for all enrolled students for the selected date
       (duplicate records for the same date are prevented).</p>
     <div class="grid-2">
       <div class="field">{{ form.session_date.label }}{{ form.session_date(class="input") }}
         {% for e in form.session_date.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
       <div class="field">{{ form.status.label }}{{ form.status(class="input") }}</div>
     </div>
-    <button class="btn btn-primary" type="submit">Record for {{ enrollments|length }} student(s)</button>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Record for {{ enrollments|length }} student(s)</button>
+      <a class="btn btn-ghost" href="{{ url_for('attendance.index') }}">Cancel</a>
+    </div>
   </form>
 </div>
 
-<h2>Recent Attendance</h2>
-{% if recent %}
-<table class="table">
-  <thead><tr><th>Date</th><th>Student</th><th>Status</th></tr></thead>
-  <tbody>
-  {% for a in recent %}
-    <tr>
-      <td>{{ a.session_date }}</td>
-      <td>{{ a.student.student_number }} — {{ a.student.full_name }}</td>
-      <td><span class="pill pill-{{ a.status }}">{{ a.status }}</span></td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p class="empty">No attendance recorded yet.</p>
-{% endif %}
+<div class="card">
+  <div class="card-head"><h2 class="card-title">Recent Attendance</h2></div>
+  {% if recent %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Date</th><th>Student</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for a in recent %}
+      <tr>
+        <td>{{ a.session_date }}</td>
+        <td>{{ a.student.student_number }} — {{ a.student.full_name }}</td>
+        <td><span class="pill pill-{{ a.status }}">{{ a.status }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty">No attendance recorded yet.</div>
+  {% endif %}
+</div>
 {% endblock %}

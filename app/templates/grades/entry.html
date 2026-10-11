@@ -1,22 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Grade Entry{% endblock %}
 {% block heading %}Grades · {{ offering.course.code }}{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('grades.index') }}">Grades</a>
+  <span class="sep">/</span><span class="current">{{ offering.course.code }}</span>
+</nav>
+{% endblock %}
 {% block content %}
-<p class="muted">{{ offering.course.title }} · {{ offering.semester.label }}</p>
+<div class="page-head">
+  <h1 class="page-title">{{ offering.course.code }} — {{ offering.course.title }}</h1>
+  <p class="page-sub">{{ offering.semester.label }} · enter a score (0–100) and optionally publish it.</p>
+</div>
 {% if enrollments %}
+<div class="table-wrap">
 <table class="table">
-  <thead><tr><th>Student</th><th>Current Grade</th><th>Published</th><th>Enter / Update</th></tr></thead>
+  <thead><tr><th>Student</th><th>Current Grade</th><th>Status</th><th>Enter / Update</th></tr></thead>
   <tbody>
   {% for e in enrollments %}
     <tr>
       <td>{{ e.student.student_number }} — {{ e.student.full_name }}</td>
       <td>{% if e.grade %}{{ e.grade.score }} ({{ e.grade.letter }}){% else %}—{% endif %}</td>
-      <td>{{ 'Yes' if e.grade and e.grade.is_published else 'No' }}</td>
+      <td>{% if e.grade and e.grade.is_published %}<span class="pill pill-published">published</span>{% else %}<span class="pill pill-pending">draft</span>{% endif %}</td>
       <td>
         <form method="post" action="{{ url_for('grades.save', enrollment_id=e.id) }}" class="inline-form">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input class="input input-sm" type="number" step="0.01" min="0" max="100" name="score"
-                 value="{{ e.grade.score if e.grade else '' }}" placeholder="0-100" required>
+                 value="{{ e.grade.score if e.grade else '' }}" placeholder="0-100" required aria-label="Score for {{ e.student.full_name }}">
           <label class="checkbox-inline"><input type="checkbox" name="publish"> publish</label>
           <button class="btn btn-sm btn-primary" type="submit">Save</button>
         </form>
@@ -25,7 +36,8 @@
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% else %}
-<p class="empty">No enrolled students for this course.</p>
+<div class="empty"><div class="empty-icon">🧑🎓</div>No enrolled students for this course.</div>
 {% endif %}
 {% endblock %}

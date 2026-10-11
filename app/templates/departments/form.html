@@ -1,7 +1,18 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Edit' if department else 'New' }} Department{% endblock %}
 {% block heading %}{{ 'Edit' if department else 'New' }} Department{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('departments.index') }}">Departments</a>
+  <span class="sep">/</span><span class="current">{{ 'Edit' if department else 'New' }}</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ 'Edit department' if department else 'New department' }}</h1>
+  <p class="page-sub">Departments own academic programmes and courses.</p>
+</div>
 <div class="card narrow">
   <form method="post" class="form">
     {{ form.hidden_tag() }}
@@ -11,8 +22,10 @@
       {% for e in form.name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}</div>
     <div class="field">{{ form.description.label }}{{ form.description(class="input", rows=4) }}</div>
     <div class="field checkbox">{{ form.is_active() }} {{ form.is_active.label }}</div>
-    <button class="btn btn-primary" type="submit">Save Department</button>
-    <a class="btn" href="{{ url_for('departments.index') }}">Cancel</a>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save department</button>
+      <a class="btn btn-ghost" href="{{ url_for('departments.index') }}">Cancel</a>
+    </div>
   </form>
 </div>
 {% endblock %}

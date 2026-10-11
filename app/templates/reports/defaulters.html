@@ -1,9 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Fee Defaulters{% endblock %}
 {% block heading %}Fee Defaulters{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('reports.index') }}">Reports</a>
+  <span class="sep">/</span><span class="current">Fee Defaulters</span>
+</nav>
+{% endblock %}
 {% block content %}
-<a class="link" href="{{ url_for('reports.index') }}">← Reports</a>
+<div class="page-head">
+  <h1 class="page-title">Fee defaulters</h1>
+  <p class="page-sub">Students with an outstanding fee balance.</p>
+</div>
 {% if defaulters %}
+<div class="table-wrap">
 <table class="table">
   <thead><tr><th>Student</th><th>Program</th><th>Outstanding</th></tr></thead>
   <tbody>
@@ -11,12 +22,13 @@
     <tr>
       <td>{{ row.student.student_number }} — {{ row.student.full_name }}</td>
       <td>{{ row.student.program.code if row.student.program else '—' }}</td>
-      <td class="warn-text">{{ '%.2f'|format(row.outstanding) }}</td>
+      <td class="warn-text"><strong>{{ '%.2f'|format(row.outstanding) }}</strong></td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% else %}
-<p class="empty">No students with outstanding balances.</p>
+<div class="empty"><div class="empty-icon">✅</div>No students with outstanding balances.</div>
 {% endif %}
 {% endblock %}

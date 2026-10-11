@@ -1,8 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Enroll in Course{% endblock %}
 {% block heading %}Enroll in a Course{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('enrollments.my_enrollments') }}">My Enrollments</a>
+  <span class="sep">/</span><span class="current">Enroll</span>
+</nav>
+{% endblock %}
 {% block content %}
-<p class="muted">Eligibility is verified on the server before your request is accepted.</p>
+<div class="page-head">
+  <h1 class="page-title">Enroll in a course</h1>
+  <p class="page-sub">Eligibility is verified on the server before your request is accepted.</p>
+</div>
 <div class="card narrow">
   <form method="post" class="form">
     {{ form.hidden_tag() }}
@@ -10,8 +20,12 @@
       {{ form.offering_id.label }}
       {{ form.offering_id(class="input") }}
       {% for e in form.offering_id.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      <span class="hint">Prerequisites, capacity and registration window are checked automatically.</span>
     </div>
-    <button class="btn btn-primary" type="submit">Check Eligibility & Apply</button>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Check eligibility &amp; apply</button>
+      <a class="btn btn-ghost" href="{{ url_for('enrollments.my_enrollments') }}">Cancel</a>
+    </div>
   </form>
 </div>
 {% endblock %}

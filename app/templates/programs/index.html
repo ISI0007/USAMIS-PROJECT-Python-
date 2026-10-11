@@ -1,29 +1,45 @@
 {% extends "base.html" %}
 {% block title %}Programs{% endblock %}
 {% block heading %}Academic Programs{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Programs</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Academic Programs</h1>
+  <p class="page-sub">Degree programmes, duration and credit requirements.</p>
+</div>
 <div class="toolbar">
-  <span></span>
-  <a class="btn btn-primary" href="{{ url_for('programs.create') }}">New Program</a>
+  <div class="toolbar-left"><span class="muted small">{{ pagination.total }} program{{ '' if pagination.total == 1 else 's' }}</span></div>
+  <div class="toolbar-right">
+    <a class="btn btn-primary btn-sm" href="{{ url_for('programs.create') }}">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> New Program
+    </a>
+  </div>
 </div>
 {% if pagination.items %}
+<div class="table-wrap">
 <table class="table">
   <thead><tr><th>Code</th><th>Name</th><th>Department</th><th>Duration</th><th>Credits</th><th></th></tr></thead>
   <tbody>
   {% for p in pagination.items %}
     <tr>
-      <td>{{ p.code }}</td>
+      <td><code>{{ p.code }}</code></td>
       <td>{{ p.name }}</td>
       <td>{{ p.department.code if p.department else '—' }}</td>
       <td>{{ p.duration_years }} yr</td>
       <td>{{ p.total_credits_required }}</td>
-      <td><a class="link" href="{{ url_for('programs.edit', program_id=p.id) }}">Edit</a></td>
+      <td class="actions"><a class="btn btn-sm btn-ghost" href="{{ url_for('programs.edit', program_id=p.id) }}">Edit</a></td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% include "partials/pagination.html" with context %}
 {% else %}
-<p class="empty">No programs yet.</p>
+<div class="empty"><div class="empty-icon">🎓</div>No programs yet.</div>
 {% endif %}
 {% endblock %}

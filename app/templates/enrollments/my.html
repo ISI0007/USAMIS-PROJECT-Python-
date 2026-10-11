@@ -1,11 +1,27 @@
 {% extends "base.html" %}
 {% block title %}My Enrollments{% endblock %}
 {% block heading %}My Enrollments{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">My Enrollments</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">My enrollments</h1>
+  <p class="page-sub">Your course registrations and their status.</p>
+</div>
 <div class="toolbar">
-  <a class="link" href="{{ url_for('enrollments.request_enrollment') }}">+ Enroll in a course</a>
+  <div class="toolbar-left"><span class="muted small">{{ enrollments|length }} enrollment{{ '' if enrollments|length == 1 else 's' }}</span></div>
+  <div class="toolbar-right">
+    <a class="btn btn-primary btn-sm" href="{{ url_for('enrollments.request_enrollment') }}">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Enroll in a course
+    </a>
+  </div>
 </div>
 {% if enrollments %}
+<div class="table-wrap">
 <table class="table">
   <thead><tr><th>Course</th><th>Semester</th><th>Status</th><th>Requested</th></tr></thead>
   <tbody>
@@ -19,7 +35,8 @@
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% else %}
-<p class="empty">You have not requested any courses yet.</p>
+<div class="empty"><div class="empty-icon">📚</div>You have not requested any courses yet.</div>
 {% endif %}
 {% endblock %}

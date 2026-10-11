@@ -1,15 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Audit Log{% endblock %}
 {% block heading %}Audit Log{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Audit Log</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Audit log</h1>
+  <p class="page-sub">Immutable record of security- and record-relevant actions.</p>
+</div>
 <div class="toolbar">
-  <form method="get" class="inline-form">
-    <input class="input" type="text" name="action" value="{{ action }}" placeholder="Filter by action">
-    <input class="input" type="text" name="entity" value="{{ entity }}" placeholder="Filter by entity">
-    <button class="btn" type="submit">Filter</button>
+  <form method="get" class="toolbar-left">
+    <input class="search-input" type="search" name="action" value="{{ action }}" placeholder="Filter by action" aria-label="Filter by action">
+    <input class="search-input" type="search" name="entity" value="{{ entity }}" placeholder="Filter by entity" aria-label="Filter by entity">
+    <button class="btn btn-sm" type="submit">Filter</button>
+    {% if action or entity %}<a class="btn btn-sm btn-ghost" href="{{ url_for('admin.audit_log') }}">Clear</a>{% endif %}
   </form>
 </div>
 {% if pagination.items %}
+<div class="table-wrap">
 <table class="table">
   <thead><tr><th>Time (UTC)</th><th>Actor</th><th>Action</th><th>Entity</th><th>Summary</th><th>IP</th></tr></thead>
   <tbody>
@@ -17,7 +29,7 @@
     <tr>
       <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
       <td>{{ log.actor_username }}</td>
-      <td>{{ log.action }}</td>
+      <td><span class="pill">{{ log.action }}</span></td>
       <td>{{ log.entity_type }}{% if log.entity_id %}#{{ log.entity_id }}{% endif %}</td>
       <td class="wrap">{{ log.summary }}</td>
       <td>{{ log.ip_address or '—' }}</td>
@@ -25,8 +37,9 @@
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% include "partials/pagination.html" with context %}
 {% else %}
-<p class="empty">No audit records match.</p>
+<div class="empty">No audit records match.</div>
 {% endif %}
 {% endblock %}

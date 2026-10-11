@@ -1,49 +1,71 @@
 {% extends "base.html" %}
 {% block title %}Fees{% endblock %}
 {% block heading %}Fee Assessments{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Fees</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Fee Assessments</h1>
+  <p class="page-sub">Fee categories, assessments and payments.</p>
+</div>
 <div class="toolbar">
-  <div class="inline-form">
-    <a class="btn" href="{{ url_for('fees.create_category') }}">New Category</a>
-    <a class="btn" href="{{ url_for('fees.assess') }}">Assess Fee</a>
-    <a class="btn btn-primary" href="{{ url_for('fees.pay') }}">Record Payment</a>
+  <div class="toolbar-left">
+    <a class="btn btn-sm" href="{{ url_for('fees.create_category') }}">New Category</a>
+    <a class="btn btn-sm" href="{{ url_for('fees.assess') }}">Assess Fee</a>
+  </div>
+  <div class="toolbar-right">
+    <a class="btn btn-primary btn-sm" href="{{ url_for('fees.pay') }}">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Record Payment
+    </a>
   </div>
 </div>
 
-<h2>Categories</h2>
-{% if categories %}
-<table class="table">
-  <thead><tr><th>Code</th><th>Name</th><th>Default Amount</th><th>Active</th></tr></thead>
-  <tbody>
-  {% for c in categories %}
-    <tr><td>{{ c.code }}</td><td>{{ c.name }}</td><td>{{ c.default_amount }}</td>
-      <td>{{ 'Yes' if c.is_active else 'No' }}</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p class="empty">No fee categories defined.</p>
-{% endif %}
+<div class="card">
+  <div class="card-head"><h2 class="card-title">Categories</h2></div>
+  {% if categories %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Code</th><th>Name</th><th>Default Amount</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for c in categories %}
+      <tr><td><code>{{ c.code }}</code></td><td>{{ c.name }}</td><td><strong>{{ c.default_amount }}</strong></td>
+        <td>{% if c.is_active %}<span class="pill pill-active">active</span>{% else %}<span class="pill pill-inactive">inactive</span>{% endif %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty">No fee categories defined.</div>
+  {% endif %}
+</div>
 
-<h2>Recent Assessments</h2>
-{% if pagination.items %}
-<table class="table">
-  <thead><tr><th>Student</th><th>Category</th><th>Amount</th><th>Adjustment</th><th>Semester</th><th>Due</th></tr></thead>
-  <tbody>
-  {% for a in pagination.items %}
-    <tr>
-      <td>{{ a.student.student_number }} — {{ a.student.full_name }}</td>
-      <td>{{ a.category.code }}</td>
-      <td>{{ a.amount }}</td>
-      <td>{{ a.adjustment }}</td>
-      <td>{{ a.semester.label if a.semester else '—' }}</td>
-      <td>{{ a.due_date or '—' }}</td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% include "partials/pagination.html" with context %}
-{% else %}
-<p class="empty">No fee assessments recorded.</p>
-{% endif %}
+<div class="card">
+  <div class="card-head"><h2 class="card-title">Recent Assessments</h2></div>
+  {% if pagination.items %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Student</th><th>Category</th><th>Amount</th><th>Adjustment</th><th>Semester</th><th>Due</th></tr></thead>
+    <tbody>
+    {% for a in pagination.items %}
+      <tr>
+        <td>{{ a.student.student_number }} — {{ a.student.full_name }}</td>
+        <td>{{ a.category.code }}</td>
+        <td><strong>{{ a.amount }}</strong></td>
+        <td>{{ a.adjustment }}</td>
+        <td>{{ a.semester.label if a.semester else '—' }}</td>
+        <td>{{ a.due_date or '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% include "partials/pagination.html" with context %}
+  {% else %}
+  <div class="empty">No fee assessments recorded.</div>
+  {% endif %}
+</div>
 {% endblock %}

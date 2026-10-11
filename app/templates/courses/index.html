@@ -1,31 +1,49 @@
 {% extends "base.html" %}
 {% block title %}Courses{% endblock %}
 {% block heading %}Courses{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Courses</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Courses</h1>
+  <p class="page-sub">Course catalogue, credit values and departments.</p>
+</div>
 <div class="toolbar">
-  <span></span>
-  {% if current_user.has_permission('manage_courses') %}
-    <a class="btn btn-primary" href="{{ url_for('courses.create') }}">New Course</a>
-  {% endif %}
+  <div class="toolbar-left">
+    <span class="muted small">{{ pagination.total }} course{{ '' if pagination.total == 1 else 's' }}</span>
+  </div>
+  <div class="toolbar-right">
+    {% if current_user.has_permission('manage_courses') %}
+      <a class="btn btn-primary btn-sm" href="{{ url_for('courses.create') }}">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> New Course
+      </a>
+    {% endif %}
+  </div>
 </div>
 {% if pagination.items %}
+<div class="table-wrap">
 <table class="table">
-  <thead><tr><th>Code</th><th>Title</th><th>Credits</th><th>Department</th><th>Active</th><th></th></tr></thead>
+  <thead><tr><th>Code</th><th>Title</th><th>Credits</th><th>Department</th><th>Status</th><th></th></tr></thead>
   <tbody>
   {% for c in pagination.items %}
     <tr>
-      <td>{{ c.code }}</td>
+      <td><code>{{ c.code }}</code></td>
       <td>{{ c.title }}</td>
       <td>{{ c.credits }}</td>
       <td>{{ c.department.code if c.department else '—' }}</td>
-      <td>{{ 'Yes' if c.is_active else 'No' }}</td>
-      <td><a class="link" href="{{ url_for('courses.detail', course_id=c.id) }}">View</a></td>
+      <td>{% if c.is_active %}<span class="pill pill-active">active</span>{% else %}<span class="pill pill-inactive">inactive</span>{% endif %}</td>
+      <td class="actions"><a class="btn btn-sm btn-ghost" href="{{ url_for('courses.detail', course_id=c.id) }}">View</a></td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% include "partials/pagination.html" with context %}
 {% else %}
-<p class="empty">No courses yet.</p>
+<div class="empty"><div class="empty-icon">📘</div>No courses yet.</div>
 {% endif %}
 {% endblock %}

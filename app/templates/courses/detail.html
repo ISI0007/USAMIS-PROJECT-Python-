@@ -1,60 +1,74 @@
 {% extends "base.html" %}
 {% block title %}{{ course.code }}{% endblock %}
 {% block heading %}Course Detail{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('courses.index') }}">Courses</a>
+  <span class="sep">/</span><span class="current">{{ course.code }}</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ course.code }} — {{ course.title }}</h1>
+  <p class="page-sub">{{ course.credits }} credits{% if course.department %} · {{ course.department.name }}{% endif %} · {{ 'Active' if course.is_active else 'Inactive' }}</p>
+</div>
+
 <div class="card">
   <div class="profile-head">
     <div>
-      <h2>{{ course.code }} — {{ course.title }}</h2>
-      <p class="muted">{{ course.credits }} credits
-        {% if course.department %}· {{ course.department.name }}{% endif %}
-        · {{ 'Active' if course.is_active else 'Inactive' }}</p>
+      <p><strong>Description</strong></p>
+      <p class="muted">{{ course.description or 'No description.' }}</p>
     </div>
     {% if current_user.has_permission('manage_courses') %}
-      <a class="btn" href="{{ url_for('courses.edit', course_id=course.id) }}">Edit</a>
+      <a class="btn btn-sm" href="{{ url_for('courses.edit', course_id=course.id) }}">Edit</a>
     {% endif %}
   </div>
-  <p>{{ course.description or 'No description.' }}</p>
-  <h3>Prerequisites</h3>
+
+  <h3 class="card-title" style="margin-top:16px;">Prerequisites</h3>
   {% if course.prerequisites %}
     <ul>
       {% for p in course.prerequisites %}
         <li>{{ p.required_course.code }} — {{ p.required_course.title }}
-          {% if p.min_grade %}(min grade {{ p.min_grade }}){% endif %}</li>
+          {% if p.min_grade %}<span class="muted small">(min grade {{ p.min_grade }})</span>{% endif %}</li>
       {% endfor %}
     </ul>
   {% else %}
-    <p class="empty">No prerequisites configured.</p>
+    <p class="muted">No prerequisites configured.</p>
   {% endif %}
 
   {% if current_user.has_permission('manage_courses') %}
-  <form method="post" action="{{ url_for('courses.add_prerequisite', course_id=course.id) }}" class="inline-form">
+  <form method="post" action="{{ url_for('courses.add_prerequisite', course_id=course.id) }}" class="inline-form" style="margin-top:12px;">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <select class="input" name="required_course_id">
-      {% for c in offerings %}{% endfor %}
+    <select class="input input-sm" name="required_course_id" aria-label="Required course">
+      {% for c in candidate_courses %}<option value="{{ c.id }}">{{ c.code }} — {{ c.title }}</option>{% endfor %}
     </select>
-    <button class="btn btn-sm" type="submit">Add</button>
+    <button class="btn btn-sm" type="submit">Add prerequisite</button>
   </form>
   {% endif %}
 </div>
 
-<h2>Offerings</h2>
-{% if offerings %}
-<table class="table">
-  <thead><tr><th>Semester</th><th>Teacher</th><th>Capacity</th><th>Enrolled</th><th>Active</th></tr></thead>
-  <tbody>
-  {% for o in offerings %}
-    <tr>
-      <td>{{ o.semester.label }}</td>
-      <td>{{ o.teacher.full_name if o.teacher else '—' }}</td>
-      <td>{{ o.capacity }}</td>
-      <td>{{ o.enrolled_count }}</td>
-      <td>{{ 'Yes' if o.is_active else 'No' }}</td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p class="empty">This course has no offerings yet.</p>
-{% endif %}
+<div class="card">
+  <div class="card-head"><h2 class="card-title">Offerings</h2></div>
+  {% if offerings %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Semester</th><th>Teacher</th><th>Capacity</th><th>Enrolled</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for o in offerings %}
+      <tr>
+        <td>{{ o.semester.label }}</td>
+        <td>{{ o.teacher.full_name if o.teacher else '—' }}</td>
+        <td>{{ o.capacity }}</td>
+        <td>{{ o.enrolled_count }}</td>
+        <td>{% if o.is_active %}<span class="pill pill-active">active</span>{% else %}<span class="pill pill-inactive">inactive</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty">This course has no offerings yet.</div>
+  {% endif %}
+</div>
 {% endblock %}

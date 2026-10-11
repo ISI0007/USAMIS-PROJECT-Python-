@@ -1,7 +1,18 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Edit' if course else 'New' }} Course{% endblock %}
 {% block heading %}{{ 'Edit' if course else 'New' }} Course{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('courses.index') }}">Courses</a>
+  <span class="sep">/</span><span class="current">{{ 'Edit' if course else 'New' }}</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ 'Edit course' if course else 'New course' }}</h1>
+  <p class="page-sub">Course code, title, credits and department.</p>
+</div>
 <div class="card narrow">
   <form method="post" class="form">
     {{ form.hidden_tag() }}
@@ -15,8 +26,10 @@
     <div class="field">{{ form.department_id.label }}{{ form.department_id(class="input") }}</div>
     <div class="field">{{ form.description.label }}{{ form.description(class="input", rows=4) }}</div>
     <div class="field checkbox">{{ form.is_active() }} {{ form.is_active.label }}</div>
-    <button class="btn btn-primary" type="submit">Save Course</button>
-    <a class="btn" href="{{ url_for('courses.index') }}">Cancel</a>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save course</button>
+      <a class="btn btn-ghost" href="{{ url_for('courses.index') }}">Cancel</a>
+    </div>
   </form>
 </div>
 {% endblock %}

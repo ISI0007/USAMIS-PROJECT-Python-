@@ -1,7 +1,18 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Edit' if semester else 'New' }} Semester{% endblock %}
 {% block heading %}{{ 'Edit' if semester else 'New' }} Semester{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('semesters.index') }}">Semesters</a>
+  <span class="sep">/</span><span class="current">{{ 'Edit' if semester else 'New' }}</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ 'Edit semester' if semester else 'New semester' }}</h1>
+  <p class="page-sub">Academic year, term and registration window.</p>
+</div>
 <div class="card narrow">
   <form method="post" class="form">
     {{ form.hidden_tag() }}
@@ -14,8 +25,10 @@
     </div>
     <div class="field checkbox">{{ form.is_active() }} {{ form.is_active.label }}</div>
     <div class="field checkbox">{{ form.registration_open() }} {{ form.registration_open.label }}</div>
-    <button class="btn btn-primary" type="submit">Save Semester</button>
-    <a class="btn" href="{{ url_for('semesters.index') }}">Cancel</a>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save semester</button>
+      <a class="btn btn-ghost" href="{{ url_for('semesters.index') }}">Cancel</a>
+    </div>
   </form>
 </div>
 {% endblock %}

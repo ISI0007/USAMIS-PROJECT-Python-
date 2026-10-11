@@ -1,31 +1,63 @@
 {% extends "base.html" %}
 {% block title %}Academic Staff Dashboard{% endblock %}
-{% block heading %}Academic Staff Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Dashboard</span>
+</nav>
+{% endblock %}
 {% block content %}
-{% if semester %}<p class="muted">Active semester: <strong>{{ semester.label }}</strong></p>{% endif %}
-<div class="stat-grid">
-  <div class="stat"><span class="stat-value">{{ counts.students }}</span><span class="stat-label">Students</span></div>
-  <div class="stat"><span class="stat-value">{{ counts.courses }}</span><span class="stat-label">Courses</span></div>
-  <div class="stat"><span class="stat-value">{{ counts.offerings }}</span><span class="stat-label">Offerings</span></div>
+<div class="page-head">
+  <h1 class="page-title">Registrar Overview</h1>
+  <p class="page-sub">{% if semester %}Active semester: <strong>{{ semester.label }}</strong>{% else %}No active semester{% endif %}</p>
 </div>
 
-<h2>Pending Enrollment Requests</h2>
-{% if pending %}
-<table class="table">
-  <thead><tr><th>Student</th><th>Course</th><th>Semester</th><th>Requested</th><th></th></tr></thead>
-  <tbody>
-  {% for e in pending %}
-    <tr>
-      <td>{{ e.student.student_number }} — {{ e.student.full_name }}</td>
-      <td>{{ e.offering.course.code }} — {{ e.offering.course.title }}</td>
-      <td>{{ e.offering.semester.label }}</td>
-      <td>{{ e.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
-      <td><a class="link" href="{{ url_for('enrollments.index', status='pending') }}">Review</a></td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p class="empty">No pending enrollment requests.</p>
-{% endif %}
+<div class="stat-grid">
+  <div class="stat">
+    <div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></span></div>
+    <span class="stat-value">{{ counts.students }}</span>
+    <span class="stat-label">Students</span>
+  </div>
+  <div class="stat">
+    <div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span></div>
+    <span class="stat-value">{{ counts.courses }}</span>
+    <span class="stat-label">Courses</span>
+  </div>
+  <div class="stat cyan">
+    <div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span></div>
+    <span class="stat-value">{{ counts.offerings }}</span>
+    <span class="stat-label">Course Offerings</span>
+  </div>
+  <div class="stat warn">
+    <div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span></div>
+    <span class="stat-value">{{ pending|length }}</span>
+    <span class="stat-label">Pending Requests</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h2 class="card-title">Pending Enrollment Requests</h2>
+    <a class="btn btn-sm btn-ghost" href="{{ url_for('enrollments.index', status='pending') }}">Review all</a></div>
+  {% if pending %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Student</th><th>Course</th><th>Semester</th><th>Requested</th><th></th></tr></thead>
+    <tbody>
+    {% for e in pending %}
+      <tr>
+        <td>{{ e.student.student_number }} — {{ e.student.full_name }}</td>
+        <td>{{ e.offering.course.code }} — {{ e.offering.course.title }}</td>
+        <td>{{ e.offering.semester.label }}</td>
+        <td>{{ e.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td class="actions"><a class="btn btn-sm" href="{{ url_for('enrollments.index', status='pending') }}">Review</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="empty"><span class="empty-icon">✅</span><br>No pending enrollment requests.</p>
+  {% endif %}
+</div>
 {% endblock %}

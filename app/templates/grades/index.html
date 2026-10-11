@@ -1,8 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Grade Entry{% endblock %}
 {% block heading %}Grade Entry{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Grades</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Grade Entry</h1>
+  <p class="page-sub">Select a course offering to enter and publish grades.</p>
+</div>
 {% if offerings %}
+<div class="table-wrap">
 <table class="table">
   <thead><tr><th>Course</th><th>Semester</th><th>Enrolled</th><th></th></tr></thead>
   <tbody>
@@ -11,12 +22,13 @@
       <td>{{ o.course.code }} — {{ o.course.title }}</td>
       <td>{{ o.semester.label }}</td>
       <td>{{ o.enrolled_count }}</td>
-      <td><a class="link" href="{{ url_for('grades.entry', offering_id=o.id) }}">Enter Grades</a></td>
+      <td class="actions"><a class="btn btn-sm btn-primary" href="{{ url_for('grades.entry', offering_id=o.id) }}">Enter Grades</a></td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% else %}
-<p class="empty">No courses are assigned to you.</p>
+<div class="empty"><div class="empty-icon">✏️</div>No courses are assigned to you.</div>
 {% endif %}
 {% endblock %}

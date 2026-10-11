@@ -1,18 +1,31 @@
 {% extends "base.html" %}
 {% block title %}Enrollments{% endblock %}
 {% block heading %}Enrollment Requests{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">Enrollments</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">Enrollment Requests</h1>
+  <p class="page-sub">Review, approve or drop course enrollments.</p>
+</div>
 <div class="toolbar">
-  <form method="get" class="inline-form">
-    <select class="input" name="status" onchange="this.form.submit()">
+  <form method="get" class="toolbar-left">
+    <label class="sr-only" for="status-filter" style="position:absolute;left:-999px;">Status</label>
+    <select class="input input-sm" id="status-filter" name="status" onchange="this.form.submit()">
       <option value="">All statuses</option>
       {% for s in ['pending','enrolled','rejected','dropped','completed'] %}
         <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s|capitalize }}</option>
       {% endfor %}
     </select>
   </form>
+  <div class="toolbar-right"><span class="muted small">{{ pagination.total }} record{{ '' if pagination.total == 1 else 's' }}</span></div>
 </div>
 {% if pagination.items %}
+<div class="table-wrap">
 <table class="table">
   <thead><tr><th>Student</th><th>Course</th><th>Semester</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead>
   <tbody>
@@ -23,7 +36,7 @@
       <td>{{ e.offering.semester.label }}</td>
       <td><span class="pill pill-{{ e.status }}">{{ e.status }}</span></td>
       <td>{{ e.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
-      <td>
+      <td class="actions">
         {% if e.status == 'pending' %}
           <form method="post" action="{{ url_for('enrollments.decide', enrollment_id=e.id) }}" class="inline"
                 onsubmit="return confirm('Confirm this decision?');">
@@ -37,14 +50,17 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-sm" type="submit">Drop</button>
           </form>
+        {% else %}
+          <span class="muted small">—</span>
         {% endif %}
       </td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% include "partials/pagination.html" with context %}
 {% else %}
-<p class="empty">No enrollment records found.</p>
+<div class="empty"><div class="empty-icon">📝</div>No enrollment records found.</div>
 {% endif %}
 {% endblock %}

@@ -1,51 +1,74 @@
 {% extends "base.html" %}
 {% block title %}Fee Account{% endblock %}
 {% block heading %}Fee Account · {{ student.full_name }}{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span>
+  {% if current_user.has_permission('manage_fees') %}<a href="{{ url_for('fees.index') }}">Fees</a>{% else %}<span>My Fees</span>{% endif %}
+  <span class="sep">/</span><span class="current">{{ student.student_number }}</span>
+</nav>
+{% endblock %}
 {% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ student.full_name }}</h1>
+  <p class="page-sub">{{ student.student_number }} · fee account</p>
+</div>
+
 <div class="stat-grid">
-  <div class="stat"><span class="stat-value">{{ balance.total_assessed }}</span><span class="stat-label">Total Assessed</span></div>
-  <div class="stat"><span class="stat-value">{{ balance.total_adjustments }}</span><span class="stat-label">Adjustments</span></div>
-  <div class="stat"><span class="stat-value">{{ balance.total_paid }}</span><span class="stat-label">Paid</span></div>
-  <div class="stat {{ 'warn' if balance.balance > 0 else '' }}">
-    <span class="stat-value">{{ balance.balance }}</span><span class="stat-label">Balance</span></div>
+  <div class="stat"><span class="stat-value small-value">{{ balance.total_assessed }}</span><span class="stat-label">Total Assessed</span></div>
+  <div class="stat"><span class="stat-value small-value">{{ balance.total_adjustments }}</span><span class="stat-label">Adjustments</span></div>
+  <div class="stat success"><span class="stat-value small-value">{{ balance.total_paid }}</span><span class="stat-label">Paid</span></div>
+  <div class="stat {{ 'danger' if balance.balance > 0 else 'success' }}">
+    <span class="stat-value small-value">{{ balance.balance }}</span><span class="stat-label">Balance</span></div>
   <div class="stat"><span class="stat-label">Status</span>
     <span class="stat-value small-value">{{ balance.status|replace('_',' ')|capitalize }}</span></div>
 </div>
 
-{% if balance.credit > 0 %}<p class="flash flash-info">Credit balance: {{ balance.credit }}</p>{% endif %}
+{% if balance.credit > 0 %}<div class="flash flash-info">Credit balance: {{ balance.credit }}</div>{% endif %}
 {% for note in balance.notes %}<p class="muted small">{{ note }}</p>{% endfor %}
 
-<h2>Assessments</h2>
-{% if assessments %}
-<table class="table">
-  <thead><tr><th>Category</th><th>Semester</th><th>Amount</th><th>Adjustment</th><th>Due</th></tr></thead>
-  <tbody>
-  {% for a in assessments %}
-    <tr>
-      <td>{{ a.category.name }}</td>
-      <td>{{ a.semester.label if a.semester else '—' }}</td>
-      <td>{{ a.amount }}</td>
-      <td>{{ a.adjustment }}</td>
-      <td>{{ a.due_date or '—' }}</td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p class="empty">No fee assessments.</p>
-{% endif %}
+<div class="card">
+  <div class="card-head"><h2 class="card-title">Assessments</h2>
+    {% if current_user.has_permission('manage_fees') %}<a class="btn btn-sm btn-ghost" href="{{ url_for('fees.assess') }}">Assess fee</a>{% endif %}</div>
+  {% if assessments %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Category</th><th>Semester</th><th>Amount</th><th>Adjustment</th><th>Due</th></tr></thead>
+    <tbody>
+    {% for a in assessments %}
+      <tr>
+        <td>{{ a.category.name }}</td>
+        <td>{{ a.semester.label if a.semester else '—' }}</td>
+        <td><strong>{{ a.amount }}</strong></td>
+        <td>{{ a.adjustment }}</td>
+        <td>{{ a.due_date or '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty">No fee assessments.</div>
+  {% endif %}
+</div>
 
-<h2>Payments</h2>
-{% if payments %}
-<table class="table">
-  <thead><tr><th>Date</th><th>Amount</th><th>Reference</th></tr></thead>
-  <tbody>
-  {% for p in payments %}
-    <tr><td>{{ p.paid_on }}</td><td>{{ p.amount }}</td><td>{{ p.reference or '—' }}</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p class="empty">No payments recorded.</p>
-{% endif %}
+<div class="card">
+  <div class="card-head"><h2 class="card-title">Payments</h2>
+    {% if current_user.has_permission('manage_fees') %}<a class="btn btn-sm btn-ghost" href="{{ url_for('fees.pay') }}">Record payment</a>{% endif %}</div>
+  {% if payments %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Date</th><th>Amount</th><th>Reference</th></tr></thead>
+    <tbody>
+    {% for p in payments %}
+      <tr><td>{{ p.paid_on }}</td><td><strong>{{ p.amount }}</strong></td><td>{{ p.reference or '—' }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty">No payments recorded.</div>
+  {% endif %}
+</div>
 {% endblock %}

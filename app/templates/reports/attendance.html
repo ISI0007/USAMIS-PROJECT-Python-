@@ -1,9 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Low Attendance{% endblock %}
 {% block heading %}Low Attendance (&lt; 75%){% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><a href="{{ url_for('reports.index') }}">Reports</a>
+  <span class="sep">/</span><span class="current">Low Attendance</span>
+</nav>
+{% endblock %}
 {% block content %}
-<a class="link" href="{{ url_for('reports.index') }}">← Reports</a>
+<div class="page-head">
+  <h1 class="page-title">Low attendance</h1>
+  <p class="page-sub">Students below the 75% attendance threshold.</p>
+</div>
 {% if summary %}
+<div class="table-wrap">
 <table class="table">
   <thead><tr><th>Student</th><th>Course</th><th>Present</th><th>Total</th><th>Rate</th></tr></thead>
   <tbody>
@@ -13,12 +24,13 @@
       <td>{{ row.offering.course.code }}</td>
       <td>{{ row.present }}</td>
       <td>{{ row.total }}</td>
-      <td class="warn-text">{{ row.rate }}%</td>
+      <td class="warn-text"><strong>{{ row.rate }}%</strong></td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% else %}
-<p class="empty">No students below the attendance threshold.</p>
+<div class="empty"><div class="empty-icon">✅</div>No students below the attendance threshold.</div>
 {% endif %}
 {% endblock %}

@@ -80,6 +80,9 @@ PostgreSQL 17
 | 7 | Documentation and five diagrams | Complete |
 | 8 | PowerPoint presentation (15 slides) | Complete |
 | 9 | Final verification and push | Complete |
+| 10 | Frontend redesign, Phases 1-2 (design system, shell, dashboards) | Complete |
+| 11 | Frontend redesign, Phase 3 (module list + form + detail pages) | Complete |
+| 12 | Frontend redesign, Phase 4 (polish, refreshed screenshots) | Complete |
 
 ### Verified so far (with evidence)
 
@@ -115,6 +118,10 @@ None. GitHub write access was available and the push succeeded.
 - **Fresh database migration:** verified — 17 tables created on `usamis_fresh`.
 - **Diagrams:** five Mermaid sources with exported PNGs (verified PNG signatures).
 - **Presentation:** `docs/USAMIS_Presentation.pptx`, 15 slides, opens in python-pptx.
+- **Screenshots:** 16 real captures of the redesigned UI (verified distinct).
+- **Frontend redesign:** Phases 1-4 complete — design system, grouped sidebar with
+  icons, role dashboards with live Chart.js charts, upgraded module/form/detail
+  pages, accessibility improvements (see `docs/FRONTEND_REDESIGN.md`).
 - **Commit:** `d5b468c` (implementation) merged with remote `ebbc84c` (LICENSE) as
   `80f99d9`.
 - **Push:** confirmed `ebbc84c..80f99d9 main -> main`; remote `main` = `80f99d9`.
