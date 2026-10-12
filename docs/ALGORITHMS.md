@@ -250,3 +250,93 @@ account view.
 Decimal arithmetic and explicit status rules give finance staff an auditable,
 reproducible figure that cannot drift due to floating-point error or hidden
 negative balances.
+
+## Algorithm 4 — AI-based Student Performance Prediction (F4)
+
+### Problem definition
+Flag students at risk of academic difficulty *early*, from data the system
+already holds, and explain every flag so staff can act on it rather than trust
+a black box.
+
+### Business objective
+Turn stored grades and attendance into a triage list (high / medium / low
+risk) so advisors spend their time where it matters. Deliberately transparent:
+an auditable logistic model, not an opaque neural network, because the output
+informs real academic decisions.
+
+### Inputs / outputs
+* **In:** credit-weighted academic average (Algorithm 2, published grades only)
+  and attendance rate (present + late over total recorded sessions).
+* **Out:** `PredictionResult(risk_score, band, factors, notes, has_data)` where
+  `risk_score` is a Decimal in `0.00..1.00`, `band` is `low|medium|high`, and
+  `factors` lists each signal's signed contribution.
+
+### Preconditions / postconditions
+* Preconditions: none — missing signals are treated as neutral and noted.
+* Postconditions: the returned score is quantised to two decimals; factors are
+  sorted by absolute impact (largest driver first).
+
+### Step-by-step logic
+1. Standardise the academic average:
+   `grade_term = (average − 65) / 15`.
+2. Standardise attendance:
+   `att_term = (attendance% − 75) / 25`.
+3. Combine: `z = b0 + b1·grade_term + b2·att_term`.
+4. Risk: `risk = sigmoid(z)` with the numerically stable form.
+5. Band: `risk ≥ 0.66 → high`, `≥ 0.40 → medium`, else `low`.
+6. Record each term as an explainable `Factor` and sort by absolute impact.
+
+### Formula
+```
+z    = −0.2 + 1.6·((grade − 65)/15) + 1.2·((attendance% − 75)/25)
+risk = 1 / (1 + e^(−z))
+```
+
+### Pseudocode
+```
+z = -0.2
+if grade is not None:      z += 1.6 * (grade - 65) / 15; factor(grade)
+else:                      note("no published grades")
+if attendance is not None: z += 1.2 * (att% - 75) / 25; factor(attendance)
+else:                      note("no attendance on record")
+risk = sigmoid(z)
+band = high if risk >= 0.66 else medium if risk >= 0.40 else low
+sort factors by |impact| descending
+```
+
+### Published coefficients
+| Symbol | Value | Meaning |
+|---|---|---|
+| `b0` bias | −0.2 | mid-band anchor when both signals are neutral |
+| `b1` grade weight | 1.6 | per standardised grade point (span 15, centre 65) |
+| `b2` attendance weight | 1.2 | per standardised attendance point (span 25, centre 75%) |
+| high cut-off | 0.66 | priority intervention |
+| medium cut-off | 0.40 | advisor check-in |
+
+> **Monotonicity note.** `risk` is monotonically *increasing* in both inputs,
+> so a higher average or attendance raises the score. The bands are tuned to
+> the institution's grading conventions; because the score is a risk analogue
+> over absolute signals, it is intended to be read alongside the raw average
+> and attendance shown on the same screens, not as a standalone verdict.
+
+### Complexity
+O(1) per student; O(n) for a cohort of n students.
+
+### Error cases
+Missing average and/or attendance → term omitted, neutral, with a note;
+`has_data=False` when both are absent. Non-finite input is not accepted by the
+service layer (values come from the database as Decimals/floats).
+
+### Example
+Average 80, attendance 90% → `z = −0.2 + 1.6·1 + 1.2·0.6 = 2.12`,
+`risk = sigmoid(2.12) ≈ 0.89` → **high** band, grade is the top driver.
+
+### Integration
+`app/algorithms/performance_prediction.py` (pure model) →
+`app/services/prediction_service.py` (`student_signals`, `predict_for_student`,
+`predict_cohort`) → student dashboard panel + `/predictions` risk board and
+`/predictions/student/<id>` explain view (permission `view_grades`).
+
+### Suitability for an MIS
+The model is small, deterministic and documented, so a registrar can justify
+every flag; it reuses data the MIS already owns and never invents inputs.

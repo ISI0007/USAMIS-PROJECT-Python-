@@ -83,6 +83,10 @@ PostgreSQL 17
 | 10 | Frontend redesign, Phases 1-2 (design system, shell, dashboards) | Complete |
 | 11 | Frontend redesign, Phase 3 (module list + form + detail pages) | Complete |
 | 12 | Frontend redesign, Phase 4 (polish, refreshed screenshots) | Complete |
+| 13 | F1 — SMS notifications (stub provider, service, routes, tests) | Complete |
+| 14 | F2 — Online payment gateway (intents, idempotent confirm, tests) | Complete |
+| 15 | F3 — QR-code attendance (HMAC tokens, sessions, tests) | Complete |
+| 16 | F4 — AI performance prediction (explainable risk model, UI, tests) | Complete |
 
 ### Verified so far (with evidence)
 

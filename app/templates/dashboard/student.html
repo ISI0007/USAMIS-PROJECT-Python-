@@ -42,6 +42,38 @@
   </div>
 </div>
 
+{# ---------- AI academic-risk insight (Algorithm 4) ---------- #}
+<div class="card risk-card risk-{{ prediction.band }}">
+  <div class="card-head">
+    <h2 class="card-title">Academic Risk Insight <span class="pill pill-ai">AI · explainable</span></h2>
+    <span class="pill band-{{ prediction.band }}">{{ prediction.band|capitalize }} risk · {{ prediction.risk_score }}</span>
+  </div>
+  <div class="risk-body">
+    <div class="risk-meter" role="img"
+         aria-label="Risk score {{ prediction.risk_score }} out of 1">
+      <div class="risk-meter-fill band-{{ prediction.band }}" style="width: {{ (prediction.risk_score * 100)|round(0, 'floor') }}%"></div>
+      <span class="risk-meter-mark medium"></span>
+      <span class="risk-meter-mark high"></span>
+    </div>
+    <p class="risk-action"><strong>Recommended:</strong> {{ prediction.action }}</p>
+    <ul class="risk-factors">
+      {% for f in prediction.factors %}
+        <li>
+          <span class="factor-name">{{ f.name }}</span>
+          <span class="factor-detail">{{ f.detail }}</span>
+          <span class="factor-impact {{ 'up' if f.impact > 0 else ('down' if f.impact < 0 else 'flat') }}">
+            {{ '+' if f.impact > 0 else '' }}{{ f.impact }}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+    {% if prediction.notes %}
+      <p class="muted small">{% for n in prediction.notes %}{{ n }}{% if not loop.last %} {% endif %}{% endfor %}</p>
+    {% endif %}
+    <p class="muted small">Transparent logistic model over published grades and recorded attendance. Advisory only — see docs/ALGORITHMS.md.</p>
+  </div>
+</div>
+
 {# ---------- Progress + current courses ---------- #}
 <div class="grid-2-1">
   <div class="card">

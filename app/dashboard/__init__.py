@@ -13,6 +13,7 @@ from ..models import (
 )
 from ..security.permissions import Role
 from ..services import fee_service
+from ..services import prediction_service
 
 bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
 
@@ -250,6 +251,9 @@ def _student_dashboard():
 
     balance = fee_service.student_balance(student)
 
+    # F4 — explainable academic-risk prediction from stored grades + attendance.
+    prediction, _signals = prediction_service.predict_for_student(student)
+
     # Current-semester active courses (distinct from full history).
     active_sem = _active_semester()
     current_enrollments = [
@@ -270,4 +274,5 @@ def _student_dashboard():
         attendance_pct=attendance_pct,
         balance=balance,
         semester=active_sem,
+        prediction=prediction,
     )

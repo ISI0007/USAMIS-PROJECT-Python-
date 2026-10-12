@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Risk Detail — {{ student.full_name }}{% endblock %}
+{% block heading %}Academic Risk{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span>
+  <a href="{{ url_for('predictions.index') }}">Academic Risk</a>
+  <span class="sep">/</span><span class="current">{{ student.student_number }}</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ student.full_name }}</h1>
+  <p class="page-sub">{{ student.student_number }}{% if student.program %} · {{ student.program.name }}{% endif %}</p>
+</div>
+
+<div class="card risk-card risk-{{ prediction.band }}">
+  <div class="card-head">
+    <h2 class="card-title">Prediction <span class="pill pill-ai">AI · explainable</span></h2>
+    <span class="pill band-{{ prediction.band }}">{{ band_label }} · {{ prediction.risk_score }}</span>
+  </div>
+  <div class="risk-body">
+    <div class="risk-meter" role="img" aria-label="Risk score {{ prediction.risk_score }} out of 1">
+      <div class="risk-meter-fill band-{{ prediction.band }}" style="width: {{ (prediction.risk_score * 100)|round(0, 'floor') }}%"></div>
+      <span class="risk-meter-mark medium"></span>
+      <span class="risk-meter-mark high"></span>
+    </div>
+    <p class="risk-action"><strong>Recommended:</strong> {{ action }}</p>
+
+    <table class="table">
+      <thead><tr><th>Factor</th><th>Detail</th><th>Impact on risk</th></tr></thead>
+      <tbody>
+      {% for f in prediction.factors %}
+        <tr>
+          <td>{{ f.name }}</td>
+          <td class="muted small">{{ f.detail }}</td>
+          <td class="factor-impact {{ 'up' if f.impact > 0 else ('down' if f.impact < 0 else 'flat') }}">
+            {{ '+' if f.impact > 0 else '' }}{{ f.impact }}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <p class="muted small">
+      Signals — weighted average:
+      {{ signals.weighted_average if signals.weighted_average is not none else 'no published grades' }};
+      attendance: {{ signals.attendance_present }}/{{ signals.attendance_total }} sessions.
+    </p>
+    {% if prediction.notes %}
+      <p class="muted small">{% for n in prediction.notes %}{{ n }}{% if not loop.last %} {% endif %}{% endfor %}</p>
+    {% endif %}
+    <p class="muted small">Advisory only. The model is a published logistic function; see docs/ALGORITHMS.md.</p>
+  </div>
+</div>
+{% endblock %}

@@ -19,6 +19,9 @@ env/
 .pytest_cache/
 .coverage
 coverage.xml
+_f4.xml
+_full.xml
+_x.xml
 htmlcov/
 
 # Instance data
