@@ -85,6 +85,8 @@ def home():
         return _teacher_dashboard()
     if role == Role.FINANCE:
         return _finance_dashboard()
+    if role == Role.PARENT:
+        return _parent_dashboard()
     return _student_dashboard()
 
 
@@ -215,6 +217,23 @@ def _finance_dashboard():
                "outstanding": outstanding, "collection_pct": round(collection_pct, 1)},
         recent=recent,
     )
+
+
+def _parent_dashboard():
+    """Parent landing: the linked students with a headline risk band each."""
+    from ..services import parent_service, prediction_service
+
+    children = parent_service.linked_students(current_user)
+    rows = []
+    for student in children:
+        prediction, signals = prediction_service.predict_for_student(student)
+        rows.append({
+            "student": student,
+            "prediction": prediction,
+            "average": signals["weighted_average"],
+            "attendance_rate": signals["attendance_rate"],
+        })
+    return render_template("dashboard/parent.html", rows=rows)
 
 
 def _student_dashboard():

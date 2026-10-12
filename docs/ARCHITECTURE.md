@@ -44,6 +44,10 @@ Key files: `app/__init__.py`, `app/config.py`, `app/extensions.py`.
 | `grades` | `/grades` | grade entry, publication, own grades |
 | `attendance` | `/attendance` | attendance recording and views |
 | `fees` | `/fees` | categories, assessments, payments |
+| `notifications` | `/notifications` | SMS dispatch and history (F1) |
+| `payments` | `/payments` | online payment intents and callbacks (F2) |
+| `predictions` | `/predictions` | explainable academic-risk board (F4) |
+| `parents` | `/parents` | read-only parent portal (F5) |
 | `reports` | `/reports` | management reports |
 | `admin` | `/admin` | users, roles, audit log |
 

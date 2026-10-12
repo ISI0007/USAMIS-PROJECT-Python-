@@ -22,6 +22,7 @@ from .attendance_session import AttendanceSession  # noqa: F401
 from .fee import FeeCategory, FeeAssessment, Payment  # noqa: F401
 from .notification import SmsMessage  # noqa: F401
 from .payment_intent import PaymentIntent  # noqa: F401
+from .parent_link import ParentLink  # noqa: F401
 
 __all__ = [
     "utcnow",
@@ -44,4 +45,5 @@ __all__ = [
     "Payment",
     "SmsMessage",
     "PaymentIntent",
+    "ParentLink",
 ]

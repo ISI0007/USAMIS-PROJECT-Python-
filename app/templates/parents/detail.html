@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Child Records — {{ student.full_name }}{% endblock %}
+{% block heading %}Parent Portal{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span>
+  <a href="{{ url_for('parents.index') }}">My Children</a>
+  <span class="sep">/</span><span class="current">{{ student.student_number }}</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ student.full_name }}</h1>
+  <p class="page-sub">{{ student.student_number }}{% if student.program %} · {{ student.program.name }}{% endif %}
+    {% if link %} · linked as {{ link.relationship_type|capitalize }}{% endif %}</p>
+</div>
+
+<div class="stat-grid">
+  <div class="stat success">
+    <div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"/></svg></span></div>
+    <span class="stat-value">{{ performance.weighted_average if performance.weighted_average is not none else '—' }}</span>
+    <span class="stat-label">Academic Average</span>
+    <span class="stat-compare">{{ grades|length }} published grade{{ '' if grades|length == 1 else 's' }}</span>
+  </div>
+  <div class="stat cyan">
+    <div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/></svg></span></div>
+    <span class="stat-value">{{ attendance_pct }}%</span>
+    <span class="stat-label">Attendance</span>
+    <span class="stat-compare">{{ attendance_present }}/{{ attendance_total }} sessions</span>
+  </div>
+  <div class="stat {{ 'danger' if balance.balance > 0 else 'success' }}">
+    <div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span></div>
+    <span class="stat-value small-value">{{ balance.balance }}</span>
+    <span class="stat-label">Fee Balance</span>
+    <span class="stat-compare">{{ 'Payment outstanding' if balance.balance > 0 else 'All settled' }}</span>
+  </div>
+  <div class="stat">
+    <div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span></div>
+    <span class="stat-value">{{ enrollments|length }}</span>
+    <span class="stat-label">Enrollments</span>
+  </div>
+</div>
+
+<div class="card risk-card risk-{{ prediction.band }}">
+  <div class="card-head">
+    <h2 class="card-title">Academic Risk Insight <span class="pill pill-ai">AI · explainable</span></h2>
+    <span class="pill band-{{ prediction.band }}">{{ prediction.band|capitalize }} risk · {{ prediction.risk_score }}</span>
+  </div>
+  <div class="risk-body">
+    <ul class="risk-factors">
+      {% for f in prediction.factors %}
+        <li>
+          <span class="factor-name">{{ f.name }}</span>
+          <span class="factor-detail">{{ f.detail }}</span>
+          <span class="factor-impact {{ 'up' if f.impact > 0 else ('down' if f.impact < 0 else 'flat') }}">
+            {{ '+' if f.impact > 0 else '' }}{{ f.impact }}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+    <p class="muted small">Advisory only. See docs/ALGORITHMS.md.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h2 class="card-title">Published Grades</h2></div>
+  {% if grades %}
+  <table class="table">
+    <thead><tr><th>Course</th><th>Score</th><th>Grade</th></tr></thead>
+    <tbody>
+    {% for g in grades %}
+      <tr>
+        <td>{{ g.enrollment.offering.course.code }} — {{ g.enrollment.offering.course.title }}</td>
+        <td>{{ g.score }}</td>
+        <td><strong>{{ g.letter }}</strong></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No published grades yet.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-head"><h2 class="card-title">Enrollment History</h2></div>
+  {% if enrollments %}
+  <table class="table">
+    <thead><tr><th>Course</th><th>Semester</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for e in enrollments %}
+      <tr>
+        <td>{{ e.offering.course.code }} — {{ e.offering.course.title }}</td>
+        <td>{{ e.offering.semester.label }}</td>
+        <td><span class="pill pill-{{ e.status }}">{{ e.status }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No enrollments on record.</p>
+  {% endif %}
+</div>
+{% endblock %}

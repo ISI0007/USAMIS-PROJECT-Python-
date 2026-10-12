@@ -77,6 +77,11 @@
           {{ navlink('predictions.index', 'Academic Risk', '/predictions', '<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>') }}
         {% endif %}
 
+        {% if current_user.has_permission('view_linked_students') %}
+          <div class="nav-group-label">My Family</div>
+          {{ navlink('parents.index', 'My Children', '/parents', '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>') }}
+        {% endif %}
+
         {% if current_user.has_permission('send_notifications') %}
           <div class="nav-group-label">Finance</div>
           {{ navlink('fees.index', 'Fees', '/fees', '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>') }}

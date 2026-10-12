@@ -87,6 +87,7 @@ PostgreSQL 17
 | 14 | F2 — Online payment gateway (intents, idempotent confirm, tests) | Complete |
 | 15 | F3 — QR-code attendance (HMAC tokens, sessions, tests) | Complete |
 | 16 | F4 — AI performance prediction (explainable risk model, UI, tests) | Complete |
+| 17 | F5 — Parent portal (guardian links, read-only views, tests) | Complete |
 
 ### Verified so far (with evidence)
 

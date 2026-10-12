@@ -29,6 +29,7 @@ from .models import (
     FeeAssessment,
     FeeCategory,
     Grade,
+    ParentLink,
     Payment,
     Prerequisite,
     Semester,
@@ -213,6 +214,8 @@ def run_seed(reset: bool = False) -> None:
     teacher_user2 = account("a.okafor", "a.okafor@usamis.demo", "Ada Okafor", "teacher")
     # Primary demo student account (roll G19).
     student_user = account("s.demo", "g2422486019@usamis.demo", "Lin Wei", "student")
+    # F5 — demo parent/guardian account (linked to two children below).
+    parent_user = account("p.wei", "parent@usamis.demo", "Wei JianGuo", "parent")
     db.session.commit()
 
     # --- Teachers ------------------------------------------------------- #
@@ -422,3 +425,15 @@ def run_seed(reset: bool = False) -> None:
             summary="Synthetic demo data generated (8-semester SE curriculum, "
                     "students G19-G26)."))
         db.session.commit()
+
+    # --- F5 parent links ------------------------------------------------ #
+    # The demo guardian (p.wei) is linked to two children (G19 and G21).
+    child_rolls = {"19": "father", "21": "father"}
+    for s in students:
+        suffix = s.student_number[-2:]
+        if suffix in child_rolls:
+            _get_or_create(ParentLink, {
+                "relationship_type": child_rolls[suffix],
+                "is_active": True,
+            }, parent_user_id=parent_user.id, student_id=s.id)
+    db.session.commit()

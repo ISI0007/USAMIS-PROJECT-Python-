@@ -20,6 +20,7 @@ class Role(StrEnum):
     TEACHER = "teacher"
     FINANCE = "finance"
     STUDENT = "student"
+    PARENT = "parent"
 
 
 ROLE_LABELS: dict[str, str] = {
@@ -28,6 +29,7 @@ ROLE_LABELS: dict[str, str] = {
     Role.TEACHER: "Teacher",
     Role.FINANCE: "Finance Officer",
     Role.STUDENT: "Student",
+    Role.PARENT: "Parent / Guardian",
 }
 
 
@@ -69,6 +71,9 @@ class Permission(StrEnum):
     # Notifications
     SEND_NOTIFICATIONS = "send_notifications"
 
+    # Parent portal (F5) — read-only views of linked students' records
+    VIEW_LINKED_STUDENTS = "view_linked_students"
+
     # Reports
     VIEW_REPORTS = "view_reports"
 
@@ -99,6 +104,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         Permission.SEND_NOTIFICATIONS,
         Permission.VIEW_OWN_FEES,
         Permission.VIEW_REPORTS,
+        Permission.VIEW_LINKED_STUDENTS,
     },
     Role.ACADEMIC_STAFF: {
         Permission.MANAGE_DEPARTMENTS,
@@ -131,6 +137,10 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         Permission.VIEW_OWN_GRADES,
         Permission.VIEW_OWN_ATTENDANCE,
         Permission.VIEW_OWN_FEES,
+    },
+    # Read-only: a parent sees ONLY the records of students linked to them.
+    Role.PARENT: {
+        Permission.VIEW_LINKED_STUDENTS,
     },
 }
 
