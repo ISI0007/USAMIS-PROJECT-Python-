@@ -8,6 +8,7 @@ independently.
 import os
 
 from flask import Flask, render_template
+from flask_wtf.csrf import CSRFError
 
 from .config import get_config
 from .extensions import db, migrate, login_manager, csrf, limiter
@@ -116,6 +117,23 @@ def _register_blueprints(app: Flask) -> None:
 
 
 def _register_error_handlers(app: Flask) -> None:
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(error):
+        """A missing/expired CSRF token must not dump a raw 'Bad Request'.
+
+        This is almost always an expired or lost session cookie (stale tab,
+        server restart, or the browser not storing cookies). Send the visitor
+        back to the sign-in page with a clear message and a fresh token.
+        """
+        from flask import flash, redirect, request, url_for
+
+        app.logger.warning("CSRF failure on %s: %s", request.path, error.description)
+        flash(
+            "Your session expired or the page was stale. Please sign in again.",
+            "warning",
+        )
+        return redirect(url_for("auth.login"))
+
     @app.errorhandler(403)
     def forbidden(error):
         return render_template("errors/403.html"), 403
