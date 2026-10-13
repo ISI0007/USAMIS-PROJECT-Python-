@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
-<body>
+<body{% if current_user.is_authenticated %} class="role-{{ current_user.role }}"{% endif %}>
 {% if current_user.is_authenticated %}
   <a class="skip-link" href="#main-content">Skip to content</a>
   {% macro navlink(endpoint, label, active_prefix, icon) %}

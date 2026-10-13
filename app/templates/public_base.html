@@ -13,10 +13,10 @@
   <header class="uni-masthead">
     <div class="uni-masthead-inner">
       <span class="uni-crest" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"/></svg>
+        <img src="{{ url_for('static', filename='img/jit-logo.png') }}" alt="Jinling Institute of Technology crest">
       </span>
       <div class="uni-titles">
-        <div class="uni-name">University of Applied Sciences</div>
+        <div class="uni-name">Jinling Institute of Technology</div>
         <div class="uni-tagline">USAMIS · Student Academic Management Information System</div>
       </div>
       <nav class="uni-masthead-nav" aria-label="Institution links">
@@ -29,8 +29,8 @@
 
   {% block hero %}
   <section class="uni-hero">
-    <img class="uni-hero-img" src="{{ url_for('static', filename='img/campus-hero.jpg') }}"
-         alt="University campus" loading="eager">
+    <img class="uni-hero-img" src="{{ url_for('static', filename='img/jit-3.jpg') }}"
+         alt="Jinling Institute of Technology campus" loading="eager">
     <div class="uni-hero-inner">
       <span class="uni-hero-eyebrow">Student &amp; Staff Portal</span>
       <h1>{% block hero_title %}Your campus, one secure sign-in.{% endblock %}</h1>

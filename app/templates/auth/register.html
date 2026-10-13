@@ -1,51 +1,73 @@
 {% extends "public_base.html" %}
 {% block title %}Create Account{% endblock %}
+{% block hero_title %}Create your student account.{% endblock %}
+{% block hero_lede %}New accounts are created as students. Staff and administrator roles are assigned by an administrator.{% endblock %}
 {% block content %}
-<div class="login-card">
-  <div class="login-brand">
-    <span class="brand-mark">U</span>
-    <div>
-      <h1>USAMIS</h1>
-      <p>University Student Academic Management Information System</p>
+<div class="auth-split">
+
+  <div class="login-card">
+    <div class="login-brand">
+      <span class="uni-crest" style="width:44px;height:44px;flex:0 0 44px;">
+        <img src="{{ url_for('static', filename='img/jit-logo.png') }}" alt="JIT crest">
+      </span>
+      <div>
+        <h1 style="font-size:20px;">Create Account</h1>
+        <p>Jinling Institute of Technology · USAMIS</p>
+      </div>
     </div>
+
+    <form method="post" action="{{ url_for('auth.register') }}" class="form">
+      {{ form.hidden_tag() }}
+      <div class="field">
+        {{ form.full_name.label }}
+        {{ form.full_name(class="input", autofocus=true, autocomplete="name", placeholder="Your full name") }}
+        {% for error in form.full_name.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      <div class="field">
+        {{ form.username.label }}
+        {{ form.username(class="input", autocomplete="username", placeholder="Choose a username") }}
+        {% for error in form.username.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      <div class="field">
+        {{ form.email.label }}
+        {{ form.email(class="input", autocomplete="email", placeholder="you@example.com") }}
+        {% for error in form.email.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      <div class="field">
+        {{ form.password.label }}
+        {{ form.password(class="input", autocomplete="new-password", placeholder="Create a password") }}
+        {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      <div class="field">
+        {{ form.confirm_password.label }}
+        {{ form.confirm_password(class="input", autocomplete="new-password", placeholder="Repeat password") }}
+        {% for error in form.confirm_password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+    </form>
+
+    <p class="muted small">
+      New accounts are created as <strong>students</strong>. Staff and administrator
+      roles are assigned only by an administrator.
+    </p>
+    <p class="muted small">
+      Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a>.
+    </p>
   </div>
 
-  <form method="post" action="{{ url_for('auth.register') }}" class="form">
-    {{ form.hidden_tag() }}
-    <div class="field">
-      {{ form.full_name.label }}
-      {{ form.full_name(class="input", autofocus=true, autocomplete="name") }}
-      {% for error in form.full_name.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+  <aside class="auth-info">
+    <div class="info-photo">
+      <img src="{{ url_for('static', filename='img/jit-4.jpg') }}" alt="Jinling Institute of Technology campus">
     </div>
-    <div class="field">
-      {{ form.username.label }}
-      {{ form.username(class="input", autocomplete="username") }}
-      {% for error in form.username.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    <div class="info-card">
+      <h3>Applying to study at JIT?</h3>
+      <ul class="auth-highlights">
+        <li><span class="tick">✓</span> Create your account to access the student portal.</li>
+        <li><span class="tick">✓</span> Enrol in courses once your student record is created.</li>
+        <li><span class="tick">✓</span> Track grades, attendance and fees in one place.</li>
+      </ul>
     </div>
-    <div class="field">
-      {{ form.email.label }}
-      {{ form.email(class="input", autocomplete="email") }}
-      {% for error in form.email.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
-    </div>
-    <div class="field">
-      {{ form.password.label }}
-      {{ form.password(class="input", autocomplete="new-password") }}
-      {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
-    </div>
-    <div class="field">
-      {{ form.confirm_password.label }}
-      {{ form.confirm_password(class="input", autocomplete="new-password") }}
-      {% for error in form.confirm_password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
-    </div>
-    <button class="btn btn-primary btn-block" type="submit">Create Account</button>
-  </form>
+  </aside>
 
-  <p class="muted small">
-    New accounts are created as <strong>students</strong>. Staff and administrator
-    roles are assigned only by an administrator.
-  </p>
-  <p class="muted small">
-    Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a>.
-  </p>
 </div>
 {% endblock %}
