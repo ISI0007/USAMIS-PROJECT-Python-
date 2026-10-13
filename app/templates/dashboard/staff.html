@@ -8,10 +8,19 @@
 </nav>
 {% endblock %}
 {% block content %}
-<div class="page-head">
-  <h1 class="page-title">Registrar Overview</h1>
-  <p class="page-sub">{% if semester %}Active semester: <strong>{{ semester.label }}</strong>{% else %}No active semester{% endif %}</p>
-</div>
+<section class="dash-band">
+  <img class="db-img" src="{{ url_for('static', filename='img/jit-4.jpg') }}" alt="">
+  <div class="db-body">
+    <div>
+      <span class="db-eyebrow">Academic Staff / Registrar</span>
+      <h1>Registrar Overview</h1>
+      <p class="db-sub">{% if semester %}Active semester: <strong>{{ semester.label }}</strong>{% else %}No active semester{% endif %}</p>
+    </div>
+    <div class="db-actions">
+      <a class="btn" href="{{ url_for('enrollments.index', status='pending') }}">Review requests</a>
+    </div>
+  </div>
+</section>
 
 <div class="stat-grid">
   <div class="stat">

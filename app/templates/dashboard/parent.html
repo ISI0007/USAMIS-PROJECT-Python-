@@ -8,10 +8,16 @@
 </nav>
 {% endblock %}
 {% block content %}
-<div class="page-head">
-  <h1 class="page-title">Welcome, {{ current_user.full_name }}</h1>
-  <p class="page-sub">Read-only oversight of your linked students.</p>
-</div>
+<section class="dash-band">
+  <img class="db-img" src="{{ url_for('static', filename='img/jit-6.jpg') }}" alt="">
+  <div class="db-body">
+    <div>
+      <span class="db-eyebrow">Parent / Guardian</span>
+      <h1>Welcome, {{ current_user.full_name }}</h1>
+      <p class="db-sub">Read-only oversight of your linked students.</p>
+    </div>
+  </div>
+</section>
 
 {% if rows %}
 <div class="stat-grid">

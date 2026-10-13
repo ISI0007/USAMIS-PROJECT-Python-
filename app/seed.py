@@ -31,6 +31,7 @@ from .models import (
     Grade,
     ParentLink,
     Payment,
+    PaymentIntent,
     Prerequisite,
     Semester,
     Student,
@@ -75,9 +76,9 @@ def _get_or_create(model, defaults=None, **filters):
 def _reset() -> None:
     """Delete demo data in dependency order (development only)."""
     for model in (
-        Payment, FeeAssessment, FeeCategory, Attendance, Grade, Enrollment,
-        Prerequisite, CourseOffering, Semester, Course, AcademicProgram,
-        Student, Teacher, Department, AuditLog, User,
+        PaymentIntent, Payment, FeeAssessment, FeeCategory, Attendance, Grade,
+        Enrollment, Prerequisite, CourseOffering, Semester, Course,
+        AcademicProgram, ParentLink, Student, Teacher, Department, AuditLog, User,
     ):
         db.session.query(model).delete()
     db.session.commit()
@@ -327,32 +328,43 @@ def run_seed(reset: bool = False) -> None:
     db.session.commit()
 
     # --- Enrollments, grades, attendance -------------------------------- #
-    # Enrol everyone (G19..G26) in their first two semesters' courses.
+    # Enrol everyone (G19..G26) across the first five semesters so the
+    # dashboards, trend charts and transcript pages show a real-looking load.
+    # The most recent semester is left as pending/review requests so the
+    # registrar "Pending Requests" queue is populated.
+    ATT_STATUSES = ("present", "present", "present", "late", "absent", "excused")
     for s in students:
-        for sem_no in (1, 2):
-            for code, *_rest in CURRICULUM.get(sem_no, []):
+        # G26 (newest intake) only has first-semester history.
+        sems = (1,) if s.student_number.endswith("26") else (1, 2, 3, 4, 5)
+        for sem_no in sems:
+            for idx, (code, *_rest) in enumerate(CURRICULUM.get(sem_no, [])):
                 offering = offerings.get((sem_no, code))
                 if offering is None:
                     continue
+                # Most recent semester for non-final students: pending requests.
+                is_latest = (sem_no == max(sems)) and (s.student_number[-2:] not in ("26",))
+                status = "pending" if (is_latest and idx % 3 == 0) else "enrolled"
                 existing = db.session.execute(
                     db.select(Enrollment).where(
                         Enrollment.student_id == s.id,
                         Enrollment.offering_id == offering.id,
-                        Enrollment.status == "enrolled")
+                        Enrollment.status.in_(("enrolled", "pending")))
                 ).scalars().first()
                 if existing:
                     continue
                 enrollment = Enrollment(student_id=s.id, offering_id=offering.id,
-                                        status="enrolled")
+                                        status=status)
                 db.session.add(enrollment)
                 db.session.flush()
 
+                if status != "enrolled":
+                    continue
                 grade = db.session.execute(
                     db.select(Grade).where(Grade.enrollment_id == enrollment.id)
                 ).scalars().first()
                 if grade is None:
-                    # Deterministic, realistic spread of scores.
-                    base = 60 + (s.id * 3 + hash(code) % 30) % 40
+                    # Deterministic, realistic spread of scores (55..92).
+                    base = 55 + (s.id * 7 + idx * 11 + sem_no * 3) % 38
                     score = Decimal(f"{base}.00")
                     letter = ("A" if score >= 85 else "B" if score >= 75
                               else "C" if score >= 65 else "D" if score >= 60 else "F")
@@ -360,9 +372,13 @@ def run_seed(reset: bool = False) -> None:
                         enrollment_id=enrollment.id, student_id=s.id, score=score,
                         letter=letter, is_published=True,
                         published_at=dt.datetime.now(dt.timezone.utc),
-                        entered_by_id=teacher_user.id))
+                        entered_by_id=(teacher_user if idx % 2 == 0 else teacher_user2).id))
 
-                for day in (dt.date(2025, 9, 8), dt.date(2025, 9, 15)):
+                # Four session dates with a realistic attendance mix.
+                for d_idx, day in enumerate((dt.date(2025, 9, 8),
+                                             dt.date(2025, 9, 15),
+                                             dt.date(2025, 9, 22),
+                                             dt.date(2025, 9, 29))):
                     exists = db.session.execute(
                         db.select(Attendance).where(
                             Attendance.student_id == s.id,
@@ -372,7 +388,8 @@ def run_seed(reset: bool = False) -> None:
                     if not exists:
                         db.session.add(Attendance(
                             student_id=s.id, offering_id=offering.id, session_date=day,
-                            status="present", recorded_by_id=teacher_user.id))
+                            status=ATT_STATUSES[(s.id + idx + d_idx) % len(ATT_STATUSES)],
+                            recorded_by_id=teacher_user.id))
     db.session.commit()
 
     # --- Fees ----------------------------------------------------------- #
@@ -404,16 +421,25 @@ def run_seed(reset: bool = False) -> None:
                     amount=amt, adjustment=Decimal("0.00"),
                     due_date=dt.date(2024, 10, 15), created_by_id=finance.id))
 
-        # Partial payment for the primary demo student (G19).
-        if s.student_number == f"{ROLL_PREFIX}19":
+        # A realistic spread of payments: full, partial and none outstanding.
+        # suffix decides the payer profile so the fee views differ per student.
+        suffix = s.student_number[-2:]
+        payments_for = {
+            "19": [("PAY-DEMO-0001", Decimal("5000.00"), dt.date(2024, 9, 20))],
+            "20": [("PAY-DEMO-0020", Decimal("12000.00"), dt.date(2024, 9, 25))],
+            "21": [("PAY-DEMO-0021", Decimal("6300.00"), dt.date(2024, 10, 2))],
+            "22": [("PAY-DEMO-0022", Decimal("13500.00"), dt.date(2024, 9, 30))],
+            "23": [("PAY-DEMO-0023", Decimal("300.00"), dt.date(2024, 10, 5))],
+            "24": [("PAY-DEMO-0024", Decimal("8000.00"), dt.date(2024, 10, 8))],
+        }
+        for ref, amt, paid_on in payments_for.get(suffix, []):
             existing_pay = db.session.execute(
                 db.select(Payment).where(Payment.student_id == s.id,
-                                         Payment.reference == "PAY-DEMO-0001")
+                                         Payment.reference == ref)
             ).scalars().first()
             if existing_pay is None:
                 db.session.add(Payment(
-                    student_id=s.id, amount=Decimal("5000.00"),
-                    reference="PAY-DEMO-0001", paid_on=dt.date(2024, 9, 20),
+                    student_id=s.id, amount=amt, reference=ref, paid_on=paid_on,
                     recorded_by_id=finance.id))
     db.session.commit()
 

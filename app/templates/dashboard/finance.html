@@ -8,10 +8,19 @@
 </nav>
 {% endblock %}
 {% block content %}
-<div class="page-head">
-  <h1 class="page-title">Finance Overview</h1>
-  <p class="page-sub">Fee assessment, collection and outstanding balances.</p>
-</div>
+<section class="dash-band">
+  <img class="db-img" src="{{ url_for('static', filename='img/jit-6.jpg') }}" alt="">
+  <div class="db-body">
+    <div>
+      <span class="db-eyebrow">Finance Officer</span>
+      <h1>Finance Overview</h1>
+      <p class="db-sub">Fee assessment, collection and outstanding balances.</p>
+    </div>
+    <div class="db-actions">
+      <a class="btn" href="{{ url_for('reports.index') }}">Reports</a>
+    </div>
+  </div>
+</section>
 
 {# ---------- KPI cards ---------- #}
 <div class="stat-grid">

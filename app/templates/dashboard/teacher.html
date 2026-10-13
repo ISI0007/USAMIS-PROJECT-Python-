@@ -8,10 +8,19 @@
 </nav>
 {% endblock %}
 {% block content %}
-<div class="page-head">
-  <h1 class="page-title">Welcome, {{ current_user.full_name.split()[0] }}</h1>
-  <p class="page-sub">{% if teacher %}Your assigned courses, grading and attendance at a glance.{% else %}No teacher profile linked.{% endif %}</p>
-</div>
+<section class="dash-band">
+  <img class="db-img" src="{{ url_for('static', filename='img/jit-5.jpg') }}" alt="">
+  <div class="db-body">
+    <div>
+      <span class="db-eyebrow">Teacher</span>
+      <h1>Welcome, {{ current_user.full_name.split()[0] }}</h1>
+      <p class="db-sub">{% if teacher %}Your assigned courses, grading and attendance at a glance.{% else %}No teacher profile linked.{% endif %}</p>
+    </div>
+    <div class="db-actions">
+      <a class="btn" href="{{ url_for('reports.index') }}">Reports</a>
+    </div>
+  </div>
+</section>
 
 {% if not teacher %}
   <p class="empty"><span class="empty-icon">👤</span><br>No teacher profile is linked to your account. Contact an administrator.</p>

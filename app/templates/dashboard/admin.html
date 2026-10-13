@@ -8,12 +8,20 @@
 </nav>
 {% endblock %}
 {% block content %}
-<div class="page-head">
-  <h1 class="page-title">Good day, {{ current_user.full_name.split()[0] }}</h1>
-  <p class="page-sub">
-    {% if semester %}Active semester: <strong>{{ semester.label }}</strong> · Registration {{ 'open' if semester.registration_open else 'closed' }}{% else %}No active semester{% endif %}
-  </p>
-</div>
+<section class="dash-band">
+  <img class="db-img" src="{{ url_for('static', filename='img/jit-2.jpg') }}" alt="">
+  <div class="db-body">
+    <div>
+      <span class="db-eyebrow">Administrator</span>
+      <h1>Good day, {{ current_user.full_name.split()[0] }}</h1>
+      <p class="db-sub">{% if semester %}Active semester: <strong>{{ semester.label }}</strong> · Registration {{ 'open' if semester.registration_open else 'closed' }}{% else %}No active semester{% endif %}</p>
+    </div>
+    <div class="db-actions">
+      <a class="btn" href="{{ url_for('reports.index') }}">Reports</a>
+      <a class="btn" href="{{ url_for('admin.users') }}">Users</a>
+    </div>
+  </div>
+</section>
 
 {# ---------- KPI cards ---------- #}
 <div class="stat-grid">
@@ -63,22 +71,22 @@
 <div class="grid-2-1">
   <div class="card">
     <div class="card-head"><h2 class="card-title">Enrollment Trend</h2><span class="muted small">active enrollments per semester</span></div>
-    <canvas id="enrollmentChart" height="110" role="img" aria-label="Enrollment trend chart"></canvas>
+    <div class="chart-box"><canvas id="enrollmentChart" role="img" aria-label="Enrollment trend chart"></canvas></div>
   </div>
   <div class="card">
     <div class="card-head"><h2 class="card-title">Grade Distribution</h2></div>
-    <canvas id="gradeChart" height="180" role="img" aria-label="Grade distribution chart"></canvas>
+    <div class="chart-box"><canvas id="gradeChart" role="img" aria-label="Grade distribution chart"></canvas></div>
   </div>
 </div>
 
 <div class="grid-2-1">
   <div class="card">
     <div class="card-head"><h2 class="card-title">Students by Department</h2></div>
-    <canvas id="deptChart" height="120" role="img" aria-label="Students by department chart"></canvas>
+    <div class="chart-box"><canvas id="deptChart" role="img" aria-label="Students by department chart"></canvas></div>
   </div>
   <div class="card">
     <div class="card-head"><h2 class="card-title">Fee Collection</h2></div>
-    <canvas id="feeChart" height="180" role="img" aria-label="Fee collection chart"></canvas>
+    <div class="chart-box"><canvas id="feeChart" role="img" aria-label="Fee collection chart"></canvas></div>
     <p class="muted small" style="margin-top:12px;">
       Collected {{ '%.0f'|format(stats.fees_paid) }} · Outstanding {{ '%.0f'|format(stats.outstanding) }}
     </p>
@@ -128,9 +136,10 @@
 (function () {
   if (typeof Chart === 'undefined') return;
   var data = JSON.parse(document.getElementById('dashboard-data').textContent);
-  var royal = '#2563eb', cyan = '#06b6d4', success = '#059669', warning = '#d97706';
+  var royal = '#b30216', cyan = '#d94a5a', success = '#059669', warning = '#d97706';
   Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
   Chart.defaults.color = '#64748b';
+  Chart.defaults.maintainAspectRatio = false;
 
   var el;
   if ((el = document.getElementById('enrollmentChart'))) {
@@ -138,7 +147,7 @@
       type: 'line',
       data: { labels: data.trend.labels, datasets: [{
         label: 'Enrollments', data: data.trend.values,
-        borderColor: royal, backgroundColor: 'rgba(37,99,235,.12)',
+        borderColor: royal, backgroundColor: 'rgba(179,2,22,.12)',
         fill: true, tension: .35, pointRadius: 3, borderWidth: 2
       }]},
       options: { plugins: { legend: { display: false } },
@@ -150,7 +159,7 @@
       type: 'doughnut',
       data: { labels: data.grades.labels, datasets: [{
         data: data.grades.values,
-        backgroundColor: ['#059669', '#2563eb', '#06b6d4', '#d97706', '#dc2626'],
+        backgroundColor: ['#059669', '#b30216', '#d94a5a', '#d97706', '#dc2626'],
         borderWidth: 0
       }]},
       options: { plugins: { legend: { position: 'bottom' } }, cutout: '62%' }
