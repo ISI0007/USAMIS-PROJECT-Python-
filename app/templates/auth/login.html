@@ -1,54 +1,91 @@
 {% extends "public_base.html" %}
 {% block title %}Sign In{% endblock %}
+{% block hero_title %}Sign in to your student &amp; staff portal.{% endblock %}
+{% block hero_lede %}Grades, enrolment, attendance, fees and academic-risk insights — securely, in one place.{% endblock %}
 {% block content %}
-<div class="login-card">
-  <div class="login-brand">
-    <span class="brand-mark">U</span>
-    <div>
-      <h1>USAMIS</h1>
-      <p>University Student Academic Management Information System</p>
+<div class="auth-split">
+
+  {# ---------- Sign-in form ---------- #}
+  <div class="login-card">
+    <div class="login-brand">
+      <span class="brand-mark">U</span>
+      <div>
+        <h1 style="font-size:22px;">Portal Sign In</h1>
+        <p>Use your university credentials.</p>
+      </div>
+    </div>
+
+    <form method="post" action="{{ url_for('auth.login') }}" class="form">
+      {{ form.hidden_tag() }}
+      <div class="field">
+        {{ form.username.label }}
+        {{ form.username(class="input", autofocus=true, autocomplete="username", placeholder="e.g. s.demo") }}
+        {% for error in form.username.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      <div class="field">
+        {{ form.password.label }}
+        {{ form.password(class="input", autocomplete="current-password", placeholder="Your password") }}
+        {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Sign In</button>
+    </form>
+
+    <p class="muted small" style="margin-top:16px;">
+      Authorized users only. All access is logged.
+    </p>
+    <p class="muted small">
+      No account yet? <a href="{{ url_for('auth.register') }}">Create one</a>.
+    </p>
+
+    {# Demo credentials: development/demo convenience only. #}
+    <div class="demo-accounts" style="box-shadow:none;border:1px dashed var(--border-strong);margin-top:20px;">
+      <h2>Demo accounts</h2>
+      <p class="muted small">Click a role to fill the form. Password for all accounts: <code>Demo_Pass1!</code></p>
+      <table class="demo-table">
+        <thead>
+          <tr><th>Role</th><th>Username</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Administrator</td><td><code>admin</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="admin">Use</button></td></tr>
+          <tr><td>Academic staff</td><td><code>registrar</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="registrar">Use</button></td></tr>
+          <tr><td>Teacher</td><td><code>t.mensah</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="t.mensah">Use</button></td></tr>
+          <tr><td>Finance officer</td><td><code>finance</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="finance">Use</button></td></tr>
+          <tr><td>Student</td><td><code>s.demo</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="s.demo">Use</button></td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <form method="post" action="{{ url_for('auth.login') }}" class="form">
-    {{ form.hidden_tag() }}
-    <div class="field">
-      {{ form.username.label }}
-      {{ form.username(class="input", autofocus=true, autocomplete="username") }}
-      {% for error in form.username.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+  {# ---------- Campus info panel ---------- #}
+  <aside class="auth-info">
+    <div class="info-photo">
+      <img src="{{ url_for('static', filename='img/students.jpg') }}" alt="Students on campus">
     </div>
-    <div class="field">
-      {{ form.password.label }}
-      {{ form.password(class="input", autocomplete="current-password") }}
-      {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+
+    <div class="info-card">
+      <h3>What you can do in the portal</h3>
+      <ul class="auth-highlights">
+        <li><span class="tick">✓</span> Track grades, GPA and credit-weighted averages.</li>
+        <li><span class="tick">✓</span> Enrol in courses and manage your semester timetable.</li>
+        <li><span class="tick">✓</span> View attendance, fee statements and pay online.</li>
+        <li><span class="tick">✓</span> Get explainable academic-risk insights and support actions.</li>
+      </ul>
     </div>
-    <button class="btn btn-primary btn-block" type="submit">Sign In</button>
-  </form>
 
-  <p class="muted small">
-    Authorized users only. All access is logged.
-  </p>
-  <p class="muted small">
-    No account yet? <a href="{{ url_for('auth.register') }}">Create one</a>.
-  </p>
-</div>
+    <div class="info-card">
+      <h3>By the numbers</h3>
+      <div class="info-stat-row">
+        <div class="info-stat"><div class="n">12k+</div><div class="l">Students</div></div>
+        <div class="info-stat"><div class="n">240</div><div class="l">Programmes</div></div>
+        <div class="info-stat"><div class="n">98%</div><div class="l">Uptime</div></div>
+      </div>
+    </div>
 
-{# Demo credentials: development/demo convenience only. #}
-<div class="demo-accounts">
-  <h2>Demo accounts</h2>
-  <p class="muted small">Click a role to fill the form. Password for all accounts: <code>Demo_Pass1!</code></p>
-  <table class="demo-table">
-    <thead>
-      <tr><th>Role</th><th>Username</th><th>Password</th><th></th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Administrator</td><td><code>admin</code></td><td><code>Demo_Pass1!</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="admin">Use</button></td></tr>
-      <tr><td>Academic staff</td><td><code>registrar</code></td><td><code>Demo_Pass1!</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="registrar">Use</button></td></tr>
-      <tr><td>Teacher</td><td><code>t.mensah</code></td><td><code>Demo_Pass1!</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="t.mensah">Use</button></td></tr>
-      <tr><td>Finance officer</td><td><code>finance</code></td><td><code>Demo_Pass1!</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="finance">Use</button></td></tr>
-      <tr><td>Student</td><td><code>s.demo</code></td><td><code>Demo_Pass1!</code></td><td><button type="button" class="btn btn-ghost btn-sm demo-fill" data-user="s.demo">Use</button></td></tr>
-    </tbody>
-  </table>
+    <div class="info-photo">
+      <img src="{{ url_for('static', filename='img/library.jpg') }}" alt="University library">
+    </div>
+  </aside>
+
 </div>
 
 <script>
