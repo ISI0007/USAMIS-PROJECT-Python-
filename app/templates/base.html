@@ -76,6 +76,9 @@
         {% if current_user.has_permission('view_grades') %}
           {{ navlink('predictions.index', 'Academic Risk', '/predictions', '<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>') }}
         {% endif %}
+        {% if current_user.has_permission('view_students') and not current_user.has_permission('view_own_grades') %}
+          {{ navlink('records.my_records', 'Academic Records', '/records', '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6M9 11h6"/>') }}
+        {% endif %}
 
         {% if current_user.has_permission('view_linked_students') %}
           <div class="nav-group-label">My Family</div>
@@ -91,6 +94,7 @@
 
         {% if current_user.has_permission('view_own_grades') and not current_user.has_permission('view_grades') %}
           <div class="nav-group-label">My Records</div>
+          {{ navlink('records.my_records', 'Academic Records', '/records', '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6M9 11h6"/>') }}
           {{ navlink('grades.my_grades', 'My Grades', '/grades/my', '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>') }}
         {% endif %}
         {% if current_user.has_permission('view_own_attendance') and not current_user.has_permission('record_attendance') %}

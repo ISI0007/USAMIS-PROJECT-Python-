@@ -87,6 +87,7 @@ def _register_blueprints(app: Flask) -> None:
     from .predictions import bp as predictions_bp
     from .parents import bp as parents_bp
     from .admin import bp as admin_bp
+    from .records import bp as records_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -105,6 +106,7 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(predictions_bp)
     app.register_blueprint(parents_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(records_bp)
 
     @app.route("/")
     def index():

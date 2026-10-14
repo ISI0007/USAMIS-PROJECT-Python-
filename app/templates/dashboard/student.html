@@ -10,6 +10,15 @@
 {% block content %}
 {% set avg = performance.weighted_average %}
 
+{# ---------- My Records tab strip ---------- #}
+<nav class="tab-strip" aria-label="My records">
+  <a href="{{ url_for('records.my_records') }}" class="{{ 'is-active' if request.path.startswith('/records') else '' }}">Academic Records</a>
+  <a href="{{ url_for('grades.my_grades') }}" class="{{ 'is-active' if request.path.startswith('/grades/my') else '' }}">Grades</a>
+  <a href="{{ url_for('attendance.my_attendance') }}" class="{{ 'is-active' if request.path.startswith('/attendance/my') else '' }}">Attendance</a>
+  <a href="{{ url_for('enrollments.my_enrollments') }}" class="{{ 'is-active' if request.path.startswith('/enrollments/my') else '' }}">Enrollments</a>
+  <a href="{{ url_for('fees.my_fees') }}" class="{{ 'is-active' if request.path.startswith('/fees/my') else '' }}">Fees</a>
+</nav>
+
 {# ---------- Welcome banner ---------- #}
 <section class="welcome-banner">
   <img class="wb-img" src="{{ url_for('static', filename='img/campus-2.jpg') }}" alt="">

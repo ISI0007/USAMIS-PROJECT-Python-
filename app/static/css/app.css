@@ -329,6 +329,69 @@ h3 { font-size: 16px; margin: var(--sp-4) 0 var(--sp-2); }
   background: var(--info-bg); color: var(--royal); padding: 3px 11px;
   border-radius: 999px; font-size: 12px; font-weight: 600;
 }
+.badge-success { background: var(--success-bg); color: #047857; }
+.badge-warn { background: var(--warning-bg); color: #b45309; }
+.badge-danger { background: var(--danger-bg); color: #b91c1c; }
+.badge-muted { background: #eef1f5; color: #475569; }
+
+/* ---------- Academic Records page ---------- */
+.record-ident {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--sp-4); flex-wrap: wrap; margin-bottom: var(--sp-4);
+}
+.record-ident-main { display: flex; align-items: center; gap: var(--sp-4); }
+.record-avatar {
+  width: 52px; height: 52px; flex: 0 0 52px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--navy); color: #fff; font-weight: 800; font-size: 18px; letter-spacing: .02em;
+}
+.record-name { font-size: 18px; font-weight: 800; color: var(--navy); }
+.record-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); font-size: 13px; margin-top: 4px; }
+.record-gpa { text-align: right; }
+.record-gpa-num { font-size: 26px; font-weight: 800; color: var(--navy); line-height: 1; }
+.record-gpa-lbl { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 3px; }
+
+.record-filters {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-3);
+  padding: var(--sp-4); margin-bottom: var(--sp-4);
+}
+.record-filter-field { display: flex; flex-direction: column; gap: 5px; min-width: 130px; }
+.record-filter-field label { font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.record-filter-field select,
+.record-filter-field input {
+  padding: 8px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-xs);
+  font-size: 13.5px; background: #fff; font-family: inherit;
+}
+.record-filter-grow { flex: 1 1 200px; }
+.record-filter-actions { display: flex; gap: 8px; }
+
+.records-table .sort-link { color: inherit; text-decoration: none; white-space: nowrap; }
+.records-table .sort-link:hover { color: var(--royal); }
+.records-table .sort-link.is-sorted { color: var(--navy); font-weight: 700; }
+.records-table .sort-caret { font-size: 10px; }
+.records-table td.num, .records-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.records-table td.mono { font-family: Consolas, "SF Mono", Menlo, monospace; font-size: 12.5px; }
+.records-table .row-fail td { background: #fff5f5; }
+.records-table th { position: static; }
+
+.record-pager { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap; }
+.record-pager-info { color: var(--muted); font-size: 13px; }
+.pagination { display: flex; gap: 6px; flex-wrap: wrap; }
+.page-link {
+  padding: 6px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-xs);
+  font-size: 13px; text-decoration: none; color: var(--text-2); background: #fff;
+}
+.page-link:hover { border-color: var(--royal); color: var(--royal); }
+.page-link.is-active { background: var(--navy); color: #fff; border-color: var(--navy); font-weight: 700; }
+
+/* Student dashboard "Academic Records" tab strip */
+.tab-strip { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 2px solid var(--border); margin-bottom: var(--sp-4); }
+.tab-strip a {
+  padding: 9px 16px; font-size: 13.5px; font-weight: 600; color: var(--muted);
+  text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -2px;
+}
+.tab-strip a:hover { color: var(--navy); }
+.tab-strip a.is-active { color: var(--navy); border-bottom-color: var(--navy); }
 
 /* ---------- Forms ---------- */
 .form { display: flex; flex-direction: column; gap: var(--sp-4); }
@@ -585,6 +648,50 @@ body.public {
   border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border);
 }
 .auth-info .info-photo img { display: block; width: 100%; height: 200px; object-fit: cover; }
+
+/* --- Looping hero slideshow (login page) --- */
+.hero-slideshow { position: absolute; inset: 0; overflow: hidden; }
+.hero-slideshow .slide {
+  position: absolute; inset: 0; opacity: 0;
+  background-size: cover; background-position: center;
+  transition: opacity 1.1s ease-in-out;
+  animation: heroFade 48s infinite;
+}
+.hero-slideshow .slide.is-active { opacity: 1; }
+@keyframes heroFade {
+  0%   { opacity: 0; transform: scale(1.04); }
+  3%   { opacity: 1; transform: scale(1.0); }
+  20%  { opacity: 1; transform: scale(1.02); }
+  25%  { opacity: 0; transform: scale(1.04); }
+  100% { opacity: 0; transform: scale(1.04); }
+}
+.hero-dots {
+  position: absolute; left: 0; right: 0; bottom: 18px; z-index: 3;
+  display: flex; gap: 8px; justify-content: center;
+}
+.hero-dots .dot {
+  width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+  background: rgba(255,255,255,.45); transition: background .2s, transform .2s;
+}
+.hero-dots .dot.is-active { background: #fff; transform: scale(1.25); }
+@media (prefers-reduced-motion: reduce) {
+  .hero-slideshow .slide { animation: none; }
+}
+
+/* --- Section preview strip (login page, loops through campus sections) --- */
+.section-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }
+.section-strip .sec {
+  position: relative; border-radius: var(--radius); overflow: hidden;
+  border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+  background-size: cover; background-position: center; height: 108px;
+}
+.section-strip .sec::after {
+  content: attr(data-label); position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 6px 10px; font-size: 11.5px; font-weight: 700; color: #fff;
+  background: linear-gradient(transparent, rgba(0,0,0,.72));
+}
+.section-strip .sec.is-active { outline: 3px solid var(--accent, #b30216); outline-offset: -3px; }
+@media (max-width: 720px) { .section-strip { grid-template-columns: repeat(2, 1fr); } }
 .auth-highlights { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .auth-highlights li { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--text-2); }
 .auth-highlights .tick {

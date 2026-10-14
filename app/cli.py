@@ -21,9 +21,11 @@ def register_cli(app: Flask) -> None:
 @with_appcontext
 def seed_command(reset: bool) -> None:
     """Populate synthetic development/demo data safely (idempotent)."""
+    from .jit_seed import seed_jit_departments
     from .seed import run_seed
 
     run_seed(reset=reset)
+    seed_jit_departments()
     click.echo("Seed complete.")
 
 
@@ -57,6 +59,7 @@ def create_admin_command(username: str, email: str, password: str) -> None:
 @with_appcontext
 def db_status_command() -> None:
     """Report row counts for the main entities."""
+    from .extensions import db
     from .models import (
         Course, Department, Enrollment, Grade, Payment, Student, User,
     )
