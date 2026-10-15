@@ -12,6 +12,9 @@
 <div class="page-head">
   <h1 class="page-title">Fee defaulters</h1>
   <p class="page-sub">Students with an outstanding fee balance.</p>
+  <div class="page-actions" style="margin-top:12px;">
+    <a class="btn btn-primary" href="{{ url_for('reports.fee_defaulters_pdf') }}">⬇ Download as PDF</a>
+  </div>
 </div>
 {% if defaulters %}
 <div class="table-wrap">

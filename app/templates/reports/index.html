@@ -11,6 +11,9 @@
 <div class="page-head">
   <h1 class="page-title">Management Reports</h1>
   <p class="page-sub">Institution-wide totals and breakdowns, derived from live data.</p>
+  <div class="page-actions" style="margin-top:12px;">
+    <a class="btn btn-primary" href="{{ url_for('reports.index_pdf') }}">⬇ Download this report as PDF</a>
+  </div>
 </div>
 
 <div class="stat-grid">
@@ -25,6 +28,18 @@
 <div class="quick-links">
   <a class="btn" href="{{ url_for('reports.fee_defaulters') }}">Fee Defaulters</a>
   <a class="btn" href="{{ url_for('reports.low_attendance') }}">Low Attendance</a>
+</div>
+
+<div class="grid-2" style="margin-top:var(--sp-4);">
+  <div class="card">
+    <div class="card-head"><h3 class="card-title">📊 Export reports as PDF</h3></div>
+    <ul class="report-export-list">
+      <li><span>Management Reports overview</span><a class="btn btn-sm" href="{{ url_for('reports.index_pdf') }}">PDF</a></li>
+      <li><span>Fee Defaulters list</span><a class="btn btn-sm" href="{{ url_for('reports.fee_defaulters_pdf') }}">PDF</a></li>
+      <li><span>Low Attendance report</span><a class="btn btn-sm" href="{{ url_for('reports.low_attendance_pdf') }}">PDF</a></li>
+    </ul>
+    <p class="muted small">Each report is generated live from the database and downloaded as a printable PDF.</p>
+  </div>
 </div>
 
 <div class="grid-2">

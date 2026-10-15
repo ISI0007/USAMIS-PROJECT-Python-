@@ -1,6 +1,9 @@
 """Reports and management analytics (database-derived, no fabricated data)."""
-from flask import Blueprint, render_template
-from flask_login import login_required
+import io
+import os
+
+from flask import Blueprint, render_template, request, send_file, url_for
+from flask_login import current_user, login_required
 from sqlalchemy import func
 
 from ..extensions import db
@@ -11,6 +14,64 @@ from ..models import (
 from ..security.decorators import permission_required
 
 bp = Blueprint("reports", __name__, url_prefix="/reports")
+
+# --------------------------------------------------------------------------- #
+# PDF export
+# --------------------------------------------------------------------------- #
+# A report page is rendered to PDF via Playwright/Chromium (already a project
+# dependency for screenshots). The PDF is streamed as a download. If the
+# browser engine is unavailable the route returns 503 rather than a corrupt
+# file, so the failure is honest and visible.
+def _render_pdf(relative_url: str, download_name: str, *, landscape: bool = False):
+    from flask import current_app, url_for
+
+    base = current_app.config.get("PDF_BASE_URL")
+    if not base:
+        # Prefer the local bind the server actually listens on; request.url_root
+        # is correct for browser-originated requests but can be "localhost"
+        # (which may not resolve to the running server).
+        host = os.environ.get("FLASK_RUN_HOST", "127.0.0.1")
+        port = os.environ.get("FLASK_RUN_PORT", "5000")
+        base = f"http://{host}:{port}"
+    target = base.rstrip("/") + relative_url
+
+    try:
+        from playwright.sync_api import sync_playwright
+    except Exception as exc:  # pragma: no cover - optional dependency
+        current_app.logger.warning("PDF export unavailable: %s", exc)
+        return "", 503
+
+    # Carry the authenticated session so the printed page is authorized.
+    cookie_header = request.headers.get("Cookie", "")
+    pdf_bytes = b""
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            context = browser.new_context(
+                extra_http_headers={"Cookie": cookie_header} if cookie_header else {},
+            )
+            page = context.new_page()
+            page.goto(target, wait_until="networkidle", timeout=30000)
+            page.emulate_media(media="print")
+            pdf_bytes = page.pdf(
+                format="A4",
+                landscape=landscape,
+                print_background=True,
+                margin={"top": "14mm", "bottom": "14mm", "left": "12mm", "right": "12mm"},
+            )
+            browser.close()
+    except Exception as exc:  # pragma: no cover - runtime dependent
+        current_app.logger.warning("PDF render failed: %s", exc)
+        return "", 503
+
+    if not pdf_bytes:
+        return "", 503
+    return send_file(
+        io.BytesIO(pdf_bytes),
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=download_name,
+    )
 
 
 @bp.route("/")
@@ -56,6 +117,14 @@ def index():
     )
 
 
+@bp.route("/pdf")
+@login_required
+@permission_required("view_reports")
+def index_pdf():
+    """Download the Management Reports overview as a PDF."""
+    return _render_pdf(url_for("reports.index"), "usamis-management-reports.pdf")
+
+
 @bp.route("/fee-defaulters")
 @login_required
 @permission_required("view_reports")
@@ -83,6 +152,16 @@ def fee_defaulters():
             })
     defaulters.sort(key=lambda r: r["outstanding"], reverse=True)
     return render_template("reports/defaulters.html", defaulters=defaulters)
+
+
+@bp.route("/fee-defaulters/pdf")
+@login_required
+@permission_required("view_reports")
+def fee_defaulters_pdf():
+    """Download the Fee Defaulters report as a PDF."""
+    return _render_pdf(
+        url_for("reports.fee_defaulters"), "usamis-fee-defaulters.pdf"
+    )
 
 
 @bp.route("/low-attendance")
@@ -114,3 +193,13 @@ def low_attendance():
             })
     summary.sort(key=lambda r: r["rate"])
     return render_template("reports/attendance.html", summary=summary)
+
+
+@bp.route("/low-attendance/pdf")
+@login_required
+@permission_required("view_reports")
+def low_attendance_pdf():
+    """Download the Low Attendance report as a PDF."""
+    return _render_pdf(
+        url_for("reports.low_attendance"), "usamis-low-attendance.pdf"
+    )
