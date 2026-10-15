@@ -28,6 +28,8 @@ class User(UserMixin, TimestampMixin, db.Model):
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     failed_login_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Relative path (under static/uploads/avatars) to the user's profile photo.
+    avatar_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     student = relationship("Student", back_populates="user", uselist=False)
     teacher = relationship("Teacher", back_populates="user", uselist=False)
@@ -55,6 +57,16 @@ class User(UserMixin, TimestampMixin, db.Model):
         from ..security.permissions import ROLE_LABELS
 
         return ROLE_LABELS.get(self.role, self.role)
+
+    @property
+    def initials(self) -> str:
+        """Two-letter initials for the avatar fallback."""
+        parts = [p for p in (self.full_name or self.username or "?").split() if p]
+        if len(parts) >= 2:
+            return (parts[0][0] + parts[-1][0]).upper()
+        if parts:
+            return parts[0][:2].upper()
+        return "?"
 
     def has_permission(self, permission: str) -> bool:
         return role_has_permission(self.role, permission)

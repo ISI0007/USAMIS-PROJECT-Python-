@@ -1,7 +1,8 @@
 """WTForms for the authentication blueprint."""
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed, FileField
 from wtforms import PasswordField, StringField, SubmitField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Regexp
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, Regexp
 
 
 class LoginForm(FlaskForm):
@@ -30,12 +31,22 @@ class RegistrationForm(FlaskForm):
         "Confirm Password",
         validators=[DataRequired(), EqualTo("password", message="Passwords must match.")],
     )
+    photo = FileField(
+        "Profile photo",
+        validators=[Optional(), FileAllowed(["png", "jpg", "jpeg", "gif", "webp"],
+                                            "Images only (png, jpg, gif, webp).")],
+    )
     submit = SubmitField("Create Account")
 
 
 class ProfileForm(FlaskForm):
     full_name = StringField("Full Name", validators=[DataRequired(), Length(max=160)])
     email = StringField("Email", validators=[DataRequired(), Email(), Length(max=255)])
+    photo = FileField(
+        "Profile photo",
+        validators=[Optional(), FileAllowed(["png", "jpg", "jpeg", "gif", "webp"],
+                                            "Images only (png, jpg, gif, webp).")],
+    )
     submit = SubmitField("Save Changes")
 
 

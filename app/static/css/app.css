@@ -192,8 +192,11 @@ h3 { font-size: 16px; margin: var(--sp-4) 0 var(--sp-2); }
   width: 30px; height: 30px; border-radius: 50%; flex: 0 0 30px;
   background: linear-gradient(135deg, #ff4d5e, var(--royal));
   color: #fff; display: inline-flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 12px;
+  font-weight: 700; font-size: 12px; overflow: hidden;
 }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-lg { width: 44px; height: 44px; flex: 0 0 44px; font-size: 16px; }
+.profile-menu-pop .pm-head { display: flex; align-items: center; gap: 10px; }
 .profile-menu-pop {
   position: absolute; right: 0; top: calc(100% + 8px); min-width: 210px;
   background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm);

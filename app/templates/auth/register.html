@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <form method="post" action="{{ url_for('auth.register') }}" class="form">
+    <form method="post" action="{{ url_for('auth.register') }}" class="form" enctype="multipart/form-data">
       {{ form.hidden_tag() }}
       <div class="field">
         {{ form.full_name.label }}
@@ -42,6 +42,12 @@
         {{ form.confirm_password.label }}
         {{ form.confirm_password(class="input", autocomplete="new-password", placeholder="Repeat password") }}
         {% for error in form.confirm_password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      <div class="field">
+        {{ form.photo.label }}
+        {{ form.photo(class="input", accept="image/*") }}
+        <span class="muted small">Optional — a profile photo so staff and classmates recognise you.</span>
+        {% for error in form.photo.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
       </div>
       <button class="btn btn-primary btn-block" type="submit">Create Account</button>
     </form>

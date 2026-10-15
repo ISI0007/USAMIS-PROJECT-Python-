@@ -9,8 +9,9 @@ from flask_login import current_user, login_required, login_user, logout_user
 from ..extensions import db, limiter
 from ..models import User, utcnow
 from ..security.decorators import is_safe_redirect
-from ..security.permissions import Role
+from ..security.permissions import Role, permissions_for
 from ..services import audit
+from ..services import avatars
 from .forms import LoginForm, PasswordChangeForm, ProfileForm, RegistrationForm
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -107,6 +108,13 @@ def register():
         )
         user.set_password(form.password.data)
         db.session.add(user)
+        db.session.flush()
+        # Optional profile photo supplied at registration.
+        if form.photo.data:
+            try:
+                avatars.save_avatar(user, form.photo.data)
+            except avatars.AvatarError as exc:
+                flash(f"Account created, but the photo was not saved: {exc}", "warning")
         db.session.commit()
 
         audit.log_action("user_registered", "User", user.id,
@@ -133,6 +141,7 @@ def logout():
 @login_required
 def profile():
     form = ProfileForm(obj=current_user)
+    password_form = PasswordChangeForm()
     if form.validate_on_submit():
         current_user.full_name = form.full_name.data.strip()
         email_owner = db.session.execute(
@@ -143,13 +152,67 @@ def profile():
             flash("That email is already in use.", "danger")
         else:
             current_user.email = form.email.data.strip()
+            if form.photo.data:
+                try:
+                    avatars.save_avatar(current_user, form.photo.data)
+                except avatars.AvatarError as exc:
+                    flash(str(exc), "danger")
+                    db.session.rollback()
+                    return redirect(url_for("auth.profile"))
             db.session.commit()
             audit.log_action("profile_updated", "User", current_user.id,
                              summary="Profile updated.")
             db.session.commit()
             flash("Profile updated.", "success")
             return redirect(url_for("auth.profile"))
-    return render_template("auth/profile.html", form=form)
+
+    from ..models import Student, Teacher
+    role_extras = {}
+    student = db.session.execute(
+        db.select(Student).where(Student.user_id == current_user.id)).scalars().first()
+    teacher = db.session.execute(
+        db.select(Teacher).where(Teacher.user_id == current_user.id)).scalars().first()
+    if student is not None:
+        role_extras = {"student_number": student.student_number,
+                       "student_id": student.id}
+    elif teacher is not None:
+        role_extras = {"staff_number": teacher.staff_number}
+
+    perms = [str(p.value if hasattr(p, "value") else p).replace("_", " ").title()
+             for p in sorted(permissions_for(current_user.role),
+                             key=lambda x: str(getattr(x, "value", x)))]
+    return render_template("auth/profile.html", form=form,
+                           password_form=password_form,
+                           permissions=perms, role_extras=role_extras)
+
+
+@bp.route("/profile/photo", methods=["POST"])
+@login_required
+def upload_photo():
+    """Dedicated avatar upload (used by the profile picture control)."""
+    file = request.files.get("photo")
+    try:
+        avatars.save_avatar(current_user, file)
+        db.session.commit()
+        audit.log_action("profile_photo_updated", "User", current_user.id,
+                         summary="Profile photo updated.")
+        db.session.commit()
+        flash("Profile photo updated.", "success")
+    except avatars.AvatarError as exc:
+        flash(str(exc), "danger")
+    return redirect(url_for("auth.profile"))
+
+
+@bp.route("/profile/photo/remove", methods=["POST"])
+@login_required
+def remove_photo():
+    avatars.remove_avatar(current_user)
+    db.session.commit()
+    audit.log_action("profile_photo_removed", "User", current_user.id,
+                     summary="Profile photo removed.")
+    db.session.commit()
+    flash("Profile photo removed.", "info")
+    return redirect(url_for("auth.profile"))
 
 
 @bp.route("/password", methods=["GET", "POST"])

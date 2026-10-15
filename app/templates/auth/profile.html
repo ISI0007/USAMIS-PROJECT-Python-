@@ -1,31 +1,146 @@
 {% extends "base.html" %}
 {% block title %}My Profile{% endblock %}
-{% block heading %}My Profile{% endblock %}
+{% block heading %}⚙️ My Profile{% endblock %}
 {% block breadcrumbs %}
 <nav class="breadcrumbs" aria-label="Breadcrumb">
   <a href="{{ url_for('dashboard.home') }}">Home</a>
-  <span class="sep">/</span><span class="current">Profile</span>
+  <span class="sep">/</span><span class="current">My Profile</span>
 </nav>
 {% endblock %}
 {% block content %}
-<div class="page-head">
-  <h1 class="page-title">My profile</h1>
-  <p class="page-sub">Update your display name and contact email.</p>
+<style>
+.pf-hero { display:flex; gap:22px; align-items:center; flex-wrap:wrap;
+  background:#fff; border:1px solid #e5e2e2; border-radius:14px; padding:22px 24px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04); margin-bottom:20px; }
+.pf-avatar { width:104px; height:104px; border-radius:50%; flex:0 0 auto;
+  background:#b30216; color:#fff; display:flex; align-items:center; justify-content:center;
+  font-size:36px; font-weight:700; overflow:hidden; position:relative; }
+.pf-avatar img { width:100%; height:100%; object-fit:cover; }
+.pf-avatar-wrap { position:relative; }
+.pf-photo-actions { display:flex; gap:6px; margin-top:8px; justify-content:center; }
+.pf-photo-actions button, .pf-photo-actions label { font-size:12px; }
+.pf-name { font-size:24px; font-weight:700; color:#1a2640; margin:0; }
+.pf-role { display:inline-block; margin-top:6px; font-size:12px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.05em; color:#b30216;
+  background:#fdecee; border-radius:999px; padding:3px 12px; }
+.pf-meta { color:#6b7280; font-size:13px; margin-top:8px; }
+.pf-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px; }
+.pf-card { background:#fff; border:1px solid #e5e2e2; border-radius:12px;
+  padding:18px 20px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.pf-card h2 { margin:0 0 14px; font-size:16px; color:#1a2640; }
+.pf-info { display:grid; grid-template-columns:150px 1fr; gap:0; font-size:14px; }
+.pf-info dt { color:#6b7280; padding:8px 0; border-bottom:1px solid #f2f0f0; }
+.pf-info dd { margin:0; padding:8px 0; border-bottom:1px solid #f2f0f0; color:#1a2640; }
+.pf-perms { list-style:none; margin:0; padding:0; }
+.pf-perms li { display:flex; align-items:center; gap:8px; padding:7px 0;
+  font-size:14px; border-bottom:1px solid #f2f0f0; color:#1a2640; }
+.pf-perms li::before { content:"🔐"; }
+.pf-field { margin-bottom:12px; }
+.pf-field label { display:block; font-size:13px; font-weight:600; margin-bottom:5px; color:#1a2640; }
+.pf-field input { width:100%; padding:9px 10px; border:1px solid #d5d2d2;
+  border-radius:8px; font-size:14px; }
+.pf-actions { display:flex; gap:8px; margin-top:14px; }
+</style>
+
+<div class="pf-hero">
+  <div class="pf-avatar-wrap">
+    <div class="pf-avatar" id="pf-avatar">
+      {% if current_user.avatar_path %}
+        <img src="{{ url_for('static', filename=current_user.avatar_path) }}"
+             alt="{{ current_user.full_name }} profile photo">
+      {% else %}
+        {{ current_user.initials }}
+      {% endif %}
+    </div>
+    <form method="post" action="{{ url_for('auth.upload_photo') }}"
+          enctype="multipart/form-data" class="pf-photo-actions" id="pf-photo-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label class="btn btn-sm" for="pf-photo">Change</label>
+      <input type="file" id="pf-photo" name="photo" accept="image/*" style="display:none;"
+             onchange="document.getElementById('pf-photo-form').submit();">
+      {% if current_user.avatar_path %}
+      <button class="btn btn-sm" type="submit"
+              formaction="{{ url_for('auth.remove_photo') }}"
+              formnovalidate onclick="return true;">Remove</button>
+      {% endif %}
+    </form>
+  </div>
+  <div>
+    <h1 class="pf-name">{{ current_user.full_name }}</h1>
+    <span class="pf-role">{{ current_user.role_label }}</span>
+    <div class="pf-meta">
+      ID: {{ role_extras.get('student_id') or role_extras.get('staff_number') or current_user.id }}
+      {% if current_user.last_login_at %}
+        &nbsp;·&nbsp; Session: Active — {{ current_user.last_login_at.strftime('%I:%M:%S %p') }}
+      {% endif %}
+    </div>
+  </div>
 </div>
-<div class="card narrow">
-  <form method="post" class="form">
-    {{ form.hidden_tag() }}
-    <div class="field">
-      {{ form.full_name.label }}{{ form.full_name(class="input") }}
-      {% for e in form.full_name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
-    </div>
-    <div class="field">
-      {{ form.email.label }}{{ form.email(class="input") }}
-      {% for e in form.email.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-primary" type="submit">Save changes</button>
-    </div>
-  </form>
+
+<div class="pf-grid">
+  <div class="pf-card">
+    <h2>👤 Account</h2>
+    <dl class="pf-info">
+      <dt>Username</dt><dd>{{ current_user.username }}</dd>
+      <dt>Full Name</dt><dd>{{ current_user.full_name }}</dd>
+      <dt>Email</dt><dd>{{ current_user.email }}</dd>
+      <dt>Role</dt><dd>{{ current_user.role_label }}</dd>
+      <dt>Institution</dt><dd>Jinling Institute of Technology</dd>
+      <dt>System</dt><dd>USAMIS v1.0</dd>
+    </dl>
+  </div>
+
+  <div class="pf-card">
+    <h2>🔐 Your Permissions</h2>
+    <ul class="pf-perms">
+      {% for p in permissions %}<li>{{ p }}</li>{% else %}<li>No permissions.</li>{% endfor %}
+    </ul>
+  </div>
+</div>
+
+<div class="pf-grid" style="margin-top:18px;">
+  <div class="pf-card">
+    <h2>✏️ Update Profile</h2>
+    <form method="post" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <div class="pf-field">
+        {{ form.full_name.label }}{{ form.full_name(class="input") }}
+        {% for e in form.full_name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="pf-field">
+        {{ form.email.label }}{{ form.email(class="input") }}
+        {% for e in form.email.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="pf-field">
+        {{ form.photo.label }}{{ form.photo(class="input") }}
+        {% for e in form.photo.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="pf-actions">
+        <button class="btn btn-primary" type="submit">Save changes</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="pf-card">
+    <h2>🔒 Change Password</h2>
+    <form method="post" action="{{ url_for('auth.change_password') }}">
+      {{ password_form.hidden_tag() }}
+      <div class="pf-field">
+        {{ password_form.current_password.label }}{{ password_form.current_password(class="input") }}
+        {% for e in password_form.current_password.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="pf-field">
+        {{ password_form.new_password.label }}{{ password_form.new_password(class="input") }}
+        {% for e in password_form.new_password.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="pf-field">
+        {{ password_form.confirm_password.label }}{{ password_form.confirm_password(class="input") }}
+        {% for e in password_form.confirm_password.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="pf-actions">
+        <button class="btn btn-primary" type="submit">Update Password</button>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
