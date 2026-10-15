@@ -29,13 +29,30 @@
 
   {% block hero %}
   <section class="uni-hero">
-    <img class="uni-hero-img" src="{{ url_for('static', filename='img/jit-3.jpg') }}"
-         alt="Jinling Institute of Technology campus" loading="eager">
+    <div class="hero-slideshow" aria-hidden="true">
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-01.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-02.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-03.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-04.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-05.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-06.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-07.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-08.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-09.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-10.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-11.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-12.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-13.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-14.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-15.jpg') }}')"></div>
+      <div class="slide" style="background-image:url('{{ url_for('static', filename='img/slides/slide-16.jpg') }}')"></div>
+    </div>
     <div class="uni-hero-inner">
       <span class="uni-hero-eyebrow">Student &amp; Staff Portal</span>
       <h1>{% block hero_title %}Your campus, one secure sign-in.{% endblock %}</h1>
       <p class="lede">{% block hero_lede %}Access grades, enrolment, attendance, fees and academic-risk insights — all in one place.{% endblock %}</p>
     </div>
+    <div class="hero-dots" role="tablist" aria-label="Campus photos"></div>
   </section>
   {% endblock %}
 

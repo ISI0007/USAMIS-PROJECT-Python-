@@ -434,6 +434,39 @@ h3 { font-size: 16px; margin: var(--sp-4) 0 var(--sp-2); }
 .report-table tbody tr:nth-child(even) { background: #faf8f8; }
 .report-table tbody tr:hover { background: #f4f1f1; }
 
+/* ---- Search + category filter toolbar ---- */
+.report-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin: 14px 0 6px; padding: 12px 14px; background: #fff;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.report-search { position: relative; flex: 1 1 300px; min-width: 220px; display: flex;
+  align-items: center; }
+.report-search-icon { position: absolute; left: 11px; width: 17px; height: 17px;
+  color: #9aa2b1; pointer-events: none; }
+.report-search-icon svg { width: 17px; height: 17px; }
+.report-search-input { width: 100%; padding: 9px 34px 9px 34px; font-size: 14px;
+  color: var(--text-2); background: #faf8f8; border: 1px solid var(--border);
+  border-radius: 8px; outline: none; transition: border-color .15s, box-shadow .15s; }
+.report-search-input:focus { border-color: var(--royal); background: #fff;
+  box-shadow: 0 0 0 3px rgba(122,20,32,.10); }
+.report-search-clear { position: absolute; right: 8px; border: 0; background: transparent;
+  font-size: 20px; line-height: 1; color: #9aa2b1; cursor: pointer; padding: 0 4px; }
+.report-search-clear:hover { color: var(--royal); }
+.report-filter-chips { display: flex; gap: 7px; flex-wrap: wrap; }
+.report-chip { border: 1px solid var(--border); background: #fff; color: var(--text-2);
+  padding: 7px 13px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .15s; }
+.report-chip:hover { border-color: var(--royal); color: var(--royal); }
+.report-chip.is-active { background: var(--navy); border-color: var(--navy); color: #fff; }
+.report-count { margin-left: auto; font-size: 12.5px; color: var(--muted);
+  white-space: nowrap; }
+.report-group-label { margin: 20px 0 0; font-size: 14px; font-weight: 700;
+  color: var(--navy); letter-spacing: .02em; text-transform: uppercase; }
+.report-tile-id { display: block; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10.5px; color: #9aa2b1; letter-spacing: .03em; margin-bottom: 6px;
+  text-transform: lowercase; }
+.report-tile[hidden] { display: none !important; }
+
 @media print {
   .sidebar, .topbar, .report-grid, .report-output-actions, .breadcrumbs,
   .report-output-hint { display: none !important; }

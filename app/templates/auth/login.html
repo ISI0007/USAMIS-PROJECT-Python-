@@ -58,8 +58,20 @@
 
   {# ---------- Campus info panel ---------- #}
   <aside class="auth-info">
-    <div class="info-photo">
-      <img src="{{ url_for('static', filename='img/jit-5.jpg') }}" alt="Jinling Institute of Technology campus">
+    <div class="info-photo hero-mini">
+      <img src="{{ url_for('static', filename='img/slides/slide-02.jpg') }}" alt="Jinling Institute of Technology campus">
+    </div>
+
+    <div class="info-card">
+      <h3>Campus in focus</h3>
+      <div class="section-strip" id="sectionStrip" aria-hidden="true">
+        <div class="sec" data-label="Campus" style="background-image:url('{{ url_for('static', filename='img/slides/slide-01.jpg') }}')"></div>
+        <div class="sec" data-label="Library" style="background-image:url('{{ url_for('static', filename='img/slides/slide-05.jpg') }}')"></div>
+        <div class="sec" data-label="Students" style="background-image:url('{{ url_for('static', filename='img/slides/slide-06.jpg') }}')"></div>
+        <div class="sec" data-label="Lecture halls" style="background-image:url('{{ url_for('static', filename='img/slides/slide-03.jpg') }}')"></div>
+        <div class="sec" data-label="Grounds" style="background-image:url('{{ url_for('static', filename='img/slides/slide-08.jpg') }}')"></div>
+        <div class="sec" data-label="Graduation" style="background-image:url('{{ url_for('static', filename='img/slides/slide-10.jpg') }}')"></div>
+      </div>
     </div>
 
     <div class="info-card">
@@ -82,7 +94,7 @@
     </div>
 
     <div class="info-photo">
-      <img src="{{ url_for('static', filename='img/jit-6.jpg') }}" alt="Jinling Institute of Technology campus">
+      <img src="{{ url_for('static', filename='img/slides/slide-09.jpg') }}" alt="Jinling Institute of Technology campus">
     </div>
   </aside>
 
@@ -98,5 +110,50 @@
       if (p) { p.value = 'Demo_Pass1!'; }
     });
   });
+
+  // Hero slideshow: continuous loop, section-by-section.
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.hero-slideshow .slide'));
+    if (!slides.length) return;
+    var dotsWrap = document.querySelector('.hero-dots');
+    var idx = 0;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // build nav dots
+    slides.forEach(function (_, i) {
+      var d = document.createElement('button');
+      d.type = 'button';
+      d.className = 'dot' + (i === 0 ? ' is-active' : '');
+      d.setAttribute('role', 'tab');
+      d.setAttribute('aria-label', 'Campus photo ' + (i + 1));
+      d.addEventListener('click', function () { show(i); });
+      if (dotsWrap) dotsWrap.appendChild(d);
+    });
+    var dotEls = dotsWrap ? Array.prototype.slice.call(dotsWrap.children) : [];
+
+    function show(i) {
+      slides[idx].classList.remove('is-active');
+      if (dotEls[idx]) dotEls[idx].classList.remove('is-active');
+      idx = (i + slides.length) % slides.length;
+      slides[idx].classList.add('is-active');
+      if (dotEls[idx]) dotEls[idx].classList.add('is-active');
+    }
+
+    // continuous loop
+    slides[0].classList.add('is-active');
+    if (!reduce) setInterval(function () { show(idx + 1); }, 3200);
+
+    // section strip: highlight each section in turn
+    var secs = Array.prototype.slice.call(document.querySelectorAll('#sectionStrip .sec'));
+    if (secs.length) {
+      var s = 0;
+      secs[0].classList.add('is-active');
+      if (!reduce) setInterval(function () {
+        secs[s].classList.remove('is-active');
+        s = (s + 1) % secs.length;
+        secs[s].classList.add('is-active');
+      }, 2000);
+    }
+  })();
 </script>
 {% endblock %}

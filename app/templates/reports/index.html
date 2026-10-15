@@ -24,62 +24,112 @@
 </div>
 
 <h2 class="section-label" style="margin:18px 0 4px;">Generate a report</h2>
-<div class="report-grid">
-  <div class="report-tile" data-slug="students-per-dept" data-title="Students per Department">
-    <div class="report-tile-icon">👥</div>
-    <div class="report-tile-title">Students per Department</div>
-    <div class="report-tile-sub">Distribution across all departments</div>
-    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+
+<!-- Search + category filter for reports (find by name, ID or category) -->
+<div class="report-toolbar">
+  <div class="report-search">
+    <span class="report-search-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+      </svg>
+    </span>
+    <input type="search" id="reportSearch" class="report-search-input"
+           placeholder="Search reports by name, ID or category…" autocomplete="off"
+           aria-label="Search reports">
+    <button type="button" class="report-search-clear" id="reportSearchClear"
+            aria-label="Clear search" hidden>&times;</button>
   </div>
-  <div class="report-tile" data-slug="fee-defaulters" data-title="Fee Defaulters List">
-    <div class="report-tile-icon">⚠️</div>
-    <div class="report-tile-title">Fee Defaulters List</div>
-    <div class="report-tile-sub">Students with outstanding balances</div>
-    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  <div class="report-filter-chips" id="reportFilterChips">
+    <button type="button" class="report-chip is-active" data-cat="all">All</button>
+    <button type="button" class="report-chip" data-cat="academic">🎓 Academic</button>
+    <button type="button" class="report-chip" data-cat="finance">💰 Finance</button>
+    <button type="button" class="report-chip" data-cat="attendance">🗓️ Attendance</button>
+    <button type="button" class="report-chip" data-cat="management">🧾 Management</button>
   </div>
-  <div class="report-tile" data-slug="revenue-summary" data-title="Revenue Summary">
-    <div class="report-tile-icon">💰</div>
-    <div class="report-tile-title">Revenue Summary</div>
-    <div class="report-tile-sub">Billed vs collected by fee type</div>
-    <button class="btn btn-primary btn-sm" type="button">Generate</button>
-  </div>
-  <div class="report-tile" data-slug="course-pass-rate" data-title="Course Pass Rate">
+  <div class="report-count" id="reportCount" aria-live="polite"></div>
+</div>
+
+<h3 class="report-group-label" data-group="academic">🎓 Academic</h3>
+<div class="report-grid" data-cat="academic">
+  <div class="report-tile" data-slug="course-pass-rate" data-cat="academic" data-title="Course Pass Rate">
+    <span class="report-tile-id">course-pass-rate</span>
     <div class="report-tile-icon">📈</div>
     <div class="report-tile-title">Course Pass Rate</div>
     <div class="report-tile-sub">Analysis of student performance</div>
     <button class="btn btn-primary btn-sm" type="button">Generate</button>
   </div>
   {% if current_user.has_permission('view_grades') %}
-  <div class="report-tile" data-slug="at-risk" data-title="Academic Risk">
+  <div class="report-tile" data-slug="at-risk" data-cat="academic" data-title="Academic Risk">
+    <span class="report-tile-id">at-risk</span>
     <div class="report-tile-icon">📉</div>
     <div class="report-tile-title">Academic Risk</div>
     <div class="report-tile-sub">Students below the risk threshold</div>
     <button class="btn btn-primary btn-sm" type="button">Generate</button>
   </div>
   {% endif %}
-  <div class="report-tile" data-slug="gpa-transcripts" data-title="GPA Transcripts">
+  <div class="report-tile" data-slug="gpa-transcripts" data-cat="academic" data-title="GPA Transcripts">
+    <span class="report-tile-id">gpa-transcripts</span>
     <div class="report-tile-icon">🏆</div>
     <div class="report-tile-title">GPA Transcripts</div>
     <div class="report-tile-sub">Per-student GPA summary</div>
     <button class="btn btn-primary btn-sm" type="button">Generate</button>
   </div>
-  <div class="report-tile" data-slug="enrollment-summary" data-title="Enrollment Summary">
-    <div class="report-tile-icon">📊</div>
-    <div class="report-tile-title">Enrollment Summary</div>
-    <div class="report-tile-sub">By status, course and department</div>
+  <div class="report-tile" data-slug="students-per-dept" data-cat="academic" data-title="Students per Department">
+    <span class="report-tile-id">students-per-dept</span>
+    <div class="report-tile-icon">👥</div>
+    <div class="report-tile-title">Students per Department</div>
+    <div class="report-tile-sub">Distribution across all departments</div>
     <button class="btn btn-primary btn-sm" type="button">Generate</button>
   </div>
-  <div class="report-tile" data-slug="low-attendance" data-title="Low Attendance">
+</div>
+
+<h3 class="report-group-label" data-group="finance">💰 Finance</h3>
+<div class="report-grid" data-cat="finance">
+  <div class="report-tile" data-slug="revenue-summary" data-cat="finance" data-title="Revenue Summary">
+    <span class="report-tile-id">revenue-summary</span>
+    <div class="report-tile-icon">💰</div>
+    <div class="report-tile-title">Revenue Summary</div>
+    <div class="report-tile-sub">Billed vs collected by fee type</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+  <div class="report-tile" data-slug="fee-defaulters" data-cat="finance" data-title="Fee Defaulters List">
+    <span class="report-tile-id">fee-defaulters</span>
+    <div class="report-tile-icon">⚠️</div>
+    <div class="report-tile-title">Fee Defaulters List</div>
+    <div class="report-tile-sub">Students with outstanding balances</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+</div>
+
+<h3 class="report-group-label" data-group="attendance">🗓️ Attendance</h3>
+<div class="report-grid" data-cat="attendance">
+  <div class="report-tile" data-slug="low-attendance" data-cat="attendance" data-title="Low Attendance">
+    <span class="report-tile-id">low-attendance</span>
     <div class="report-tile-icon">🗓️</div>
     <div class="report-tile-title">Low Attendance</div>
     <div class="report-tile-sub">Below the 75% attendance threshold</div>
     <button class="btn btn-primary btn-sm" type="button">Generate</button>
   </div>
-  <div class="report-tile" data-slug="overview" data-title="Management Overview">
+</div>
+
+<h3 class="report-group-label" data-group="management">🧾 Management</h3>
+<div class="report-grid" data-cat="management">
+  <div class="report-tile" data-slug="enrollment-summary" data-cat="management" data-title="Enrollment Summary">
+    <span class="report-tile-id">enrollment-summary</span>
+    <div class="report-tile-icon">📊</div>
+    <div class="report-tile-title">Enrollment Summary</div>
+    <div class="report-tile-sub">By status, course and department</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+  <div class="report-tile" data-slug="overview" data-cat="management" data-title="Management Overview">
+    <span class="report-tile-id">overview</span>
     <div class="report-tile-icon">🧾</div>
     <div class="report-tile-title">Management Overview</div>
     <div class="report-tile-sub">Institution-wide totals and breakdowns</div>
     <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+</div>
   </div>
 </div>
 
@@ -182,7 +232,65 @@ function printReport() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('.report-tile[data-slug]').forEach(tile => {
+  const tiles = Array.from(document.querySelectorAll('.report-tile[data-slug]'));
+  const search = document.getElementById('reportSearch');
+  const clearBtn = document.getElementById('reportSearchClear');
+  const chips = Array.from(document.querySelectorAll('.report-chip'));
+  const countEl = document.getElementById('reportCount');
+  const groups = Array.from(document.querySelectorAll('.report-group-label'));
+  let activeCat = 'all';
+
+  function apply() {
+    const q = (search.value || '').trim().toLowerCase();
+    let visible = 0;
+    tiles.forEach(tile => {
+      const slug = (tile.getAttribute('data-slug') || '').toLowerCase();
+      const title = (tile.getAttribute('data-title') || '').toLowerCase();
+      const cat = (tile.getAttribute('data-cat') || '').toLowerCase();
+      const sub = (tile.querySelector('.report-tile-sub')?.textContent || '').toLowerCase();
+      const matchCat = activeCat === 'all' || cat === activeCat;
+      const matchQ = !q || slug.includes(q) || title.includes(q) || cat.includes(q) || sub.includes(q);
+      const show = matchCat && matchQ;
+      tile.hidden = !show;
+      if (show) visible++;
+    });
+    // hide a whole category section (label + grid) when nothing in it is visible
+    groups.forEach(g => {
+      const key = g.getAttribute('data-group');
+      const grid = document.querySelector('.report-grid[data-cat="' + key + '"]');
+      const n = grid ? Array.from(grid.querySelectorAll('.report-tile')).filter(t => !t.hidden).length : 0;
+      const show = n > 0 && (activeCat === 'all' || activeCat === key);
+      g.hidden = !show;
+      if (grid) grid.hidden = !show;
+    });
+    if (countEl) {
+      countEl.textContent = q || activeCat !== 'all'
+        ? visible + ' of ' + tiles.length + ' reports'
+        : tiles.length + ' reports';
+    }
+    if (clearBtn) clearBtn.hidden = !q;
+  }
+
+  if (search) {
+    search.addEventListener('input', apply);
+    search.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { search.value = ''; apply(); }
+      if (e.key === 'Enter') {
+        const first = tiles.find(t => !t.hidden);
+        if (first) first.click();
+      }
+    });
+  }
+  if (clearBtn) clearBtn.addEventListener('click', function () {
+    search.value = ''; apply(); search.focus();
+  });
+  chips.forEach(chip => chip.addEventListener('click', function () {
+    activeCat = chip.getAttribute('data-cat');
+    chips.forEach(c => c.classList.toggle('is-active', c === chip));
+    apply();
+  }));
+
+  tiles.forEach(tile => {
     tile.addEventListener('click', function () {
       const slug = tile.getAttribute('data-slug');
       const meta = REPORTS[slug];
@@ -209,6 +317,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
   });
+
+  apply();
 });
 </script>
 {% endblock %}
