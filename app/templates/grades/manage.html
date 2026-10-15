@@ -54,23 +54,23 @@
   </div>
   <div class="gm-actions">
     <button class="btn btn-primary" type="button" onclick="gmOpenModal()">+ Enter Grade</button>
-    <a class="btn" href="{{ url_for('grades.manage') }}">📄 Transcript</a>
-    <a class="btn" href="{{ url_for('grades.manage') }}#gpa-distribution">📈 GPA Distribution</a>
+    <a class="btn" href="{{ url_for('reports.analytics_view', slug='gpa-transcripts') }}">📄 Transcript</a>
+    <button class="btn" type="button" onclick="gmScrollTo('gpa-distribution')">📈 GPA Distribution</button>
   </div>
 </div>
 
 <div class="gm-cards" id="gpa-distribution">
-  <div class="gm-card">
+  <div class="gm-card" id="gpa-distribution">
     <h3>📈 GPA Distribution</h3>
     {% for b in bands %}
       <div class="gm-band"><span>{{ b.label }}</span><b>{{ b.count }} students</b></div>
     {% endfor %}
   </div>
-  <div class="gm-card">
+  <div class="gm-card" id="course-pass-rate">
     <h3>📊 Course Pass Rate</h3>
     {% for c in pass_rates %}
-      <div class="gm-rate">
-        <span class="gm-rate-label">{{ c.title }}</span>
+      <div class="gm-rate" title="{{ c.code }} — {{ c.title }}">
+        <span class="gm-rate-label">{{ c.title }} <span class="muted small">{{ c.code }}</span></span>
         <span class="bar"><i style="width: {{ c.rate }}%"></i></span>
         <b>{{ c.rate }}%</b>
       </div>
@@ -103,6 +103,7 @@
           <td>
             <button class="btn btn-sm" type="button"
                     onclick="gmEdit({{ r.id }}, '{{ r.student_name|e }}', '{{ r.course_title|e }}', '{{ r.score }}')">✏️</button>
+            <a class="btn btn-sm" href="{{ url_for('reports.analytics_view', slug='gpa-transcripts') }}?q={{ r.student_number }}" title="Transcript for {{ r.student_name|e }}">📄</a>
           </td>
         </tr>
         {% else %}
@@ -186,12 +187,39 @@ function gmRecalc() {
 }
 function gmOpenModal() {
   document.getElementById('gm-form').reset();
+  document.getElementById('gm-form').setAttribute('action', '{{ url_for("grades.enter") }}');
+  document.getElementById('gm-modal-title').textContent = '🏆 Enter Grade';
+  document.getElementById('gm-form').dataset.editing = '';
+  const s = document.getElementById('gm-student');
+  const o = document.getElementById('gm-offering');
+  if (s) { s.disabled = false; s.required = true; }
+  if (o) { o.disabled = false; o.required = true; }
   gmRecalc();
   document.getElementById('gm-modal').classList.add('is-open');
   setTimeout(() => document.getElementById('gm-student').focus(), 30);
 }
 function gmCloseModal() {
   document.getElementById('gm-modal').classList.remove('is-open');
+}
+function gmScrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function gmEdit(gradeId, studentName, courseTitle, score) {
+  // Open the modal pre-filled to edit an existing record's score.
+  const form = document.getElementById('gm-form');
+  form.reset();
+  form.setAttribute('action', '/grades/record/' + gradeId);
+  form.dataset.editing = '1';
+  document.getElementById('gm-modal-title').textContent = '✏️ Edit Grade';
+  const s = document.getElementById('gm-student');
+  const o = document.getElementById('gm-offering');
+  if (s) { s.disabled = true; s.required = false; }
+  if (o) { o.disabled = true; o.required = false; }
+  document.getElementById('gm-score').value = (score === null || score === undefined) ? '' : score;
+  gmRecalc();
+  document.getElementById('gm-modal').classList.add('is-open');
+  setTimeout(() => document.getElementById('gm-score').focus(), 30);
 }
 document.addEventListener('DOMContentLoaded', function () {
   const score = document.getElementById('gm-score');

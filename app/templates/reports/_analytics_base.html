@@ -28,9 +28,13 @@
 
   {% for tbl in doc.tables %}
   <div class="report-block">
-    <h2 class="report-block-title">{{ tbl.heading }}</h2>
+    <div class="report-block-head">
+      <h2 class="report-block-title">{{ tbl.heading }}</h2>
+      <input class="report-row-filter" type="search" placeholder="🔍 Filter rows…"
+             data-target="report-tbl-{{ loop.index }}" aria-label="Filter table rows">
+    </div>
     <div class="table-wrap">
-      <table class="data-table">
+      <table class="data-table" id="report-tbl-{{ loop.index }}">
         <thead>
           <tr>{% for c in tbl.columns %}<th>{{ c }}</th>{% endfor %}</tr>
         </thead>
@@ -47,6 +51,34 @@
   {% endfor %}
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Row filter boxes
+  document.querySelectorAll('.report-row-filter').forEach(function (box) {
+    box.addEventListener('input', function () {
+      const q = (box.value || '').trim().toLowerCase();
+      const table = document.getElementById(box.getAttribute('data-target'));
+      if (!table) return;
+      table.querySelectorAll('tbody tr').forEach(function (tr) {
+        const hit = !q || tr.textContent.toLowerCase().includes(q);
+        tr.style.display = hit ? '' : 'none';
+      });
+    });
+  });
+  // Pre-focus from ?q= (e.g. jumping to a student's transcript)
+  const focus = {{ focus|tojson if focus is defined else 'null' }};
+  if (focus) {
+    const box = document.querySelector('.report-row-filter');
+    if (box) {
+      box.value = focus;
+      box.dispatchEvent(new Event('input'));
+    }
+    const first = document.querySelector('#report-tbl-1 tbody tr, table tbody tr');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+</script>
+
 <style>
 .report-doc { max-width: 1100px; }
 .report-doc-head { display:flex; justify-content:space-between; align-items:flex-start;
@@ -61,6 +93,11 @@
 .report-stat-label { font-size:12px; text-transform:uppercase; letter-spacing:.04em;
   color:#6b7280; margin-top:4px; }
 .report-block { margin-bottom:26px; }
-.report-block-title { margin:0 0 10px; font-size:16px; color:#1a2640; }
+.report-block-head { display:flex; justify-content:space-between; align-items:center;
+  gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.report-block-title { margin:0; font-size:16px; color:#1a2640; }
+.report-row-filter { padding:7px 11px; border:1px solid #d5d2d2; border-radius:8px;
+  font-size:13px; min-width:200px; outline:none; }
+.report-row-filter:focus { border-color:#b30216; box-shadow:0 0 0 3px rgba(179,2,22,.10); }
 </style>
 {% endblock %}

@@ -356,7 +356,9 @@ def analytics_view(slug):
         abort(404)
     builder, tpl, title = _ANALYTICS[slug]
     doc = builder()
-    return render_template(tpl, doc=doc, slug=slug, report_title=title)
+    # Optional client-side narrowing (e.g. jump to one student's row).
+    focus = (request.args.get("q") or "").strip()
+    return render_template(tpl, doc=doc, slug=slug, report_title=title, focus=focus)
 
 
 @bp.route("/<slug>/pdf")

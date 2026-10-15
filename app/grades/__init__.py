@@ -49,7 +49,7 @@ def _gpa_bands():
 
 
 def _course_pass_rate():
-    """Pass rate per course, from published grades."""
+    """Pass rate per course, from published grades (aggregated across offerings)."""
     rows = db.session.execute(
         db.select(Course.code, Course.title, Grade.letter)
         .join(Enrollment, Enrollment.id == Grade.enrollment_id)
@@ -59,17 +59,17 @@ def _course_pass_rate():
     ).all()
     agg: dict = {}
     for code, title, letter in rows:
-        slot = agg.setdefault((code, title), {"pass": 0, "total": 0})
+        slot = agg.setdefault(code, {"title": title, "pass": 0, "total": 0})
         slot["total"] += 1
         if grade_scale.is_pass(letter):
             slot["pass"] += 1
     out = []
-    for (code, title), slot in agg.items():
+    for code, slot in agg.items():
         if not slot["total"]:
             continue
         rate = round(slot["pass"] / slot["total"] * 100)
-        out.append({"code": code, "title": title, "rate": rate})
-    out.sort(key=lambda r: r["rate"])
+        out.append({"code": code, "title": slot["title"], "rate": rate})
+    out.sort(key=lambda r: (r["rate"], r["code"]))
     return out
 
 
