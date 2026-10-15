@@ -79,13 +79,6 @@
         {% endif %}
         {% if current_user.has_permission('view_reports') %}
           {{ navlink('reports.index', 'Reports', '/reports', '<path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/>') }}
-          {{ navhref('/reports/revenue-summary', 'Revenue Summary', '/reports/revenue-summary', '<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>') }}
-          {{ navhref('/reports/course-pass-rate', 'Course Pass Rate', '/reports/course-pass-rate', '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>') }}
-          {{ navhref('/reports/gpa-transcripts', 'GPA Transcripts', '/reports/gpa-transcripts', '<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>') }}
-          {% if current_user.has_permission('view_grades') %}
-            {{ navlink('predictions.index', 'Academic Risk', '/predictions', '<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>') }}
-          {% endif %}
-          {{ navhref('/reports/enrollment-summary', 'Enrollment Summary', '/reports/enrollment-summary', '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>') }}
         {% endif %}
         {% if current_user.has_permission('view_students') and not current_user.has_permission('view_own_grades') %}
           {{ navlink('records.my_records', 'Academic Records', '/records', '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6M9 11h6"/>') }}

@@ -126,7 +126,7 @@ def _report_registry() -> dict:
     analytics = {
         "revenue-summary": ("Revenue Summary", "Billed vs collected by fee type"),
         "course-pass-rate": ("Course Pass Rate", "Analysis of student performance"),
-        "at-risk": ("At-Risk Students", "Students below the risk threshold"),
+        "at-risk": ("Academic Risk", "Students below the risk threshold"),
         "gpa-transcripts": ("GPA Transcripts", "Per-student GPA summary"),
         "enrollment-summary": ("Enrollment Summary", "By status, course and department"),
     }
