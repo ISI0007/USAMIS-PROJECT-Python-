@@ -43,6 +43,24 @@
   </div>
 </div>
 
+<div class="card" style="margin-top:var(--sp-4);">
+  <div class="card-head"><h3 class="card-title">📈 Analytics Reports</h3></div>
+  <ul class="report-export-list">
+    <li><span><strong>Revenue Summary</strong> — fees billed, collected and outstanding by fee type.</span>
+      <span class="export-actions"><a class="btn btn-sm" href="{{ url_for('reports.analytics_view', slug='revenue-summary') }}">View</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_pdf', slug='revenue-summary') }}">PDF</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_docx', slug='revenue-summary') }}">Word</a></span></li>
+    <li><span><strong>Course Pass Rate</strong> — proportion of grades at pass level, per course.</span>
+      <span class="export-actions"><a class="btn btn-sm" href="{{ url_for('reports.analytics_view', slug='course-pass-rate') }}">View</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_pdf', slug='course-pass-rate') }}">PDF</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_docx', slug='course-pass-rate') }}">Word</a></span></li>
+    <li><span><strong>GPA Transcripts</strong> — grade-point average per student from published grades.</span>
+      <span class="export-actions"><a class="btn btn-sm" href="{{ url_for('reports.analytics_view', slug='gpa-transcripts') }}">View</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_pdf', slug='gpa-transcripts') }}">PDF</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_docx', slug='gpa-transcripts') }}">Word</a></span></li>
+    <li><span><strong>Enrollment Summary</strong> — enrollments by status, course and department.</span>
+      <span class="export-actions"><a class="btn btn-sm" href="{{ url_for('reports.analytics_view', slug='enrollment-summary') }}">View</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_pdf', slug='enrollment-summary') }}">PDF</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_docx', slug='enrollment-summary') }}">Word</a></span></li>
+    {% if current_user.has_permission('view_grades') %}
+    <li><span><strong>Academic Risk</strong> — early-warning view of students at academic risk.</span>
+      <span class="export-actions"><a class="btn btn-sm" href="{{ url_for('predictions.index') }}">View</a></span></li>
+    {% endif %}
+  </ul>
+</div>
+
 <div class="grid-2">
   <div class="card">
     <h3 class="card-title">Students per Department</h3>
