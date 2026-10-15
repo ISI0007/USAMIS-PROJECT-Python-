@@ -13,7 +13,8 @@
   <h1 class="page-title">Low attendance</h1>
   <p class="page-sub">Students below the 75% attendance threshold.</p>
   <div class="page-actions" style="margin-top:12px;">
-    <a class="btn btn-primary" href="{{ url_for('reports.low_attendance_pdf') }}">⬇ Download as PDF</a>
+    <a class="btn btn-primary" href="{{ url_for('reports.low_attendance_pdf') }}">⬇ Download PDF</a>
+    <a class="btn" href="{{ url_for('reports.low_attendance_docx') }}">⬇ Download Word (editable)</a>
   </div>
 </div>
 {% if summary %}

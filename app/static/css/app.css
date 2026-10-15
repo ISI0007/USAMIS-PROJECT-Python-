@@ -392,6 +392,7 @@ h3 { font-size: 16px; margin: var(--sp-4) 0 var(--sp-2); }
   font-size: 13.5px; font-weight: 600; color: var(--text-2);
 }
 .report-export-list li .btn { flex: 0 0 auto; }
+.report-export-list li .export-actions { display: inline-flex; gap: 6px; }
 
 /* Student dashboard "Academic Records" tab strip */
 .tab-strip { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 2px solid var(--border); margin-bottom: var(--sp-4); }
