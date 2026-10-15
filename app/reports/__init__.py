@@ -3,7 +3,7 @@ import datetime as dt
 import io
 import os
 
-from flask import Blueprint, render_template, request, send_file, url_for
+from flask import Blueprint, render_template, request, send_file, url_for, abort
 from flask_login import current_user, login_required
 from sqlalchemy import func
 
@@ -14,6 +14,7 @@ from ..models import (
 )
 from ..security.decorators import permission_required
 from ..services import report_documents as report_docs
+from ..services import analytics_documents as analytics_docs
 
 bp = Blueprint("reports", __name__, url_prefix="/reports")
 
@@ -255,6 +256,67 @@ def low_attendance_docx():
         mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         as_attachment=True, download_name=f"{name}.docx",
     )
+
+
+# --------------------------------------------------------------------------- #
+# Additional analytics reports (Revenue, Pass Rate, At-Risk, GPA, Enrollment)
+# --------------------------------------------------------------------------- #
+_ANALYTICS = {
+    "revenue-summary": (analytics_docs.revenue_summary_doc, "reports/revenue_summary.html",
+                        "Revenue Summary"),
+    "course-pass-rate": (analytics_docs.course_pass_rate_doc, "reports/pass_rate.html",
+                         "Course Pass Rate"),
+    "at-risk": (analytics_docs.at_risk_doc, "reports/at_risk.html", "At-Risk Students"),
+    "gpa-transcripts": (analytics_docs.gpa_transcripts_doc, "reports/gpa.html", "GPA Transcripts"),
+    "enrollment-summary": (analytics_docs.enrollment_summary_doc, "reports/enrollment.html",
+                           "Enrollment Summary"),
+}
+
+
+def _analytics_download(slug, fmt):
+    builder, _tpl, _title = _ANALYTICS[slug]
+    doc = builder()
+    if fmt == "pdf":
+        payload = report_docs.build_pdf(doc)
+        mimetype = "application/pdf"
+    else:
+        payload = report_docs.build_docx(doc)
+        mimetype = ("application/vnd.openxmlformats-officedocument."
+                    "wordprocessingml.document")
+    return send_file(
+        io.BytesIO(payload), mimetype=mimetype, as_attachment=True,
+        download_name=f"{doc.reference}.{fmt}",
+    )
+
+
+@bp.route("/<slug>")
+@login_required
+@permission_required("view_reports")
+def analytics_view(slug):
+    """On-screen view for each analytics report."""
+    if slug not in _ANALYTICS:
+        abort(404)
+    builder, tpl, title = _ANALYTICS[slug]
+    doc = builder()
+    return render_template(tpl, doc=doc, slug=slug, report_title=title)
+
+
+@bp.route("/<slug>/pdf")
+@login_required
+@permission_required("view_reports")
+def analytics_pdf(slug):
+    if slug not in _ANALYTICS:
+        abort(404)
+    return _analytics_download(slug, "pdf")
+
+
+@bp.route("/<slug>/docx")
+@login_required
+@permission_required("view_reports")
+def analytics_docx(slug):
+    if slug not in _ANALYTICS:
+        abort(404)
+    return _analytics_download(slug, "docx")
 
 
 # --------------------------------------------------------------------------- #
