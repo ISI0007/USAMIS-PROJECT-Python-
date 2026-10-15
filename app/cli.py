@@ -12,6 +12,7 @@ from flask.cli import with_appcontext
 
 def register_cli(app: Flask) -> None:
     app.cli.add_command(seed_command)
+    app.cli.add_command(seed_java_command)
     app.cli.add_command(create_admin_command)
     app.cli.add_command(db_status_command)
 
@@ -22,11 +23,23 @@ def register_cli(app: Flask) -> None:
 def seed_command(reset: bool) -> None:
     """Populate synthetic development/demo data safely (idempotent)."""
     from .jit_seed import seed_jit_departments
+    from .java_seed_bridge import reconcile_java_seed
     from .seed import run_seed
 
     run_seed(reset=reset)
     seed_jit_departments()
-    click.echo("Seed complete.")
+    report = reconcile_java_seed()
+    click.echo(f"Seed complete. Java bridge: {report}")
+
+
+@click.command("seed-java")
+@with_appcontext
+def seed_java_command() -> None:
+    """Reconcile the Java reference roster into the Python database."""
+    from .java_seed_bridge import reconcile_java_seed
+
+    report = reconcile_java_seed()
+    click.echo(f"Java seed reconciled: {report}")
 
 
 @click.command("create-admin")
