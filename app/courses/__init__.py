@@ -1,9 +1,10 @@
 """Course management."""
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from ..extensions import db
-from ..models import Course, CourseOffering, Department, Prerequisite
+from ..models import (Course, CourseOffering, Department, Prerequisite,
+                      Semester, Teacher)
 from ..security.decorators import permission_required
 from ..services import audit
 from .forms import CourseForm
@@ -26,7 +27,13 @@ def index():
         db.select(Course).order_by(Course.code),
         page=page, per_page=15, error_out=False,
     )
-    return render_template("courses/index.html", pagination=pagination)
+    departments = db.session.execute(
+        db.select(Department).order_by(Department.code)).scalars().all()
+    semesters = db.session.execute(
+        db.select(Semester).order_by(Semester.academic_year.desc(), Semester.term)
+    ).scalars().all()
+    return render_template("courses/index.html", pagination=pagination,
+                           departments=departments, semesters=semesters)
 
 
 @bp.route("/<int:course_id>")
@@ -72,13 +79,49 @@ def create():
                 is_active=form.is_active.data,
             )
             db.session.add(course)
-            db.session.commit()
+            db.session.flush()
+            _maybe_create_offering(course, form)
             audit.log_action("course_created", "Course", course.id,
                              summary=f"Created {course.code}")
             db.session.commit()
             flash(f"Course {course.code} created.", "success")
+            if request.form.get("ajax") == "1":
+                return jsonify({"ok": True, "code": course.code, "title": course.title})
             return redirect(url_for("courses.index"))
     return render_template("courses/form.html", form=form, course=None)
+
+
+def _maybe_create_offering(course, form) -> None:
+    """Create a course offering when instructor/semester details are given."""
+    semester_id = form.semester_id.data or 0
+    if not semester_id:
+        return
+    teacher_id = _teacher_id_for(form.instructor.data)
+    offering = CourseOffering(
+        course_id=course.id,
+        semester_id=semester_id,
+        teacher_id=teacher_id,
+        capacity=form.max_enrollment.data or 50,
+    )
+    db.session.add(offering)
+
+
+def _teacher_id_for(name: str | None):
+    """Resolve a free-text instructor name to a Teacher row, creating one."""
+    if not name or not name.strip():
+        return None
+    parts = name.strip().split()
+    first = parts[0] if parts else name.strip()
+    last = " ".join(parts[1:]) if len(parts) > 1 else "-"
+    teacher = db.session.execute(
+        db.select(Teacher).where(Teacher.first_name == first, Teacher.last_name == last)
+    ).scalars().first()
+    if teacher:
+        return teacher.id
+    teacher = Teacher(first_name=first, last_name=last)
+    db.session.add(teacher)
+    db.session.flush()
+    return teacher.id
 
 
 @bp.route("/<int:course_id>/edit", methods=["GET", "POST"])
@@ -145,4 +188,10 @@ def _choices(form) -> None:
     form.department_id.choices = [(0, "— none —")] + [
         (d.id, f"{d.code} — {d.name}")
         for d in db.session.execute(db.select(Department).order_by(Department.code)).scalars().all()
+    ]
+    form.semester_id.choices = [(0, "— none —")] + [
+        (s.id, s.label)
+        for s in db.session.execute(
+            db.select(Semester).order_by(Semester.academic_year.desc(), Semester.term)
+        ).scalars().all()
     ]

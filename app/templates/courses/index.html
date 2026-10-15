@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Courses{% endblock %}
-{% block heading %}Courses{% endblock %}
+{% block heading %}📚 Courses{% endblock %}
 {% block breadcrumbs %}
 <nav class="breadcrumbs" aria-label="Breadcrumb">
   <a href="{{ url_for('dashboard.home') }}">Home</a>
@@ -8,6 +8,28 @@
 </nav>
 {% endblock %}
 {% block content %}
+<style>
+.modal-overlay { position:fixed; inset:0; background:rgba(10,15,25,.45);
+  display:none; align-items:flex-start; justify-content:center; z-index:60;
+  padding:48px 16px; }
+.modal-overlay.is-open { display:flex; }
+.modal { background:#fff; border-radius:14px; width:min(560px,100%);
+  box-shadow:0 20px 50px rgba(0,0,0,.25); overflow:hidden; }
+.modal-head { display:flex; justify-content:space-between; align-items:center;
+  padding:16px 20px; border-bottom:1px solid #eee; }
+.modal-head h2 { margin:0; font-size:18px; }
+.modal-body { padding:18px 20px; max-height:70vh; overflow:auto; }
+.modal-foot { display:flex; justify-content:flex-end; gap:10px;
+  padding:14px 20px; border-top:1px solid #eee; background:#fafafa; }
+.modal-body label { display:block; font-size:13px; font-weight:600;
+  margin:12px 0 5px; color:#1a2640; }
+.modal-body label .req { color:#b30216; }
+.modal-body input, .modal-body select { width:100%; padding:9px 10px;
+  border:1px solid #d5d2d2; border-radius:8px; font-size:14px; }
+.modal-body .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.modal-error { color:#b30216; font-size:13px; margin-top:8px; }
+</style>
+
 <div class="page-head">
   <h1 class="page-title">Courses</h1>
   <p class="page-sub">Course catalogue, credit values and departments.</p>
@@ -18,9 +40,9 @@
   </div>
   <div class="toolbar-right">
     {% if current_user.has_permission('manage_courses') %}
-      <a class="btn btn-primary btn-sm" href="{{ url_for('courses.create') }}">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> New Course
-      </a>
+      <button class="btn btn-primary btn-sm" type="button" onclick="courseOpenModal()">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> 📚 Add New Course
+      </button>
     {% endif %}
   </div>
 </div>
@@ -45,5 +67,100 @@
 {% include "partials/pagination.html" with context %}
 {% else %}
 <div class="empty"><div class="empty-icon">📘</div>No courses yet.</div>
+{% endif %}
+
+{% if current_user.has_permission('manage_courses') %}
+<!-- Add New Course modal -->
+<div class="modal-overlay" id="course-modal" role="dialog" aria-modal="true" aria-labelledby="course-modal-title">
+  <div class="modal">
+    <form method="post" action="{{ url_for('courses.create') }}" id="course-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="ajax" value="1">
+      <div class="modal-head">
+        <h2 id="course-modal-title">📚 Add New Course</h2>
+        <button class="btn btn-sm" type="button" onclick="courseCloseModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="grid-2">
+          <div>
+            <label>Course Code <span class="req">*</span></label>
+            <input type="text" name="code" id="c-code" placeholder="e.g. CS301" required>
+          </div>
+          <div>
+            <label>Credits <span class="req">*</span></label>
+            <input type="number" name="credits" id="c-credits" value="3" min="1" max="12" required>
+          </div>
+        </div>
+
+        <label>Course Name <span class="req">*</span></label>
+        <input type="text" name="title" id="c-title" placeholder="e.g. Database Systems" required>
+
+        <label>Department <span class="req">*</span></label>
+        <select name="department_id" id="c-dept" required>
+          {% for d in departments %}
+          <option value="{{ d.id }}" {% if 'computer' in d.name.lower() %}selected{% endif %}>{{ d.name }}</option>
+          {% endfor %}
+        </select>
+
+        <label>Instructor <span class="req">*</span></label>
+        <input type="text" name="instructor" id="c-instructor" placeholder="Instructor name" required>
+
+        <div class="grid-2">
+          <div>
+            <label>Max Enrollment</label>
+            <input type="number" name="max_enrollment" id="c-max" value="50" min="1" max="1000">
+          </div>
+          <div>
+            <label>Semester</label>
+            <select name="semester_id" id="c-semester">
+              {% for s in semesters %}
+              <option value="{{ s.id }}">{{ s.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-error" id="course-error" style="display:none;"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" type="button" onclick="courseCloseModal()">Cancel</button>
+        <button class="btn btn-primary" type="submit" id="course-save">Save Course</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function courseOpenModal() {
+  document.getElementById('course-form').reset();
+  document.getElementById('course-error').style.display = 'none';
+  document.getElementById('course-modal').classList.add('is-open');
+  setTimeout(() => document.getElementById('c-code').focus(), 30);
+}
+function courseCloseModal() {
+  document.getElementById('course-modal').classList.remove('is-open');
+}
+document.addEventListener('DOMContentLoaded', function () {
+  const overlay = document.getElementById('course-modal');
+  if (!overlay) return;
+  overlay.addEventListener('click', function (e) { if (e.target === this) courseCloseModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') courseCloseModal(); });
+  document.getElementById('course-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const form = this;
+    const data = new FormData(form);
+    fetch(form.action, { method: 'POST', body: data, headers: { 'X-Requested-With': 'fetch' } })
+      .then(r => r.json().catch(() => ({ ok: false })))
+      .then(j => {
+        if (j && j.ok) { window.location.reload(); }
+        else {
+          const err = document.getElementById('course-error');
+          err.textContent = 'Could not save the course (code may already exist).';
+          err.style.display = 'block';
+        }
+      })
+      .catch(() => { form.submit(); });
+  });
+});
+</script>
 {% endif %}
 {% endblock %}

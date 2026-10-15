@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}Grade Management{% endblock %}
+{% block heading %}🏆 Grade Management{% endblock %}
+{% block content %}
+{% set css %}
+<style>
+.gm-topbar { display:flex; justify-content:space-between; align-items:center; gap:12px;
+  flex-wrap:wrap; margin-bottom:16px; }
+.gm-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.gm-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:14px; margin-bottom:20px; }
+.gm-card { background:#fff; border:1px solid #e5e2e2; border-radius:12px;
+  padding:16px 18px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.gm-card h3 { margin:0 0 10px; font-size:14px; color:#1a2640; display:flex;
+  align-items:center; gap:6px; }
+.gm-band { display:flex; justify-content:space-between; padding:4px 0;
+  border-bottom:1px dashed #eee; font-size:13px; }
+.gm-band:last-child { border-bottom:none; }
+.gm-band b { color:#1a2640; }
+.gm-rate { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:13px; }
+.gm-rate span.gm-rate-label { flex:1; }
+.gm-rate .bar { flex:0 0 70px; height:8px; background:#eee; border-radius:5px; overflow:hidden; }
+.gm-rate .bar > i { display:block; height:100%; background:#b30216; }
+.gm-search { display:flex; gap:8px; }
+.modal-overlay { position:fixed; inset:0; background:rgba(10,15,25,.45);
+  display:none; align-items:flex-start; justify-content:center; z-index:60;
+  padding:48px 16px; }
+.modal-overlay.is-open { display:flex; }
+.modal { background:#fff; border-radius:14px; width:min(560px,100%);
+  box-shadow:0 20px 50px rgba(0,0,0,.25); overflow:hidden; }
+.modal-head { display:flex; justify-content:space-between; align-items:center;
+  padding:16px 20px; border-bottom:1px solid #eee; }
+.modal-head h2 { margin:0; font-size:18px; }
+.modal-body { padding:18px 20px; }
+.modal-foot { display:flex; justify-content:flex-end; gap:10px;
+  padding:14px 20px; border-top:1px solid #eee; background:#fafafa; }
+.modal-body label { display:block; font-size:13px; font-weight:600;
+  margin:12px 0 5px; color:#1a2640; }
+.modal-body label .req { color:#b30216; }
+.modal-body select, .modal-body input { width:100%; padding:9px 10px;
+  border:1px solid #d5d2d2; border-radius:8px; font-size:14px; }
+.modal-body .auto-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.modal-body .auto input[readonly] { background:#f4f2f2; color:#6b7280; }
+</style>
+{% endset %}
+{{ css|safe }}
+
+<div class="gm-topbar">
+  <div class="gm-search">
+    <form method="get" action="{{ url_for('grades.manage') }}" style="display:flex;gap:8px;">
+      <input class="input" type="search" name="q" value="{{ query }}" placeholder="🔍 Search grades...">
+      <button class="btn" type="submit">Search</button>
+    </form>
+  </div>
+  <div class="gm-actions">
+    <button class="btn btn-primary" type="button" onclick="gmOpenModal()">+ Enter Grade</button>
+    <a class="btn" href="{{ url_for('grades.manage') }}">📄 Transcript</a>
+    <a class="btn" href="{{ url_for('grades.manage') }}#gpa-distribution">📈 GPA Distribution</a>
+  </div>
+</div>
+
+<div class="gm-cards" id="gpa-distribution">
+  <div class="gm-card">
+    <h3>📈 GPA Distribution</h3>
+    {% for b in bands %}
+      <div class="gm-band"><span>{{ b.label }}</span><b>{{ b.count }} students</b></div>
+    {% endfor %}
+  </div>
+  <div class="gm-card">
+    <h3>📊 Course Pass Rate</h3>
+    {% for c in pass_rates %}
+      <div class="gm-rate">
+        <span class="gm-rate-label">{{ c.title }}</span>
+        <span class="bar"><i style="width: {{ c.rate }}%"></i></span>
+        <b>{{ c.rate }}%</b>
+      </div>
+    {% else %}
+      <div class="muted small">No published grades yet.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<section class="card">
+  <h2>🏆 Grade Records <span class="muted small">({{ total_records }} records)</span></h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Student ID</th><th>Student Name</th><th>Course</th>
+          <th>Score</th><th>Grade</th><th>GPA Points</th><th>Semester</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td>{{ r.student_number }}</td>
+          <td>{{ r.student_name }}</td>
+          <td>{{ r.course_title }}<br><span class="muted small">{{ r.course_code }}</span></td>
+          <td>{{ r.score }}/100</td>
+          <td><b>{{ r.letter }}</b></td>
+          <td>{{ r.points if r.points is not none else '—' }}</td>
+          <td>{{ r.semester }}</td>
+          <td>
+            <button class="btn btn-sm" type="button"
+                    onclick="gmEdit({{ r.id }}, '{{ r.student_name|e }}', '{{ r.course_title|e }}', '{{ r.score }}')">✏️</button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="muted">No grade records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Enter Grade modal -->
+<div class="modal-overlay" id="gm-modal" role="dialog" aria-modal="true" aria-labelledby="gm-modal-title">
+  <div class="modal">
+    <form method="post" action="{{ url_for('grades.enter') }}" id="gm-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="modal-head">
+        <h2 id="gm-modal-title">🏆 Enter Grade</h2>
+        <button class="btn btn-sm" type="button" onclick="gmCloseModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>Select Student <span class="req">*</span></label>
+        <select name="student_id" id="gm-student" required>
+          <option value="">— Select Student —</option>
+          {% for s in students %}
+          <option value="{{ s.id }}">{{ s.student_number }} — {{ s.full_name }}</option>
+          {% endfor %}
+        </select>
+
+        <label>Select Course <span class="req">*</span></label>
+        <select name="offering_id" id="gm-offering" required>
+          <option value="">— Select Course —</option>
+          {% for o in offerings %}
+          <option value="{{ o.id }}">{{ o.course.code }} — {{ o.course.title }} ({{ o.semester.label if o.semester else '—' }})</option>
+          {% endfor %}
+        </select>
+
+        <label>Score (0–100) <span class="req">*</span></label>
+        <input type="number" step="0.01" min="0" max="100" name="score" id="gm-score" required>
+
+        <div class="auto-row">
+          <div class="auto">
+            <label>Grade (auto)</label>
+            <input type="text" id="gm-grade" readonly placeholder="e.g. A">
+          </div>
+          <div class="auto">
+            <label>GPA Points (auto)</label>
+            <input type="text" id="gm-points" readonly placeholder="—">
+          </div>
+        </div>
+
+        <label>Semester</label>
+        <select name="semester_id" id="gm-semester">
+          {% for sem in semesters %}
+          <option value="{{ sem.id }}">{{ sem.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" type="button" onclick="gmCloseModal()">Cancel</button>
+        <button class="btn btn-primary" type="submit">Save Grade</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const GM_SCALE = {{ scale|tojson }};
+function gmLetterFor(score) {
+  const v = parseFloat(score);
+  if (isNaN(v) || v < 0 || v > 100) return ['', ''];
+  for (const s of GM_SCALE) {
+    if (v >= s.low && v < s.high) return [s.letter, s.points];
+  }
+  return ['F', 0];
+}
+function gmRecalc() {
+  const score = document.getElementById('gm-score').value;
+  const [letter, points] = gmLetterFor(score);
+  document.getElementById('gm-grade').value = letter;
+  document.getElementById('gm-points').value = (letter === '') ? '' : points;
+}
+function gmOpenModal() {
+  document.getElementById('gm-form').reset();
+  gmRecalc();
+  document.getElementById('gm-modal').classList.add('is-open');
+  setTimeout(() => document.getElementById('gm-student').focus(), 30);
+}
+function gmCloseModal() {
+  document.getElementById('gm-modal').classList.remove('is-open');
+}
+document.addEventListener('DOMContentLoaded', function () {
+  const score = document.getElementById('gm-score');
+  if (score) score.addEventListener('input', gmRecalc);
+  document.getElementById('gm-modal').addEventListener('click', function (e) {
+    if (e.target === this) gmCloseModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') gmCloseModal();
+  });
+});
+</script>
+{% endblock %}
