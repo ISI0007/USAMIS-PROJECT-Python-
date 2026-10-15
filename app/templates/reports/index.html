@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Reports{% endblock %}
-{% block heading %}Management Reports{% endblock %}
+{% block heading %}📊 Management Reports{% endblock %}
 {% block breadcrumbs %}
 <nav class="breadcrumbs" aria-label="Breadcrumb">
   <a href="{{ url_for('dashboard.home') }}">Home</a>
@@ -10,11 +10,8 @@
 {% block content %}
 <div class="page-head">
   <h1 class="page-title">Management Reports</h1>
-  <p class="page-sub">Institution-wide totals and breakdowns, derived from live data.</p>
-  <div class="page-actions" style="margin-top:12px;">
-    <a class="btn btn-primary" href="{{ url_for('reports.index_pdf') }}">⬇ Download PDF</a>
-    <a class="btn" href="{{ url_for('reports.index_docx') }}">⬇ Download Word (editable)</a>
-  </div>
+  <p class="page-sub">Reports are generated live from the database. Click any report to view it,
+     then export it as a letterhead PDF or an editable Word file.</p>
 </div>
 
 <div class="stat-grid">
@@ -26,46 +23,89 @@
   <div class="stat danger"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span></div><span class="stat-value small-value">{{ '%.0f'|format(totals.outstanding) }}</span><span class="stat-label">Outstanding</span></div>
 </div>
 
-<div class="quick-links">
-  <a class="btn" href="{{ url_for('reports.fee_defaulters') }}">Fee Defaulters</a>
-  <a class="btn" href="{{ url_for('reports.low_attendance') }}">Low Attendance</a>
-</div>
-
-<div class="grid-2" style="margin-top:var(--sp-4);">
-  <div class="card">
-    <div class="card-head"><h3 class="card-title">📊 Export reports as PDF</h3></div>
-    <ul class="report-export-list">
-      <li><span>Management Reports overview</span><span class="export-actions"><a class="btn btn-sm" href="{{ url_for('reports.index_pdf') }}">PDF</a><a class="btn btn-sm" href="{{ url_for('reports.index_docx') }}">Word</a></span></li>
-      <li><span>Fee Defaulters list</span><span class="export-actions"><a class="btn btn-sm" href="{{ url_for('reports.fee_defaulters_pdf') }}">PDF</a><a class="btn btn-sm" href="{{ url_for('reports.fee_defaulters_docx') }}">Word</a></span></li>
-      <li><span>Low Attendance report</span><span class="export-actions"><a class="btn btn-sm" href="{{ url_for('reports.low_attendance_pdf') }}">PDF</a><a class="btn btn-sm" href="{{ url_for('reports.low_attendance_docx') }}">Word</a></span></li>
-    </ul>
-    <p class="muted small">Each report is generated live from the database as an official letterhead document, downloadable as PDF or an editable Word file.</p>
+<h2 class="section-label" style="margin:18px 0 4px;">Generate a report</h2>
+<div class="report-grid">
+  <div class="report-tile" data-slug="students-per-dept" data-title="Students per Department">
+    <div class="report-tile-icon">👥</div>
+    <div class="report-tile-title">Students per Department</div>
+    <div class="report-tile-sub">Distribution across all departments</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+  <div class="report-tile" data-slug="fee-defaulters" data-title="Fee Defaulters List">
+    <div class="report-tile-icon">⚠️</div>
+    <div class="report-tile-title">Fee Defaulters List</div>
+    <div class="report-tile-sub">Students with outstanding balances</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+  <div class="report-tile" data-slug="revenue-summary" data-title="Revenue Summary">
+    <div class="report-tile-icon">💰</div>
+    <div class="report-tile-title">Revenue Summary</div>
+    <div class="report-tile-sub">Billed vs collected by fee type</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+  <div class="report-tile" data-slug="course-pass-rate" data-title="Course Pass Rate">
+    <div class="report-tile-icon">📈</div>
+    <div class="report-tile-title">Course Pass Rate</div>
+    <div class="report-tile-sub">Analysis of student performance</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+  {% if current_user.has_permission('view_grades') %}
+  <div class="report-tile" data-slug="at-risk" data-title="At-Risk Students">
+    <div class="report-tile-icon">📉</div>
+    <div class="report-tile-title">At-Risk Students</div>
+    <div class="report-tile-sub">Students below the risk threshold</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+  {% endif %}
+  <div class="report-tile" data-slug="gpa-transcripts" data-title="GPA Transcripts">
+    <div class="report-tile-icon">🏆</div>
+    <div class="report-tile-title">GPA Transcripts</div>
+    <div class="report-tile-sub">Per-student GPA summary</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+  <div class="report-tile" data-slug="enrollment-summary" data-title="Enrollment Summary">
+    <div class="report-tile-icon">📊</div>
+    <div class="report-tile-title">Enrollment Summary</div>
+    <div class="report-tile-sub">By status, course and department</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+  <div class="report-tile" data-slug="low-attendance" data-title="Low Attendance">
+    <div class="report-tile-icon">🗓️</div>
+    <div class="report-tile-title">Low Attendance</div>
+    <div class="report-tile-sub">Below the 75% attendance threshold</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
+  </div>
+  <div class="report-tile" data-slug="overview" data-title="Management Overview">
+    <div class="report-tile-icon">🧾</div>
+    <div class="report-tile-title">Management Overview</div>
+    <div class="report-tile-sub">Institution-wide totals and breakdowns</div>
+    <button class="btn btn-primary btn-sm" type="button">Generate</button>
   </div>
 </div>
 
-<div class="card" style="margin-top:var(--sp-4);">
-  <div class="card-head"><h3 class="card-title">📈 Analytics Reports</h3></div>
-  <ul class="report-export-list">
-    <li><span><strong>Revenue Summary</strong> — fees billed, collected and outstanding by fee type.</span>
-      <span class="export-actions"><a class="btn btn-sm" href="{{ url_for('reports.analytics_view', slug='revenue-summary') }}">View</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_pdf', slug='revenue-summary') }}">PDF</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_docx', slug='revenue-summary') }}">Word</a></span></li>
-    <li><span><strong>Course Pass Rate</strong> — proportion of grades at pass level, per course.</span>
-      <span class="export-actions"><a class="btn btn-sm" href="{{ url_for('reports.analytics_view', slug='course-pass-rate') }}">View</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_pdf', slug='course-pass-rate') }}">PDF</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_docx', slug='course-pass-rate') }}">Word</a></span></li>
-    <li><span><strong>GPA Transcripts</strong> — grade-point average per student from published grades.</span>
-      <span class="export-actions"><a class="btn btn-sm" href="{{ url_for('reports.analytics_view', slug='gpa-transcripts') }}">View</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_pdf', slug='gpa-transcripts') }}">PDF</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_docx', slug='gpa-transcripts') }}">Word</a></span></li>
-    <li><span><strong>Enrollment Summary</strong> — enrollments by status, course and department.</span>
-      <span class="export-actions"><a class="btn btn-sm" href="{{ url_for('reports.analytics_view', slug='enrollment-summary') }}">View</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_pdf', slug='enrollment-summary') }}">PDF</a><a class="btn btn-sm" href="{{ url_for('reports.analytics_docx', slug='enrollment-summary') }}">Word</a></span></li>
-    {% if current_user.has_permission('view_grades') %}
-    <li><span><strong>Academic Risk</strong> — early-warning view of students at academic risk.</span>
-      <span class="export-actions"><a class="btn btn-sm" href="{{ url_for('predictions.index') }}">View</a></span></li>
-    {% endif %}
-  </ul>
+<!-- Live report output (same design as the Java reports view) -->
+<div class="card report-output" id="reportOutputCard">
+  <div class="report-output-head">
+    <span class="report-output-title" id="reportOutputTitle">Report</span>
+    <span class="report-output-actions">
+      <a class="btn btn-outline btn-sm" id="reportPdfLink" href="#" target="_blank" rel="noopener">⬇ PDF</a>
+      <a class="btn btn-outline btn-sm" id="reportDocxLink" href="#" target="_blank" rel="noopener">⬇ Word</a>
+      <button class="btn btn-outline btn-sm" type="button" onclick="printReport()">🖨 Print / Save PDF</button>
+      <button class="btn btn-outline btn-sm" type="button" onclick="closeReport()">✕ Close</button>
+    </span>
+  </div>
+  <div class="report-output-body" id="reportOutput">
+    <p class="muted report-output-hint">Choose a report above to generate it.</p>
+  </div>
 </div>
 
-<div class="grid-2">
+<!-- Pre-rendered snapshots (used when JS is off / for the at-a-glance tables) -->
+<div class="grid-2" style="margin-top:22px;">
   <div class="card">
     <h3 class="card-title">Students per Department</h3>
     {% if students_per_department %}
-    <table class="table">
+    <div class="report-table-wrap">
+    <table class="report-table">
       <thead><tr><th>Department</th><th>Students</th></tr></thead>
       <tbody>
       {% for code, count in students_per_department %}
@@ -73,27 +113,31 @@
       {% endfor %}
       </tbody>
     </table>
+    </div>
     {% else %}<div class="empty">No data.</div>{% endif %}
   </div>
 
   <div class="card">
     <h3 class="card-title">Enrollment by Status</h3>
     {% if enrollment_by_status %}
-    <table class="table">
+    <div class="report-table-wrap">
+    <table class="report-table">
       <thead><tr><th>Status</th><th>Count</th></tr></thead>
       <tbody>
       {% for status, count in enrollment_by_status %}
-        <tr><td><span class="pill pill-{{ status }}">{{ status }}</span></td><td><strong>{{ count }}</strong></td></tr>
+        <tr><td>{{ status }}</td><td><strong>{{ count }}</strong></td></tr>
       {% endfor %}
       </tbody>
     </table>
+    </div>
     {% else %}<div class="empty">No data.</div>{% endif %}
   </div>
 
   <div class="card">
     <h3 class="card-title">Published Grade Distribution</h3>
     {% if grade_distribution %}
-    <table class="table">
+    <div class="report-table-wrap">
+    <table class="report-table">
       <thead><tr><th>Letter</th><th>Count</th></tr></thead>
       <tbody>
       {% for letter, count in grade_distribution %}
@@ -101,7 +145,70 @@
       {% endfor %}
       </tbody>
     </table>
+    </div>
     {% else %}<div class="empty">No published grades.</div>{% endif %}
   </div>
 </div>
+
+<script>
+const REPORTS = {
+  {% for slug, r in report_registry.items() %}
+  "{{ slug }}": { title: "{{ r.title|e }}", subtitle: "{{ r.subtitle|e }}",
+    pdf: "{{ r.pdf_url }}", docx: "{{ r.docx_url or '' }}" },
+  {% endfor %}
+};
+
+function closeReport() {
+  document.getElementById('reportOutputCard').classList.remove('is-open');
+}
+
+function printReport() {
+  const node = document.getElementById('reportOutputCard').cloneNode(true);
+  node.classList.add('is-open');
+  const actions = node.querySelector('.report-output-actions');
+  if (actions) actions.remove();
+  const w = window.open('', '_blank');
+  if (!w) { alert('Allow pop-ups to print the report'); return; }
+  const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+    .map(l => '<link rel="stylesheet" href="' + l.href + '">').join('');
+  w.document.write('<html><head><title>USAMIS Report</title>' + styles +
+    '<style>@page{size:A4;margin:14mm}body{background:#fff;padding:0}' +
+    '.sidebar,.topbar,.breadcrumbs,.report-output-actions{display:none!important}' +
+    '.report-output{display:block!important}</style></head><body>' +
+    node.outerHTML + '</body></html>');
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 350);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.report-tile[data-slug]').forEach(tile => {
+    tile.addEventListener('click', function () {
+      const slug = tile.getAttribute('data-slug');
+      const meta = REPORTS[slug];
+      if (!meta) return;
+      const card = document.getElementById('reportOutputCard');
+      document.getElementById('reportOutputTitle').textContent = meta.title;
+      const pdf = document.getElementById('reportPdfLink');
+      const docx = document.getElementById('reportDocxLink');
+      pdf.href = meta.pdf;
+      if (meta.docx) { docx.href = meta.docx; docx.style.display = ''; }
+      else { docx.style.display = 'none'; }
+      document.getElementById('reportOutput').innerHTML =
+        '<p class="muted">Generating…</p>';
+      card.classList.add('is-open');
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      fetch('/reports/_render/' + slug, { headers: { 'X-Requested-With': 'fetch' } })
+        .then(r => r.text())
+        .then(html => {
+          document.getElementById('reportOutput').innerHTML = html;
+        })
+        .catch(() => {
+          document.getElementById('reportOutput').innerHTML =
+            '<p class="muted">Could not generate the report here. Use the PDF or Word buttons.</p>';
+        });
+    });
+  });
+});
+</script>
 {% endblock %}

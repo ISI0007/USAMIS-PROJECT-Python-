@@ -117,7 +117,65 @@ def index():
         enrollment_by_status=enrollment_by_status,
         grade_distribution=grade_distribution,
         totals=totals,
+        report_registry=_report_registry(),
     )
+
+
+def _report_registry() -> dict:
+    """Cards shown on the Reports page (mirrors the Java reports view)."""
+    analytics = {
+        "revenue-summary": ("Revenue Summary", "Billed vs collected by fee type"),
+        "course-pass-rate": ("Course Pass Rate", "Analysis of student performance"),
+        "at-risk": ("At-Risk Students", "Students below the risk threshold"),
+        "gpa-transcripts": ("GPA Transcripts", "Per-student GPA summary"),
+        "enrollment-summary": ("Enrollment Summary", "By status, course and department"),
+    }
+    registry: dict = {}
+    for slug, (title, subtitle) in analytics.items():
+        registry[slug] = {
+            "title": title, "subtitle": subtitle,
+            "pdf_url": url_for("reports.analytics_pdf", slug=slug),
+            "docx_url": url_for("reports.analytics_docx", slug=slug),
+        }
+    registry["fee-defaulters"] = {
+        "title": "Fee Defaulters List", "subtitle": "Students with outstanding balances",
+        "pdf_url": url_for("reports.fee_defaulters_pdf"),
+        "docx_url": url_for("reports.fee_defaulters_docx"),
+    }
+    registry["low-attendance"] = {
+        "title": "Low Attendance", "subtitle": "Below the 75% attendance threshold",
+        "pdf_url": url_for("reports.low_attendance_pdf"),
+        "docx_url": url_for("reports.low_attendance_docx"),
+    }
+    registry["overview"] = {
+        "title": "Management Overview", "subtitle": "Institution-wide totals and breakdowns",
+        "pdf_url": url_for("reports.index_pdf"),
+        "docx_url": url_for("reports.index_docx"),
+    }
+    registry["students-per-dept"] = {
+        "title": "Students per Department", "subtitle": "Distribution across all departments",
+        "pdf_url": url_for("reports.index_pdf"), "docx_url": "",
+    }
+    return registry
+
+
+@bp.route("/_render/<slug>")
+@login_required
+@permission_required("view_reports")
+def render_fragment(slug):
+    """Return a small HTML fragment for the on-page report card (fetch target)."""
+    builder = _ANALYTICS.get(slug, (None, None, None))[0] if slug in _ANALYTICS else None
+    if builder is not None:
+        doc = builder()
+    elif slug == "fee-defaulters":
+        doc, _name = _fee_defaulters_doc()
+    elif slug == "low-attendance":
+        doc, _name = _low_attendance_doc()
+    elif slug in ("overview", "students-per-dept"):
+        doc = _management_overview_doc()
+    else:
+        abort(404)
+    return render_template("reports/_fragment.html", doc=doc)
 
 
 @bp.route("/pdf")

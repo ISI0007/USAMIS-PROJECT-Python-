@@ -1,0 +1,27 @@
+{% if doc.totals %}
+<div class="report-kpis">
+  {% for label, value in doc.totals %}
+  <div class="report-kpi"><b>{{ value }}</b><span>{{ label }}</span></div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% for tbl in doc.tables %}
+<h3 style="margin:14px 0 8px;color:var(--navy);font-size:15px;">{{ tbl.heading }}</h3>
+{% if tbl.rows %}
+<div class="report-table-wrap">
+  <table class="report-table">
+    <thead>
+      <tr>{% for c in tbl.columns %}<th>{{ c }}</th>{% endfor %}</tr>
+    </thead>
+    <tbody>
+      {% for r in tbl.rows %}
+      <tr>{% for cell in r %}<td>{{ cell }}</td>{% endfor %}</tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="muted small">No data.</p>
+{% endif %}
+{% endfor %}

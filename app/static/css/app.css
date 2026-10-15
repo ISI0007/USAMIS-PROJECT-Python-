@@ -397,6 +397,50 @@ h3 { font-size: 16px; margin: var(--sp-4) 0 var(--sp-2); }
 .report-export-list li .btn { flex: 0 0 auto; }
 .report-export-list li .export-actions { display: inline-flex; gap: 6px; }
 
+/* ---- Report tiles (JIT Management Reports design) ---- */
+.report-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px; margin: 6px 0 22px; }
+.report-tile { background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,.06); text-align: center; padding: 30px 18px;
+  cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.report-tile:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,42,74,.14);
+  border-color: var(--royal); }
+.report-tile-icon { font-size: 32px; line-height: 1; margin-bottom: 10px; }
+.report-tile-title { font-weight: 700; color: var(--navy); font-size: 15px; }
+.report-tile-sub { font-size: 12.5px; color: var(--muted); margin-bottom: 14px; min-height: 32px; }
+.report-tile .btn { margin-top: auto; }
+.report-tile.is-flat { cursor: default; }
+.report-tile.is-flat:hover { transform: none; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  border-color: var(--border); }
+
+/* Generated report output card */
+.report-output { display: none; margin-top: 8px; }
+.report-output.is-open { display: block; }
+.report-output-head { display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.report-output-title { font-weight: 700; color: var(--navy); font-size: 16px; }
+.report-output-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.report-output-body { padding: 18px; overflow-x: auto; }
+.report-output-body h2 { margin: 0 0 4px; font-size: 20px; }
+.report-kpis { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 4px 0 18px; }
+.report-kpi b { display: block; font-size: 22px; color: var(--royal); font-weight: 700; }
+.report-kpi span { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: #6b7280; }
+.report-table-wrap { overflow-x: auto; }
+.report-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.report-table thead th { background: var(--navy); color: #fff; padding: 10px 12px;
+  text-align: left; font-weight: 600; font-size: 12px; letter-spacing: .03em; white-space: nowrap; }
+.report-table tbody td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+.report-table tbody tr:nth-child(even) { background: #faf8f8; }
+.report-table tbody tr:hover { background: #f4f1f1; }
+
+@media print {
+  .sidebar, .topbar, .report-grid, .report-output-actions, .breadcrumbs,
+  .report-output-hint { display: none !important; }
+  .report-output { display: block !important; }
+  .report-table thead th { background: #1a2a4a !important; -webkit-print-color-adjust: exact; }
+}
+
 /* Student dashboard "Academic Records" tab strip */
 .tab-strip { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 2px solid var(--border); margin-bottom: var(--sp-4); }
 .tab-strip a {
