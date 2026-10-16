@@ -2,7 +2,7 @@
 
 All statistics are derived from the database — never hardcoded.
 """
-from flask import Blueprint, render_template
+from flask import Blueprint, current_app, render_template
 from flask_login import current_user, login_required
 from sqlalchemy import func
 
@@ -260,7 +260,7 @@ def _student_dashboard():
             "published": e.grade.is_published,
         }
         for e in enrollments if e.grade is not None
-    ])
+    ], gpa_enabled=current_app.config.get("GPA_ENABLED", True))
 
     attendance_rows = db.session.execute(
         db.select(Attendance).where(Attendance.student_id == student.id)

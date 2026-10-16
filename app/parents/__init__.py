@@ -4,7 +4,7 @@ A read-only area for guardians. A parent account may only ever see the
 students linked to it via :class:`app.models.ParentLink`; every detail route
 re-checks that ownership with ``parent_service.link_for``.
 """
-from flask import Blueprint, abort, render_template
+from flask import Blueprint, abort, current_app, render_template
 from flask_login import current_user, login_required
 
 from ..extensions import db
@@ -76,7 +76,7 @@ def student_detail(student_id: int):
             "published": g.is_published,
         }
         for g in grades
-    ])
+    ], gpa_enabled=current_app.config.get("GPA_ENABLED", True))
 
     attendance_rows = db.session.execute(
         db.select(Attendance).where(Attendance.student_id == student.id)

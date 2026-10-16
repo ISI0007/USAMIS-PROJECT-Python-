@@ -49,7 +49,9 @@ class BaseConfig:
     LOGIN_LOCKOUT_MINUTES = int(os.environ.get("LOGIN_LOCKOUT_MINUTES", "15"))
 
     # Academic policy defaults (documented in docs/ALGORITHMS.md)
-    GPA_ENABLED = _bool(os.environ.get("GPA_ENABLED"), False)
+    # GPA mapping is on by default so transcripts show a grade point average;
+    # set GPA_ENABLED=false to fall back to the numeric weighted average only.
+    GPA_ENABLED = _bool(os.environ.get("GPA_ENABLED"), True)
     PASS_MARK = 50.0
 
     # Pagination

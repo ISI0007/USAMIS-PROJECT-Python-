@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from flask import current_app
+
 from ..algorithms.logistic_risk_model import (
     ATTENDANCE_FLOOR,
     DECISION_THRESHOLD,
@@ -50,7 +52,8 @@ def _student_feature_rows() -> tuple[list[int], np.ndarray, np.ndarray, list[dic
         records = [{"course_code": c.code, "credits": c.credits,
                     "score": g.score, "published": g.is_published}
                    for g, c in grade_rows]
-        performance = calculate_performance(records)
+        performance = calculate_performance(
+            records, gpa_enabled=current_app.config.get("GPA_ENABLED", True))
         weighted_average = performance.weighted_average
 
         # --- attendance rate ---

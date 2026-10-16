@@ -35,8 +35,8 @@
     </div>
   </div>
   <div class="record-gpa">
-    <div class="record-gpa-num">{{ summary.total_credits }}</div>
-    <div class="record-gpa-lbl">Credits on record</div>
+    <div class="record-gpa-num">{{ '%.2f'|format(summary.gpa) if summary.gpa is not none else '—' }}</div>
+    <div class="record-gpa-lbl">GPA (4.0 scale)</div>
   </div>
 </div>
 

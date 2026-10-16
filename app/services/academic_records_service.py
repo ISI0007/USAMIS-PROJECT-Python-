@@ -263,9 +263,33 @@ def summary_for(rows_all: list[RecordRow]) -> dict:
     total_credits = sum(r.credits for r in rows_all)
     graded = sum(1 for r in rows_all if r.is_graded)
     pending = total_courses - graded
+
+    # Credit-weighted GPA (4.0 scale) over graded records, using the same
+    # institutional scale as the transcript report. ``None`` when nothing is
+    # graded so the UI can show an honest dash instead of a fabricated 0.00.
+    from ..algorithms.academic_performance import (
+        calculate_performance, grade_point_for, letter_for,
+    )
+    gpa_points = 0.0
+    gpa_credits = 0
+    for r in rows_all:
+        if not r.is_graded or r.final_grade is None:
+            continue
+        try:
+            score = float(r.final_grade)
+        except (TypeError, ValueError):
+            continue
+        gp = grade_point_for(score, enabled=True)
+        if gp is None:
+            continue
+        gpa_points += gp * r.credits
+        gpa_credits += r.credits
+    gpa = round(gpa_points / gpa_credits, 2) if gpa_credits else None
+
     return {
         "total_courses": total_courses,
         "total_credits": total_credits,
         "graded": graded,
         "pending": pending,
+        "gpa": gpa,
     }

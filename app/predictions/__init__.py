@@ -103,10 +103,24 @@ def ml_predict(student_id: int):
     out = ml_training_service.predict_student_ml(student_id)
     if out is None:
         return jsonify({"ok": False, "error": "student not found or no data"}), 404
+    student = out.get("student")
     return jsonify({
         "ok": True,
         "student_id": student_id,
+        "student": {
+            "id": student.id,
+            "student_number": getattr(student, "student_number", None),
+            "full_name": getattr(student, "full_name", None),
+        } if student is not None else None,
         "probability": round(out["probability"], 4),
         "predicted_at_risk": out["predicted_at_risk"],
+        "weighted_average": (
+            float(out["weighted_average"])
+            if out.get("weighted_average") is not None else None
+        ),
+        "attendance_rate": (
+            round(float(out["attendance_rate"]), 4)
+            if out.get("attendance_rate") is not None else None
+        ),
         "contributions": out["contributions"],
     })
