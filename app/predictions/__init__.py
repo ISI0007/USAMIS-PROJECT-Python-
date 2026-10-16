@@ -4,14 +4,14 @@ Staff/teacher-facing cohort risk view plus a per-student detail page. All
 predictions come from :mod:`app.services.prediction_service`; nothing here is
 fabricated.
 """
-from flask import Blueprint, abort, render_template, request
+from flask import Blueprint, abort, jsonify, render_template, request
 from flask_login import login_required
 from sqlalchemy import func
 
 from ..extensions import db
 from ..models import Student
 from ..security.decorators import permission_required
-from ..services import prediction_service
+from ..services import ml_training_service, prediction_service
 
 bp = Blueprint("predictions", __name__, url_prefix="/predictions")
 
@@ -49,7 +49,6 @@ def index():
 @login_required
 @permission_required("view_grades")
 def student_detail(student_id: int):
-    """Explainable prediction for a single student."""
     student = db.session.get(Student, student_id)
     if student is None:
         abort(404)
@@ -65,3 +64,49 @@ def student_detail(student_id: int):
             db.select(func.count()).select_from(Student).where(Student.id == student.id)
         ),
     )
+
+
+@bp.route("/ml")
+@login_required
+@permission_required("view_grades")
+def ml_model():
+    """AI/ML page: train the logistic-regression classifier and show results."""
+    force = request.args.get("train") == "1"
+    result = ml_training_service.predict_cohort_ml()
+    if force:
+        ml_training_service.train_model(force=True)
+        result = ml_training_service.predict_cohort_ml()
+    return render_template(
+        "predictions/ml.html",
+        report=result["report"],
+        rows=result["rows"],
+        trained=result["trained"],
+        threshold=ml_training_service.DECISION_THRESHOLD,
+        weight_pairs=list(zip(result["report"].feature_names, result["report"].weights)),
+    )
+
+
+@bp.route("/ml/train", methods=["POST"])
+@login_required
+@permission_required("view_grades")
+def ml_train():
+    """Retrain the model and return the fresh training report as JSON."""
+    model, report, raw = ml_training_service.train_model(force=True)
+    return jsonify({"ok": True, "report": report.as_dict()})
+
+
+@bp.route("/ml/predict/<int:student_id>")
+@login_required
+@permission_required("view_grades")
+def ml_predict(student_id: int):
+    """Predict one student with the trained model; return JSON."""
+    out = ml_training_service.predict_student_ml(student_id)
+    if out is None:
+        return jsonify({"ok": False, "error": "student not found or no data"}), 404
+    return jsonify({
+        "ok": True,
+        "student_id": student_id,
+        "probability": round(out["probability"], 4),
+        "predicted_at_risk": out["predicted_at_risk"],
+        "contributions": out["contributions"],
+    })
