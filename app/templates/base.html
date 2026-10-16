@@ -80,6 +80,11 @@
         {% if current_user.has_permission('view_reports') %}
           {{ navlink('reports.index', 'Reports', '/reports', '<path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/>') }}
         {% endif %}
+        {% if current_user.has_permission('view_grades') %}
+          <div class="nav-group-label">Analytics</div>
+          {{ navlink('predictions.ml_model', 'AI / ML Model', '/predictions/ml', '<path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6"/>') }}
+          {{ navlink('predictions.index', 'Academic Risk', '/predictions', '<path d="M3 3v18h18"/><path d="M7 15l4-6 4 4 4-7"/>') }}
+        {% endif %}
         {% if current_user.has_permission('view_students') and not current_user.has_permission('view_own_grades') %}
           {{ navlink('records.my_records', 'Academic Records', '/records', '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6M9 11h6"/>') }}
         {% endif %}
