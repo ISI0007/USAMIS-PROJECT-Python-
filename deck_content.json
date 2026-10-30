@@ -1,0 +1,567 @@
+{
+  "base": "C:\\Users\\Admin\\USAMIS-PROJECT-Python-",
+  "slides": [
+    {
+      "type": "title",
+      "kicker": "University Student Academic Management Information System",
+      "heading": "USAMIS — Four-Layer Architecture",
+      "sub": "QR attendance with OpenCV image decoding and an early academic-risk neural experiment",
+      "meta": "Jinling Institute of Technology  ·  Python 3.11 · Flask · PostgreSQL 17  ·  30 October 2026"
+    },
+    {
+      "type": "agenda",
+      "items": [
+        "Project overview and scope",
+        "The four logical layers",
+        "Layer 3 — academic processing and algorithms",
+        "Request trace: OpenCV QR attendance",
+        "Request trace: neural risk experiment",
+        "Model architecture, training and evaluation",
+        "Verification evidence",
+        "Limitations and next steps"
+      ]
+    },
+    {
+      "type": "divider",
+      "num": "01",
+      "title": "Project Overview",
+      "blurb": "A role-based academic management information system, extended with computer vision and a research-grade neural experiment."
+    },
+    {
+      "type": "bullets",
+      "title": "What USAMIS Does",
+      "sub": "One Flask application serving five academic roles",
+      "items": [
+        "Enrolment, academic history, attendance, fees and results in one place",
+        "Departments, programmes, courses, semesters and course offerings",
+        "Deterministic eligibility rules, credit-weighted GPA, published results",
+        "QR session links plus photographed-code decoding with OpenCV",
+        "Decimal-safe assessment, payment records and outstanding balances",
+        "Generated reports, exports and an immutable audit log"
+      ]
+    },
+    {
+      "type": "stats",
+      "title": "The System at a Glance",
+      "sub": "Measured on the completed demonstration build",
+      "stats": [
+        [
+          "22",
+          "application tables"
+        ],
+        [
+          "194",
+          "automated tests passed"
+        ],
+        [
+          "24",
+          "web pages verified 200"
+        ],
+        [
+          "6",
+          "implemented roles"
+        ]
+      ],
+      "note": "Roles: Administrator, Registrar, Teacher, Finance Officer, Student and Parent. The parent portal reads a linked student's record and never writes academic data."
+    },
+    {
+      "type": "bullets",
+      "title": "Scope Discipline",
+      "sub": "What was added and what was deliberately not",
+      "items": [
+        "OpenCV image scanning, QR POST confirmation, independent neural experiment, logistic comparison, artefact persistence",
+        "Deterministic enrolment, grade/GPA and fee algorithms — official records must follow institutional rules",
+        "LSTM until genuine weekly sequences exist; face recognition without a validated requirement",
+        "Transformers until data scale justifies the complexity",
+        "Consented historical snapshots, later-cohort evaluation, calibration checks, human review of alerts"
+      ],
+      "cols": 1
+    },
+    {
+      "type": "divider",
+      "num": "02",
+      "title": "The Four Layers",
+      "blurb": "Logical responsibilities inside a single Flask process — not four separately deployed servers."
+    },
+    {
+      "type": "table",
+      "title": "Layer Responsibilities",
+      "sub": "Each layer carries independent evidence",
+      "headers": [
+        "Layer",
+        "Responsibility",
+        "Code",
+        "Evidence"
+      ],
+      "widths": [
+        0.2,
+        0.3,
+        0.28,
+        0.22
+      ],
+      "rows": [
+        [
+          "1. Presentation",
+          "Render pages, collect input, display results",
+          "app/frontend/templates, static",
+          "Templates compile; pages inspected"
+        ],
+        [
+          "2. Application",
+          "Route requests, authenticate, authorise, adapt forms",
+          "Flask blueprints, security/",
+          "HTTP, auth and invalid-input tests"
+        ],
+        [
+          "3. Academic Processing",
+          "Apply policy, orchestrate, decode QR, train and infer",
+          "backend/services, algorithms",
+          "Pure algorithm tests; real QR pixels"
+        ],
+        [
+          "4. Data",
+          "Store and retrieve records and artefacts",
+          "database/models, repositories",
+          "Round-trip and persistence tests"
+        ]
+      ]
+    },
+    {
+      "type": "cards",
+      "title": "Why Four Layers Matters",
+      "sub": "Separation that is checkable, not just claimed",
+      "cols": 3,
+      "cards": [
+        [
+          "No framework leakage",
+          "Layer 3 algorithms contain no Flask, SQLAlchemy or PostgreSQL imports. They are testable as pure functions."
+        ],
+        [
+          "Repositories, not queries",
+          "New code reaches the database through repositories. The neural route calls a service, which calls its repository."
+        ],
+        [
+          "Honest boundaries",
+          "Some legacy Flask routes still query the ORM directly. The architecture is a practical separation, not a purity claim."
+        ],
+        [
+          "Independent evidence",
+          "Each layer has its own verification scope in verify_layers.ps1, plus integrated request tests on top."
+        ],
+        [
+          "Compile without a server",
+          "All Jinja templates compile standalone, proving Layer 1 is not entangled with a running application."
+        ],
+        [
+          "Audit by construction",
+          "Every sensitive operation writes an audit row in Layer 4 as part of the same transaction."
+        ]
+      ]
+    },
+    {
+      "type": "divider",
+      "num": "03",
+      "title": "Layer 3 — Algorithms",
+      "blurb": "Deterministic policy for official records. Statistical models only for research and support."
+    },
+    {
+      "type": "bullets",
+      "title": "Deterministic Algorithms",
+      "sub": "Explainable, reproducible, and auditable by an examiner",
+      "items": [
+        "Checks status, duplicates, prerequisites and capacity. No score, no probability — a rule outcome.",
+        "Credit-weighted average of published grades, expressed on the institutional scale.",
+        "Decimal-safe arithmetic with explicit status rules, avoiding floating-point drift.",
+        "A student's official standing must be defensible to an appeal. Rules can be read, cited and corrected."
+      ],
+      "cols": 1
+    },
+    {
+      "type": "bullets",
+      "title": "Probabilistic Components",
+      "sub": "Where statistical learning is appropriate — and where it is not",
+      "items": [
+        "Computer vision, emphatically not deep learning. A classical detector reads pixels from a photographed code.",
+        "A trainable 4–32–16–1 network — this is the deep-learning component of the demonstration.",
+        "The same implementation with no hidden layer. A fair, like-for-like baseline.",
+        "No model changes a student's grades, enrolment or official academic standing. Ever."
+      ],
+      "cols": 1
+    },
+    {
+      "type": "divider",
+      "num": "04",
+      "title": "QR Attendance",
+      "blurb": "Acquire attendance reliably, from an image, with signature and replay protection."
+    },
+    {
+      "type": "bullets",
+      "title": "Request Trace — OpenCV Attendance",
+      "sub": "One scan, four layers, six steps",
+      "items": [
+        "A signed-in student photographs or uploads the displayed QR image.",
+        "The route checks login, the attendance permission and CSRF protection.",
+        "OpenCV decodes the image; attendance logic verifies the HMAC signature, expiry, open session and enrolment.",
+        "PostgreSQL stores the attendance row and an audit entry in one transaction.",
+        "An existing daily record is updated, never duplicated — the operation is idempotent.",
+        "The student sees confirmation and their attendance history."
+      ],
+      "cols": 1
+    },
+    {
+      "type": "cards",
+      "title": "Security Properties of Scanning",
+      "sub": "Deliberate constraints, stated plainly",
+      "cols": 3,
+      "cards": [
+        [
+          "Processed in memory",
+          "The uploaded image is never persisted to disk. Decoding happens entirely in memory."
+        ],
+        [
+          "No URL following",
+          "The decoder never follows a URL embedded in an uploaded QR code. Tampered codes are rejected."
+        ],
+        [
+          "POST confirms",
+          "An ordinary phone-camera QR link first shows a confirmation page. Only the POST writes attendance."
+        ],
+        [
+          "HMAC signed",
+          "Session tokens are signed and time-limited, so a captured token cannot be replayed later."
+        ],
+        [
+          "Idempotent writes",
+          "A repeat scan updates the day's record rather than creating a second one."
+        ],
+        [
+          "Honest limitation",
+          "Scanning does not prove physical presence, and cannot stop a student sharing an active code."
+        ]
+      ]
+    },
+    {
+      "type": "image",
+      "title": "The Student Scanner",
+      "sub": "Photograph upload with live confirmation",
+      "img": "docs/screenshots/upgrade/s-demo-attendance-scanner.png",
+      "caption": "Student view at /attendance/scanner — upload or photograph a QR code to record attendance."
+    },
+    {
+      "type": "divider",
+      "num": "05",
+      "title": "Neural Risk Experiment",
+      "blurb": "Can earlier academic signals identify students who need support? A measured, honest investigation."
+    },
+    {
+      "type": "bullets",
+      "title": "The Research Question, Framed Carefully",
+      "sub": "What this experiment does and does not claim",
+      "items": [
+        "Previous average (0–100), attendance proportion (0–1), early assessment average (0–100), credit load (1–40).",
+        "failed_later — an outcome observed strictly after the snapshot date.",
+        "Today's cumulative database records are never converted into historical training examples.",
+        "The bundled generator creates labelled synthetic examples for teaching only.",
+        "60 rows and 15 per class are software minimums, not proof of statistical adequacy.",
+        "A reproducible classroom demonstration — not a validated institutional predictor."
+      ],
+      "cols": 1
+    },
+    {
+      "type": "table",
+      "title": "Model Architecture",
+      "sub": "A small network, chosen for explainability over complexity",
+      "headers": [
+        "Element",
+        "Design choice",
+        "Rationale"
+      ],
+      "widths": [
+        0.22,
+        0.4,
+        0.38
+      ],
+      "rows": [
+        [
+          "Input layer",
+          "4 numeric features",
+          "Only signals available at the snapshot date"
+        ],
+        [
+          "Hidden layer 1",
+          "32 ReLU units",
+          "Sufficient capacity for a small tabular problem"
+        ],
+        [
+          "Hidden layer 2",
+          "16 ReLU units",
+          "Progressive compression before the decision"
+        ],
+        [
+          "Output",
+          "1 sigmoid unit",
+          "Produces a probability-like score in [0,1]"
+        ],
+        [
+          "Comparator",
+          "No hidden layer",
+          "Identical implementation — this is logistic regression"
+        ],
+        [
+          "Implementation",
+          "NumPy backpropagation",
+          "No framework dependency; fully inspectable"
+        ]
+      ]
+    },
+    {
+      "type": "stats",
+      "title": "Training Configuration",
+      "sub": "Fixed for reproducibility",
+      "stats": [
+        [
+          "42",
+          "random seed"
+        ],
+        [
+          "0.03",
+          "learning rate"
+        ],
+        [
+          "1,200",
+          "max epochs"
+        ],
+        [
+          "80",
+          "early-stop patience"
+        ]
+      ],
+      "note": "Loss: binary cross-entropy with L2 regularisation. Best validation-loss weights are restored. Normalisation is fitted on training data only — never on validation or test."
+    },
+    {
+      "type": "bullets",
+      "title": "Evaluation Protocol",
+      "sub": "Designed so the test set cannot influence model choice",
+      "items": [
+        "Stratified approximately 60/20/20 across distinct students.",
+        "Prevents the same student's examples appearing in both training and test groups.",
+        "The comparator is chosen on validation only.",
+        "The test group is reported afterwards and does not select the model.",
+        "Precision, recall, F1, accuracy, confusion matrix and Brier score.",
+        "Scores are not established as calibrated real-world probabilities."
+      ],
+      "cols": 1
+    },
+    {
+      "type": "cards",
+      "title": "Request Trace — Neural Inference",
+      "sub": "Layer 2 validates, Layer 3 computes, Layer 4 loads",
+      "cols": 3,
+      "cards": [
+        [
+          "Layer 1",
+          "Displays a research form and the held-out results table for comparison."
+        ],
+        [
+          "Layer 2",
+          "Permits users holding manage_students, validates the request and handles errors gracefully."
+        ],
+        [
+          "Layer 3",
+          "Validates four numerical inputs and performs forward inference."
+        ],
+        [
+          "Layer 4",
+          "Loads a versioned JSON artefact, with a PostgreSQL fallback if the file is absent."
+        ],
+        [
+          "Offline training",
+          "Reads CSV snapshots and atomically saves the artefact — no partial writes."
+        ],
+        [
+          "Persistence",
+          "risk_snapshots and risk_experiments store the dataset and trained bundle in SQL."
+        ]
+      ]
+    },
+    {
+      "type": "image",
+      "title": "Admin — Neural Experiment",
+      "sub": "Research form and held-out model comparison",
+      "img": "docs/screenshots/upgrade/admin-predictions-neural.png",
+      "caption": "Administrator view at /predictions/neural."
+    },
+    {
+      "type": "image",
+      "title": "Model Result",
+      "sub": "A single inference rendered for the user",
+      "img": "docs/screenshots/upgrade/neural-result.png",
+      "caption": "Synthetic-data disclosure is shown alongside any score."
+    },
+    {
+      "type": "divider",
+      "num": "06",
+      "title": "Verification",
+      "blurb": "Claims backed by executed checks, not estimates."
+    },
+    {
+      "type": "stats",
+      "title": "Evidence",
+      "sub": "Recorded 30 October 2026 against the live build",
+      "stats": [
+        [
+          "194",
+          "tests passed"
+        ],
+        [
+          "0",
+          "failures or skips"
+        ],
+        [
+          "4/4",
+          "layer scopes passed"
+        ],
+        [
+          "25",
+          "pages returned 200"
+        ]
+      ],
+      "note": "Full PostgreSQL-backed suite ran in 68.01 seconds. Evidence file: instance/verification.xml. 24 pages plus one neural form submission verified across administrator, teacher, student and parent accounts."
+    },
+    {
+      "type": "bullets",
+      "title": "What Was Actually Checked",
+      "sub": "Each item was executed, not assumed",
+      "items": [
+        "All four scopes in scripts/verify_layers.ps1 passed independently.",
+        "Tests decode actual QR pixels, persist attendance, reject tampered codes, and confirm repeat scans are idempotent.",
+        "Final migration metadata comparison returned an empty diff.",
+        "The complete dump restored into a separate empty database; every table count matched.",
+        "Eight student and two teacher profiles carry local fictional portraits — display assets, not training data.",
+        "A physical-phone classroom trial remains outstanding."
+      ],
+      "cols": 1
+    },
+    {
+      "type": "table",
+      "title": "Demonstration Database",
+      "sub": "Restored and row-counted",
+      "headers": [
+        "Entity",
+        "Count",
+        "Entity",
+        "Count"
+      ],
+      "widths": [
+        0.28,
+        0.22,
+        0.28,
+        0.22
+      ],
+      "rows": [
+        [
+          "Students",
+          "8",
+          "Courses",
+          "44"
+        ],
+        [
+          "Teachers",
+          "2",
+          "Course offerings",
+          "44"
+        ],
+        [
+          "Departments",
+          "3",
+          "Enrolments",
+          "231"
+        ],
+        [
+          "Semesters",
+          "8",
+          "Grades",
+          "217"
+        ],
+        [
+          "Users",
+          "14",
+          "Attendance rows",
+          "868"
+        ],
+        [
+          "Fee assessments",
+          "24",
+          "Payments",
+          "6"
+        ],
+        [
+          "Research snapshots",
+          "600",
+          "Trained experiments",
+          "1"
+        ]
+      ]
+    },
+    {
+      "type": "divider",
+      "num": "07",
+      "title": "Limitations and Next Steps",
+      "blurb": "Stated plainly, because a demonstration earns trust by naming its edges."
+    },
+    {
+      "type": "cards",
+      "title": "Honest Limitations",
+      "sub": "What this build does not establish",
+      "cols": 3,
+      "cards": [
+        [
+          "Synthetic metrics",
+          "Model scores come from generated data. They demonstrate method, not institutional truth."
+        ],
+        [
+          "No historical cohort",
+          "Real prediction requires consented dated snapshots and later observed outcomes."
+        ],
+        [
+          "Not calibrated",
+          "Brier score is reported, but scores are not validated probabilities."
+        ],
+        [
+          "Threshold unset",
+          "Choosing an operating threshold depends on advisor capacity — an institutional decision."
+        ],
+        [
+          "External providers",
+          "SMS and payment adapters exist; live services were not exercised. Demo records are labelled stub."
+        ],
+        [
+          "Physical trial pending",
+          "OpenCV decoding is tested on images, not yet in a live classroom."
+        ]
+      ]
+    },
+    {
+      "type": "bullets",
+      "title": "Recommended Next Steps",
+      "sub": "In priority order",
+      "items": [
+        "Consented, dated, governance-approved data with later observed outcomes.",
+        "Temporal validation is the only meaningful test of a predictor.",
+        "Tune the decision boundary to the number of students advisors can actually support.",
+        "A DAG with topological sorting can detect cycles and show a valid course order — high value, little data required.",
+        "Consider richer sequence models once genuine weekly sequences exist."
+      ],
+      "cols": 1
+    },
+    {
+      "type": "closing",
+      "heading": "Questions",
+      "lines": [
+        "USAMIS runs locally at http://127.0.0.1:5055 — a classroom demonstration with fictional people and synthetic training data.",
+        "Four layers, one process. Deterministic rules for official records. Statistical models for support, never authority.",
+        "194 tests passed. Four layer scopes verified. Every claim in this deck is reproducible from the repository."
+      ]
+    }
+  ]
+}
