@@ -11,10 +11,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from decimal import Decimal
 
-from sqlalchemy import func, select
-
-from ..extensions import db
-from ..models import Course, CourseOffering, Enrollment, Grade, Prerequisite, Student
 
 
 # Machine-readable reason codes returned alongside the human explanation.
@@ -50,88 +46,17 @@ class EligibilityResult:
         }
 
 
-def _prerequisites_met(student: Student, course: Course) -> tuple[bool, list[str]]:
-    """Return (met, unmet_descriptions).
-
-    A prerequisite is satisfied when the student has a *published* passing
-    grade (>= min_grade or the course pass mark) for the required course.
-    """
-    prereqs: list[Prerequisite] = (
-        db.session.execute(
-            select(Prerequisite).where(Prerequisite.course_id == course.id)
-        )
-        .scalars()
-        .all()
-    )
-    unmet: list[str] = []
-    for prereq in prereqs:
-        required = db.session.get(Course, prereq.required_course_id)
-        if required is None:
-            continue
-        threshold = (
-            Decimal(str(prereq.min_grade))
-            if prereq.min_grade is not None
-            else Decimal("50.00")
-        )
-        # Best published grade the student obtained in any offering of the
-        # required course. Built as a proper subquery so SQLAlchemy can
-        # compose the IN clause correctly.
-        offering_ids = select(CourseOffering.id).where(
-            CourseOffering.course_id == required.id
-        )
-        score = db.session.execute(
-            select(func.max(Grade.score))
-            .join(Enrollment, Grade.enrollment_id == Enrollment.id)
-            .where(
-                Enrollment.student_id == student.id,
-                Enrollment.offering_id.in_(offering_ids),
-                Grade.is_published.is_(True),
-            )
-        ).scalar()
-        if score is None or Decimal(str(score)) < threshold:
-            unmet.append(
-                f"{required.code} (need >= {threshold})"
-            )
-    return (len(unmet) == 0), unmet
-
-
-def check_capacity(offering, lock: bool = False) -> tuple[bool, int, int]:
-    """Check available capacity for ``offering``.
-
-    When ``lock`` is True the offering row is selected ``FOR UPDATE`` so two
-    concurrent transactions cannot both admit the final seat. This relies on
-    PostgreSQL row locking; on SQLite the clause is a no-op (documented).
-
-    Returns ``(has_room, enrolled_count, capacity)``.
-    """
-    if lock:
-        offering = db.session.execute(
-            select(type(offering))
-            .where(type(offering).id == offering.id)
-            .with_for_update()
-        ).scalar_one()
-
-    enrolled = db.session.execute(
-        select(func.count(Enrollment.id)).where(
-            Enrollment.offering_id == offering.id,
-            Enrollment.status.in_(("enrolled", "completed")),
-        )
-    ).scalar_one()
-
-    return enrolled < offering.capacity, int(enrolled), int(offering.capacity)
-
-
 def evaluate_enrollment(
-    student: Student | None,
+    student,
     offering,
     *,
-    lock_capacity: bool = False,
+    facts: dict,
 ) -> EligibilityResult:
     """Evaluate eligibility of ``student`` for ``offering``.
 
     The checks run in a documented order and each failure returns a
     structured result with a clear reason code. Capacity is checked with an
-    optional row lock for concurrency safety.
+    facts snapshot retrieved by the service under an optional capacity lock.
     """
     details: dict = {}
 
@@ -167,23 +92,13 @@ def evaluate_enrollment(
         )
 
     # 3. Duplicate active enrollment.
-    duplicate = db.session.execute(
-        select(Enrollment).where(
-            Enrollment.student_id == student.id,
-            Enrollment.offering_id == offering.id,
-            Enrollment.status.in_(("pending", "enrolled", "completed")),
-        )
-    ).scalars().first()
-    if duplicate is not None:
-        return EligibilityResult(
-            False,
-            REASON_ALREADY_ENROLLED,
-            f"Already {duplicate.status} in {course.code}.",
-        )
+    if facts['duplicate_status'] is not None:
+        return EligibilityResult(False, REASON_ALREADY_ENROLLED,
+                                 f"Already {facts['duplicate_status']} in {course.code}.")
 
     # 4. Prerequisites.
-    met, unmet = _prerequisites_met(student, course)
-    if not met:
+    unmet = facts['unmet']
+    if unmet:
         return EligibilityResult(
             False,
             REASON_PREREQUISITE_MISSING,
@@ -193,7 +108,8 @@ def evaluate_enrollment(
         )
 
     # 5. Capacity (optionally with a row lock to protect against races).
-    has_room, enrolled, capacity = check_capacity(offering, lock=lock_capacity)
+    enrolled, capacity = facts['enrolled'], facts['capacity']
+    has_room = enrolled < capacity
     details.update({"enrolled": enrolled, "capacity": capacity})
     if not has_room:
         return EligibilityResult(

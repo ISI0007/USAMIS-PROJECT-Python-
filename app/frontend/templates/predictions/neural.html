@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Early Academic Risk Experiment{% endblock %}
+{% block heading %}Early Academic Risk Experiment{% endblock %}
+{% block content %}
+<h1 class="page-title">Early Academic Risk Experiment</h1>
+<p>A neural network with two hidden layers estimates risk from an earlier academic snapshot. Results support advisor review and never change grades or enrollment.</p>
+{% if error %}<p role="alert" class="alert alert-danger">{{ error }}</p>{% endif %}
+{% if bundle %}
+<p><strong>Dataset: {{ bundle.data_kind }}.</strong> {{ bundle.source }}<br>
+Model {{ bundle.model_version }}. Trained {{ bundle.trained_at }}.<br>
+Split: {{ bundle.split_counts.train }} training, {{ bundle.split_counts.validation }} validation, {{ bundle.split_counts.test }} test students.</p>
+{% if bundle.data_kind == 'synthetic' %}<p class="alert alert-warning">Demonstration only: synthetic-data results do not establish accuracy for real students.</p>{% endif %}
+<h2>Held-out test results</h2>
+<table class="table"><thead><tr><th>Model</th><th>Precision</th><th>Recall</th><th>F1</th><th>Confusion matrix [[TN, FP], [FN, TP]]</th></tr></thead><tbody>
+{% for name, item in bundle.results.items() %}<tr><td>{{ name|replace('_', ' ') }}</td><td>{{ '%.3f'|format(item.test.precision) }}</td><td>{{ '%.3f'|format(item.test.recall) }}</td><td>{{ '%.3f'|format(item.test.f1) }}</td><td>{{ item.test.confusion_matrix }}</td></tr>{% endfor %}
+</tbody></table>
+<p>Validation F1 selected: {{ bundle.selected_by_validation_f1|replace('_', ' ') }}. The demonstration form below uses the neural network for comparison.</p>
+<h2>Try an academic snapshot</h2>
+<form method="post" class="form card narrow">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% for name, label, low, high, step in [('prior_average','Previous average (0–100)',0,100,0.1),('attendance_rate','Attendance proportion (0–1)',0,1,0.01),('early_average','Early assessment average (0–100)',0,100,0.1),('credit_load','Credit load (1–40)',1,40,1)] %}
+<div class="field"><label for="{{ name }}">{{ label }}</label><input class="input" id="{{ name }}" name="{{ name }}" type="number" min="{{ low }}" max="{{ high }}" step="{{ step }}" required value="{{ request.form.get(name, '') }}"></div>
+{% endfor %}
+<button class="btn btn-primary" type="submit">Estimate risk</button></form>
+{% if result %}<p role="status" class="card"><strong>Model score: {{ '%.1f'|format(result.score * 100) }}%</strong>. {{ 'Advisor review suggested' if result.above_threshold else 'Below the experimental review threshold' }}. This score is not a validated real-world probability.</p>{% endif %}
+{% else %}<p>No model has been trained. Follow the training instructions in docs/FOUR_LAYER_UPGRADE.md.</p>{% endif %}
+{% endblock %}

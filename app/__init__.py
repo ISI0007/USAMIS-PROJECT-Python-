@@ -6,6 +6,11 @@ development, testing and production configurations can be created
 independently.
 """
 import os
+from pathlib import Path
+
+# Keep existing app.* imports stable while locating code in its layer folders.
+_layer_root = Path(__file__).resolve().parent
+__path__.extend([str(_layer_root / "backend"), str(_layer_root / "database")])
 
 from flask import Flask, render_template
 from flask_wtf.csrf import CSRFError
@@ -22,7 +27,7 @@ def create_app(config_name: str | None = None, config_object=None) -> Flask:
     :param config_object: an already-instantiated configuration object or
         class, primarily used by the test suite.
     """
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_relative_config=True, template_folder="frontend/templates", static_folder="frontend/static")
 
     if config_object is not None:
         app.config.from_object(config_object)
@@ -32,7 +37,6 @@ def create_app(config_name: str | None = None, config_object=None) -> Flask:
     os.makedirs(app.instance_path, exist_ok=True)
 
     _init_extensions(app)
-    _ensure_schema(app)
     _register_blueprints(app)
     _register_error_handlers(app)
     _register_security_headers(app)
@@ -70,31 +74,6 @@ def _init_extensions(app: Flask) -> None:
         return redirect(url_for("auth.login", next=request.path))
 
 
-def _ensure_schema(app: Flask) -> None:
-    """Idempotently ensure small additive schema changes are present.
-
-    The project keeps an Alembic migration folder, but for tiny additive
-    columns (profile photo) a guarded ALTER TABLE is simpler and safe to run
-    on every boot: it is a no-op once the column exists. Never drops or
-    rewrites data.
-    """
-    try:
-        from sqlalchemy import inspect, text
-
-        with app.app_context():
-            engine = db.engine
-            inspector = inspect(engine)
-            if "users" not in inspector.get_table_names():
-                return
-            cols = {c["name"] for c in inspector.get_columns("users")}
-            if "avatar_path" not in cols:
-                with engine.begin() as conn:
-                    conn.execute(text("ALTER TABLE users ADD COLUMN avatar_path VARCHAR(255)"))
-                app.logger.info("Schema guard: added users.avatar_path")
-    except Exception as exc:  # pragma: no cover - boot resilience
-        app.logger.warning("Schema guard skipped: %s", exc)
-
-
 def _register_blueprints(app: Flask) -> None:
     from .auth import bp as auth_bp
     from .dashboard import bp as dashboard_bp
@@ -114,6 +93,7 @@ def _register_blueprints(app: Flask) -> None:
     from .parents import bp as parents_bp
     from .admin import bp as admin_bp
     from .records import bp as records_bp
+    from .people import bp as people_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -133,6 +113,7 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(parents_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(records_bp)
+    app.register_blueprint(people_bp)
 
     @app.route("/")
     def index():

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Confirm Attendance{% endblock %}
+{% block heading %}Confirm Attendance{% endblock %}
+{% block content %}
+<h1>Confirm attendance</h1>
+<p>Submit to validate this session and record your attendance.</p>
+<form method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<input type="hidden" name="token" value="{{ token }}">
+<button type="submit" class="btn btn-primary">Record my attendance</button>
+</form>
+{% endblock %}

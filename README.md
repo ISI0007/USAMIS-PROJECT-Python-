@@ -1,3 +1,7 @@
+# October 2026 four-layer upgrade
+
+The SQL, teacher instructions and updated presentation are in [deliverables](deliverables/). See [upgrade guide](docs/FOUR_LAYER_UPGRADE.md) and [verified results](docs/VERIFICATION_2026_10_30.md) for the new OpenCV scanner, trained neural experiment, illustrated profiles and SQL corrections. Run migrations explicitly before startup; install `requirements-vision.txt` for image scanning. Older sections below describe the original project.
+
 # USAMIS-Python
 
 **University Student Academic Management Information System**

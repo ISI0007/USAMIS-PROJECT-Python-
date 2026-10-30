@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}My Attendance{% endblock %}
+{% block heading %}My Attendance{% endblock %}
+{% block breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('dashboard.home') }}">Home</a>
+  <span class="sep">/</span><span class="current">My Attendance</span>
+</nav>
+{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('attendance.qr_scanner') }}">Scan an attendance QR image</a></p>
+<div class="page-head">
+  <h1 class="page-title">My attendance</h1>
+  <p class="page-sub">Your recorded attendance across enrolled courses.</p>
+</div>
+<div class="stat-grid">
+  <div class="stat success"><span class="stat-value">{{ present }}</span><span class="stat-label">Present / Late</span></div>
+  <div class="stat"><span class="stat-value">{{ total }}</span><span class="stat-label">Sessions</span></div>
+</div>
+{% if rows %}
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Date</th><th>Course</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for a in rows %}
+    <tr>
+      <td>{{ a.session_date }}</td>
+      <td>{{ a.offering.course.code }} — {{ a.offering.course.title }}</td>
+      <td><span class="pill pill-{{ a.status }}">{{ a.status }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty"><div class="empty-icon">🗓️</div>No attendance records yet.</div>
+{% endif %}
+{% endblock %}

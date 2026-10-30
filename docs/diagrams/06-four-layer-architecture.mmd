@@ -1,0 +1,28 @@
+flowchart TB
+    U[Administrator / Registrar / Teacher / Finance / Student / Parent]
+    subgraph L1[Layer 1: Presentation]
+      UI[HTML templates, forms, dashboards, QR image upload]
+    end
+    subgraph L2[Layer 2: Application]
+      R[Flask routes, authentication, RBAC, CSRF, HTTP responses]
+    end
+    subgraph L3[Layer 3: Academic Processing and Algorithms]
+      S[Academic workflow services]
+      A[Enrollment checks / GPA / Decimal fee calculations]
+      V[OpenCV QR decoding / HMAC session validation]
+      N[Neural-network training and inference / Logistic comparison]
+    end
+    subgraph L4[Layer 4: Data]
+      ORM[SQLAlchemy models and repository access]
+      DB[(PostgreSQL: 22 application tables)]
+      FILES[(Dated CSV snapshots / versioned model JSON)]
+    end
+    U <--> UI
+    UI <--> R
+    R <--> S
+    S --- A
+    S --- V
+    S --- N
+    S <--> ORM
+    ORM <--> DB
+    ORM <--> FILES

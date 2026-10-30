@@ -231,6 +231,10 @@ def test_student_scan_route_marks_present(client, login, make_user, app, db):
     login("qrstudent", password="Student_Pass1!")
     resp = client.get(f"/attendance/scan?token={token}", follow_redirects=True)
     assert resp.status_code == 200
+    assert b"Confirm attendance" in resp.data
+    with app.app_context():
+        assert _db.session.scalar(_db.select(_db.func.count(Attendance.id))) == 0
+    resp = client.post('/attendance/scan', data={'token': token}, follow_redirects=True)
     assert b"Attendance recorded" in resp.data
     with app.app_context():
         assert _db.session.scalar(_db.select(_db.func.count(Attendance.id))) == 1

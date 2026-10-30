@@ -1,0 +1,305 @@
+erDiagram
+    departments {
+        INTEGER id PK
+        VARCHAR code
+        VARCHAR name
+        TEXT description
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    fee_categories {
+        INTEGER id PK
+        VARCHAR code
+        VARCHAR name
+        TEXT description
+        NUMERIC default_amount
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    risk_experiments {
+        INTEGER id PK
+        VARCHAR dataset_sha256
+        JSON artifact
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    risk_snapshots {
+        INTEGER id PK
+        VARCHAR dataset_sha256
+        VARCHAR student_key
+        DATE snapshot_date
+        DATE outcome_date
+        NUMERIC prior_average
+        NUMERIC attendance_rate
+        NUMERIC early_average
+        NUMERIC credit_load
+        BOOLEAN failed_later
+        VARCHAR data_kind
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    semesters {
+        INTEGER id PK
+        VARCHAR academic_year
+        VARCHAR term
+        DATE start_date
+        DATE end_date
+        BOOLEAN is_active
+        BOOLEAN registration_open
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    users {
+        INTEGER id PK
+        VARCHAR username
+        VARCHAR email
+        VARCHAR full_name
+        VARCHAR password_hash
+        VARCHAR role
+        BOOLEAN is_active_flag
+        VARCHAR status
+        DATETIME last_login_at
+        INTEGER failed_login_count
+        DATETIME locked_until
+        VARCHAR avatar_path
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    academic_programs {
+        INTEGER id PK
+        VARCHAR code
+        VARCHAR name
+        INTEGER department_id FK
+        INTEGER duration_years
+        INTEGER total_credits_required
+        TEXT description
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    departments ||--o{ academic_programs : "department_id"
+    audit_logs {
+        INTEGER id PK
+        INTEGER actor_id FK
+        VARCHAR actor_username
+        VARCHAR action
+        VARCHAR entity_type
+        VARCHAR entity_id
+        TEXT summary
+        VARCHAR ip_address
+        DATETIME created_at
+    }
+    users |o--o{ audit_logs : "actor_id"
+    courses {
+        INTEGER id PK
+        VARCHAR code
+        VARCHAR title
+        TEXT description
+        NUMERIC credits
+        INTEGER department_id FK
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    departments |o--o{ courses : "department_id"
+    teachers {
+        INTEGER id PK
+        VARCHAR staff_number
+        INTEGER user_id FK
+        VARCHAR first_name
+        VARCHAR last_name
+        VARCHAR email
+        INTEGER department_id FK
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    departments |o--o{ teachers : "department_id"
+    users |o--o| teachers : "user_id"
+    course_offerings {
+        INTEGER id PK
+        INTEGER course_id FK
+        INTEGER semester_id FK
+        INTEGER teacher_id FK
+        INTEGER capacity
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    semesters ||--o{ course_offerings : "semester_id"
+    teachers |o--o{ course_offerings : "teacher_id"
+    courses ||--o{ course_offerings : "course_id"
+    prerequisites {
+        INTEGER id PK
+        INTEGER course_id FK
+        INTEGER required_course_id FK
+        NUMERIC min_grade
+    }
+    courses ||--o{ prerequisites : "course_id"
+    courses ||--o{ prerequisites : "required_course_id"
+    students {
+        INTEGER id PK
+        VARCHAR student_number
+        INTEGER user_id FK
+        VARCHAR first_name
+        VARCHAR last_name
+        VARCHAR email
+        VARCHAR phone
+        VARCHAR address
+        DATE date_of_birth
+        INTEGER department_id FK
+        INTEGER program_id FK
+        DATE admission_date
+        VARCHAR enrollment_status
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    departments |o--o{ students : "department_id"
+    academic_programs |o--o{ students : "program_id"
+    users |o--o| students : "user_id"
+    attendance_sessions {
+        INTEGER id PK
+        INTEGER offering_id FK
+        DATETIME session_date
+        VARCHAR token
+        DATETIME expires_at
+        BOOLEAN is_open
+        INTEGER opened_by_id FK
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    course_offerings ||--o{ attendance_sessions : "offering_id"
+    users |o--o{ attendance_sessions : "opened_by_id"
+    enrollments {
+        INTEGER id PK
+        INTEGER student_id FK
+        INTEGER offering_id FK
+        VARCHAR status
+        DATETIME requested_at
+        DATETIME decided_at
+        INTEGER decided_by_id FK
+        TEXT decision_note
+        TEXT eligibility_reason
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    course_offerings ||--o{ enrollments : "offering_id"
+    users |o--o{ enrollments : "decided_by_id"
+    students ||--o{ enrollments : "student_id"
+    fee_assessments {
+        INTEGER id PK
+        INTEGER student_id FK
+        INTEGER category_id FK
+        INTEGER semester_id FK
+        NUMERIC amount
+        NUMERIC adjustment
+        DATE due_date
+        TEXT note
+        INTEGER created_by_id FK
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    students ||--o{ fee_assessments : "student_id"
+    users |o--o{ fee_assessments : "created_by_id"
+    fee_categories ||--o{ fee_assessments : "category_id"
+    semesters |o--o{ fee_assessments : "semester_id"
+    parent_links {
+        INTEGER id PK
+        INTEGER parent_user_id FK
+        INTEGER student_id FK
+        VARCHAR relationship_type
+        VARCHAR contact_phone
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    students ||--o{ parent_links : "student_id"
+    users ||--o{ parent_links : "parent_user_id"
+    sms_messages {
+        INTEGER id PK
+        VARCHAR recipient
+        TEXT body
+        VARCHAR category
+        VARCHAR status
+        VARCHAR provider
+        VARCHAR provider_ref
+        TEXT error
+        DATETIME sent_at
+        INTEGER student_id FK
+        INTEGER created_by_id FK
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    users |o--o{ sms_messages : "created_by_id"
+    students |o--o{ sms_messages : "student_id"
+    attendance {
+        INTEGER id PK
+        INTEGER student_id FK
+        INTEGER offering_id FK
+        DATE session_date
+        VARCHAR status
+        TEXT note
+        VARCHAR source
+        INTEGER session_id FK
+        INTEGER recorded_by_id FK
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    students ||--o{ attendance : "student_id"
+    course_offerings ||--o{ attendance : "offering_id"
+    attendance_sessions |o--o{ attendance : "session_id"
+    users |o--o{ attendance : "recorded_by_id"
+    grades {
+        INTEGER id PK
+        INTEGER enrollment_id FK
+        INTEGER student_id FK
+        NUMERIC score
+        VARCHAR letter
+        BOOLEAN is_published
+        DATETIME published_at
+        INTEGER entered_by_id FK
+        TEXT remarks
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    students ||--o{ grades : "student_id"
+    users |o--o{ grades : "entered_by_id"
+    enrollments ||--o{ grades : "enrollment_id"
+    payments {
+        INTEGER id PK
+        INTEGER student_id FK
+        INTEGER assessment_id FK
+        NUMERIC amount
+        VARCHAR reference
+        DATE paid_on
+        TEXT note
+        INTEGER recorded_by_id FK
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    users |o--o{ payments : "recorded_by_id"
+    students ||--o{ payments : "student_id"
+    fee_assessments |o--o{ payments : "assessment_id"
+    payment_intents {
+        INTEGER id PK
+        INTEGER student_id FK
+        INTEGER assessment_id FK
+        NUMERIC amount
+        VARCHAR currency
+        VARCHAR reference
+        VARCHAR status
+        VARCHAR provider
+        VARCHAR provider_ref
+        TEXT checkout_url
+        TEXT error
+        DATETIME completed_at
+        INTEGER payment_id FK
+        INTEGER created_by_id FK
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    payments |o--o{ payment_intents : "payment_id"
+    students ||--o{ payment_intents : "student_id"
+    fee_assessments |o--o{ payment_intents : "assessment_id"
+    users |o--o{ payment_intents : "created_by_id"

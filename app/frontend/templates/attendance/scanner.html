@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Scan Attendance QR{% endblock %}
+{% block heading %}Scan Attendance QR{% endblock %}
+{% block content %}
+<h1 class="page-title">Scan Attendance QR</h1>
+<p>Take a photo of the lecturer's current QR code or choose a saved image. USAMIS decodes it locally with OpenCV and checks your enrollment and the session expiry.</p>
+{% if error %}<p role="alert" class="alert alert-danger">{{ error }}</p>{% endif %}
+<form method="post" enctype="multipart/form-data" class="form card narrow">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label for="qr_image">QR image (maximum 4 MB, 12 megapixels)</label>
+<input class="input" id="qr_image" name="qr_image" type="file" accept="image/png,image/jpeg,image/webp" capture="environment" required>
+<button type="submit" class="btn btn-primary">Scan and record attendance</button>
+</form>
+<p>The image is processed in memory and is not stored. You can also use your phone's normal camera to open the QR link.</p>
+{% endblock %}

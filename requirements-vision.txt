@@ -1,0 +1,4 @@
+# Optional OpenCV QR-image scanner. Core phone-camera QR URLs work without it.
+-r requirements.txt
+opencv-python-headless==4.10.0.84
+Pillow==10.4.0

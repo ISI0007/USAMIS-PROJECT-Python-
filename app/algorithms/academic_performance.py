@@ -10,7 +10,7 @@ See ``docs/ALGORITHMS.md``.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 # Documented default letter-grade scale (0-100). Configurable via config;
 # documented in docs/ALGORITHMS.md.
@@ -29,7 +29,7 @@ PASS_MARK = Decimal("50.00")
 @dataclass
 class GradeLine:
     course_code: str
-    credits: int
+    credits: Decimal
     score: Decimal
     letter: str
     grade_point: float | None
@@ -38,8 +38,8 @@ class GradeLine:
 @dataclass
 class PerformanceResult:
     weighted_average: Decimal | None
-    total_credits: int
-    graded_credits: int
+    total_credits: Decimal
+    graded_credits: Decimal
     gpa: float | None
     passed: int
     failed: int
@@ -117,17 +117,17 @@ def calculate_performance(
             notes.append(f"{code}: non-numeric grade '{raw_score}' excluded.")
             continue
 
-        if score < 0 or score > 100:
+        if not score.is_finite() or score < 0 or score > 100:
             notes.append(f"{code}: grade {score} out of range 0-100; excluded.")
             continue
 
         credits = rec.get("credits")
         try:
-            credits = int(credits)
-        except (TypeError, ValueError):
+            credits = Decimal(str(credits))
+        except (TypeError, ValueError, InvalidOperation):
             notes.append(f"{code}: invalid credits; excluded.")
             continue
-        if credits <= 0:
+        if not credits.is_finite() or credits <= 0:
             notes.append(f"{code}: non-positive credits; excluded.")
             continue
 

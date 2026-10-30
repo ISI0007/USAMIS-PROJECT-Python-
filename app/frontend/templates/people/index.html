@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Student and Teacher Directory{% endblock %}
+{% block heading %}People{% endblock %}
+{% block content %}
+<div class="page-head"><h1 class="page-title">Student and teacher directory</h1><p class="page-sub">Academic profiles and departments. Demo portraits are fictional illustrations.</p></div>
+{% for title, people in [('Teachers',teachers),('Students',students)] %}
+<h2>{{ title }} <span class="muted">({{ people|length }})</span></h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:22px;margin:20px 0 36px;">
+{% for person in people %}
+<article class="card" style="padding:0;overflow:hidden;">
+{% if person.avatar %}<img src="{{ url_for('static',filename=person.avatar) }}" alt="Illustrated profile for {{ person.name }}" style="width:100%;aspect-ratio:1;object-fit:cover;" loading="lazy">{% endif %}
+<div style="padding:18px"><h3 style="margin:0 0 8px">{{ person.name }}</h3><p class="muted small">{{ person.number }}<br>{{ person.subtitle }}</p>
+{% if person.kind=='Student' %}<a class="btn btn-sm" href="{{ url_for('students.profile',student_id=person.id) }}">View academic profile</a>{% endif %}</div>
+</article>
+{% endfor %}</div>{% endfor %}
+{% endblock %}
